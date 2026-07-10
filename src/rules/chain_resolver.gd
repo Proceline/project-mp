@@ -73,6 +73,37 @@ func apply_chain_influence(chains: Array, balls: Array[BallState]) -> void:
 		elif target.kind == BallState.Kind.HAZARD:
 			target.value = max(target.value - total, 0)
 
+func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictionary:
+	var result := {
+		"attack": 0,
+		"shield": 0,
+		"heal": 0,
+		"cleared_color_ids": [],
+		"removed_ball_ids": [],
+	}
+	for chain in chains:
+		for member in chain.members:
+			result.cleared_color_ids.append(member.id)
+	for ball in balls:
+		if ball.kind != BallState.Kind.COMBAT or ball.value <= 0:
+			continue
+		if not _is_touched_by_any_chain(chains, ball):
+			continue
+		if ball.combat_kind == BallState.CombatKind.ATTACK:
+			result.attack += ball.value
+		elif ball.combat_kind == BallState.CombatKind.SHIELD:
+			result.shield += ball.value
+		elif ball.combat_kind == BallState.CombatKind.HEAL:
+			result.heal += ball.value
+		result.removed_ball_ids.append(ball.id)
+	return result
+
+func _is_touched_by_any_chain(chains: Array, target: BallState) -> bool:
+	for chain in chains:
+		if _chain_touches_ball(chain, target):
+			return true
+	return false
+
 func _chain_touches_ball(chain: Dictionary, target: BallState) -> bool:
 	for member in chain.members:
 		if member.position.distance_to(target.position) <= influence_distance:

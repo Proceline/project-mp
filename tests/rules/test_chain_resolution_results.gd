@@ -1,0 +1,24 @@
+extends RefCounted
+
+const BallState = preload("res://src/rules/ball_state.gd")
+const ChainResolver = preload("res://src/rules/chain_resolver.gd")
+
+func test_finished_chain_converts_combat_values_to_results(runner) -> void:
+	var resolver := ChainResolver.new()
+	var attack: BallState = BallState.new_ball(20, BallState.Kind.COMBAT, Vector2(30, 0))
+	attack.combat_kind = BallState.CombatKind.ATTACK
+	attack.value = 9
+	var shield: BallState = BallState.new_ball(21, BallState.Kind.COMBAT, Vector2(60, 0))
+	shield.combat_kind = BallState.CombatKind.SHIELD
+	shield.value = 4
+	var chain := {"color_id": 1, "members": [], "strength": 5}
+	for i in range(5):
+		var color: BallState = BallState.new_ball(i, BallState.Kind.COLOR, Vector2(i * 20, 0))
+		color.color_id = 1
+		color.flashing = true
+		chain.members.append(color)
+	var result: Dictionary = resolver.resolve_finished_chains([chain], [attack, shield])
+	runner.assert_eq(result.attack, 9, "attack value is emitted")
+	runner.assert_eq(result.shield, 4, "shield value is emitted")
+	runner.assert_true(result.removed_ball_ids.has(20), "triggered attack orb removed")
+	runner.assert_true(result.removed_ball_ids.has(21), "triggered shield orb removed")
