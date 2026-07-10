@@ -2,7 +2,6 @@ extends Node2D
 class_name GameController
 
 const BattleState = preload("res://src/rules/battle_state.gd")
-const ChainResolver = preload("res://src/rules/chain_resolver.gd")
 const BossController = preload("res://src/boss/boss_controller.gd")
 const ActionBarVolleyMechanic = preload("res://src/boss/action_bar_volley_mechanic.gd")
 const HpPhaseMechanic = preload("res://src/boss/hp_phase_mechanic.gd")
@@ -19,7 +18,6 @@ const BattleUI = preload("res://src/ui/battle_ui.gd")
 @onready var ui: BattleUI = %BattleUI
 
 var battle := BattleState.new()
-var chain_resolver := ChainResolver.new()
 var volley_mechanic: ActionBarVolleyMechanic
 
 func _ready() -> void:
