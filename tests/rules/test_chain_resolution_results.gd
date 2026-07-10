@@ -11,14 +11,22 @@ func test_finished_chain_converts_combat_values_to_results(runner) -> void:
 	var shield: BallState = BallState.new_ball(21, BallState.Kind.COMBAT, Vector2(60, 0))
 	shield.combat_kind = BallState.CombatKind.SHIELD
 	shield.value = 4
+	var heal: BallState = BallState.new_ball(22, BallState.Kind.COMBAT, Vector2(90, 0))
+	heal.combat_kind = BallState.CombatKind.HEAL
+	heal.value = 6
 	var chain := {"color_id": 1, "members": [], "strength": 5}
 	for i in range(5):
 		var color: BallState = BallState.new_ball(i, BallState.Kind.COLOR, Vector2(i * 20, 0))
 		color.color_id = 1
 		color.flashing = true
 		chain.members.append(color)
-	var result: Dictionary = resolver.resolve_finished_chains([chain], [attack, shield])
+	var result: Dictionary = resolver.resolve_finished_chains([chain], [attack, shield, heal])
 	runner.assert_eq(result.attack, 9, "attack value is emitted")
 	runner.assert_eq(result.shield, 4, "shield value is emitted")
+	runner.assert_eq(result.heal, 6, "heal value is emitted")
+	runner.assert_eq(result.cleared_color_ids.size(), 5, "cleared color ids include every chain member")
+	for i in range(5):
+		runner.assert_true(result.cleared_color_ids.has(i), "cleared color ids include member %d" % i)
 	runner.assert_true(result.removed_ball_ids.has(20), "triggered attack orb removed")
 	runner.assert_true(result.removed_ball_ids.has(21), "triggered shield orb removed")
+	runner.assert_true(result.removed_ball_ids.has(22), "triggered heal orb removed")

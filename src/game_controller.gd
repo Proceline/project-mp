@@ -55,8 +55,11 @@ func _process(delta: float) -> void:
 	for exploded in playfield.check_boundary_explosions():
 		battle.apply_player_damage(max(exploded.value, 1))
 		boss_controller.notify_player_damage(max(exploded.value, 1))
-	_tick_chains(delta)
+	advance_chain_resolution(delta)
 	ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview)
+
+func advance_chain_resolution(delta: float) -> void:
+	_tick_chains(delta)
 
 func _boss_action_ratio() -> float:
 	if volley_mechanic == null or volley_mechanic.interval_seconds <= 0.0:
