@@ -141,8 +141,8 @@ func test_incoming_orb_stops_against_settled_ball_without_overlap(runner: TestRu
 
 func test_playfield_relaxes_overlapping_settled_balls(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
-	var first: BallState = BallState.new_ball(30, BallState.Kind.COLOR, Vector2(-82, 0))
-	var second: BallState = BallState.new_ball(31, BallState.Kind.COLOR, Vector2(-90, 0))
+	var first: BallState = BallState.new_ball(30, BallState.Kind.COLOR, Vector2(-130, 0))
+	var second: BallState = BallState.new_ball(31, BallState.Kind.COLOR, Vector2(-150, 0))
 	first.settled = true
 	second.settled = true
 	playfield.add_ball(first)
@@ -167,17 +167,33 @@ func test_playfield_keeps_orb_edge_outside_visual_core_isolation(runner: TestRun
 	runner.assert_true(ball.position.length() - ball.radius >= playfield.core_collision_radius - 0.1, "orb edge stays outside the visible core isolation ring")
 	_remove_playfield_from_tree(playfield)
 
-func test_settled_orbs_continue_drifting_toward_core_until_blocked(runner: TestRunner) -> void:
+func test_supported_settled_orbs_do_not_keep_pushing_each_other(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
-	var ball: BallState = BallState.new_ball(41, BallState.Kind.COLOR, Vector2(180, 0))
+	var inner: BallState = BallState.new_ball(41, BallState.Kind.COLOR, Vector2(playfield.core_collision_radius + 24.0, 0))
+	var outer: BallState = BallState.new_ball(42, BallState.Kind.COLOR, Vector2(playfield.core_collision_radius + 72.0, 0))
+	inner.settled = true
+	outer.settled = true
+	playfield.add_ball(inner)
+	playfield.add_ball(outer)
+	var inner_start := inner.position
+	var outer_start := outer.position
+
+	for i in range(30):
+		playfield.advance_orb_physics(1.0 / 60.0)
+
+	runner.assert_true(inner.position.distance_to(inner_start) < 0.001, "core-supported orb stays locked")
+	runner.assert_true(outer.position.distance_to(outer_start) < 0.001, "orb supported by another orb does not keep pushing")
+	_remove_playfield_from_tree(playfield)
+
+func test_unsupported_settled_orb_releases_after_support_check(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var ball: BallState = BallState.new_ball(43, BallState.Kind.COLOR, Vector2(180, 0))
 	ball.settled = true
 	playfield.add_ball(ball)
 
-	playfield.advance_orb_physics(0.5)
+	playfield.release_unsupported_orbs()
 
-	var core_limit: float = playfield.core_collision_radius + ball.radius
-	runner.assert_true(ball.position.length() < 180.0, "settled orb keeps drifting inward under center pressure")
-	runner.assert_true(ball.position.length() >= core_limit - 0.1, "settled orb stops outside the core isolation ring")
+	runner.assert_true(not ball.settled, "unsupported settled orb becomes active again")
 	_remove_playfield_from_tree(playfield)
 
 func test_playfield_boundary_explosion_removes_hazard_node(runner: TestRunner) -> void:

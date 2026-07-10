@@ -119,11 +119,15 @@ func _apply_chain_result(result: Dictionary) -> void:
 	_remove_balls_by_id(result.removed_ball_ids)
 
 func _remove_balls_by_id(ids: Array) -> void:
+	var removed_any := false
 	for i in range(playfield.balls.size() - 1, -1, -1):
 		var ball = playfield.balls[i]
 		if ids.has(ball.id):
 			playfield.balls.remove_at(i)
 			playfield._remove_orb_node(ball.id)
+			removed_any = true
+	if removed_any:
+		playfield.release_unsupported_orbs()
 
 func _hazard_damage(ball: BallState) -> int:
 	if ball.hazard_damage > 0:

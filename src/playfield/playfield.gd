@@ -9,7 +9,7 @@ var orb_nodes_by_id: Dictionary = {}
 var danger_radius: float = 260.0
 var core_radius: float = 58.0
 var core_collision_radius: float = 80.0
-var settled_center_pressure_speed: float = 48.0
+var support_slop: float = 1.5
 var rotation_speed: float = 2.4
 var hazard_warning_seconds: float = 1.25
 
@@ -18,9 +18,6 @@ func _ready() -> void:
 	for ball in balls:
 		_assign_settle_target_if_needed(ball)
 		_ensure_orb_node(ball)
-
-func _process(delta: float) -> void:
-	advance_orb_physics(delta)
 
 func add_ball(ball: BallState) -> void:
 	_assign_settle_target_if_needed(ball)
@@ -36,6 +33,7 @@ func rotate_settled(angle_delta: float) -> void:
 			if node != null:
 				node.position = rotated_position
 	relax_settled_balls()
+	release_unsupported_orbs()
 
 func advance_hazard_phases(delta: float) -> void:
 	if delta <= 0.0:
@@ -59,6 +57,8 @@ func check_boundary_explosions() -> Array[BallState]:
 	for ball in exploded:
 		balls.erase(ball)
 		_remove_orb_node(ball.id)
+	if not exploded.is_empty():
+		release_unsupported_orbs()
 	return exploded
 
 func _ensure_orb_node(ball: BallState) -> void:
@@ -127,19 +127,17 @@ func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dic
 func advance_orb_physics(delta: float) -> void:
 	if delta <= 0.0:
 		return
-	var moved := false
+	release_unsupported_orbs()
+
+func release_unsupported_orbs() -> void:
 	for ball in balls:
 		if not ball.settled:
 			continue
-		var distance := ball.position.length()
-		var core_limit := _core_limit_for_ball(ball)
-		if distance <= core_limit + 0.001:
+		if _has_inward_support(ball):
 			continue
-		var step := minf(settled_center_pressure_speed * delta, distance - core_limit)
-		ball.position -= _safe_direction(ball.position) * step
-		moved = true
-	if moved:
-		relax_settled_balls()
+		ball.settled = false
+		ball.has_settle_target = true
+		ball.settle_target = Vector2.ZERO
 
 func relax_settled_balls() -> void:
 	var core_limit_by_id := {}
@@ -164,8 +162,6 @@ func relax_settled_balls() -> void:
 				var distance := offset.length()
 				if distance >= minimum_distance:
 					continue
-				if _separate_core_bound_pair(first, second, minimum_distance):
-					continue
 				var direction := _safe_direction(offset)
 				var correction := (minimum_distance - distance) * 0.5
 				first.position -= direction * correction
@@ -184,26 +180,25 @@ func _sync_orb_nodes_to_state() -> void:
 		if node != null:
 			node.position = ball.position
 
-func _separate_core_bound_pair(first: BallState, second: BallState, minimum_distance: float) -> bool:
-	var first_core_limit: float = _core_limit_for_ball(first)
-	var second_core_limit: float = _core_limit_for_ball(second)
-	var first_core_band: float = first_core_limit + first.radius
-	var second_core_band: float = second_core_limit + second.radius
-	if first.position.length() > first_core_band or second.position.length() > second_core_band:
-		return false
-	var first_direction: Vector2 = _safe_direction(first.position)
-	var second_direction: Vector2 = _safe_direction(second.position)
-	var average_direction: Vector2 = _safe_direction(first_direction + second_direction)
-	var average_angle: float = average_direction.angle()
-	var average_radius: float = (first_core_limit + second_core_limit) * 0.5
-	var ratio: float = clampf(minimum_distance / maxf(average_radius * 2.0, 0.001), 0.0, 1.0)
-	var separation_angle: float = asin(ratio) * 2.0 + 0.03
-	first.position = Vector2(cos(average_angle - separation_angle * 0.5), sin(average_angle - separation_angle * 0.5)) * first_core_limit
-	second.position = Vector2(cos(average_angle + separation_angle * 0.5), sin(average_angle + separation_angle * 0.5)) * second_core_limit
-	return true
-
 func _core_limit_for_ball(ball: BallState) -> float:
 	return core_collision_radius + ball.radius
+
+func _has_inward_support(ball: BallState) -> bool:
+	var core_limit := _core_limit_for_ball(ball)
+	if ball.position.length() <= core_limit + support_slop:
+		return true
+	var inward := -_safe_direction(ball.position)
+	for other in balls:
+		if other == ball or not other.settled:
+			continue
+		if other.position.length() >= ball.position.length():
+			continue
+		var offset := other.position - ball.position
+		if offset.dot(inward) <= 0.0:
+			continue
+		if offset.length() <= ball.radius + other.radius + support_slop:
+			return true
+	return false
 
 func _safe_direction(vector: Vector2) -> Vector2:
 	if vector.length() <= 0.001:
