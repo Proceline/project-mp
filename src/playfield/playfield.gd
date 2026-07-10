@@ -56,7 +56,7 @@ func advance_hazard_phases(delta: float) -> void:
 func check_boundary_explosions() -> Array[BallState]:
 	var exploded: Array[BallState] = []
 	for ball in balls:
-		if ball.kind == BallState.Kind.HAZARD and ball.position.length() > danger_radius:
+		if ball.kind == BallState.Kind.HAZARD and ball.settled and ball.position.length() > danger_radius:
 			exploded.append(ball)
 	for ball in exploded:
 		balls.erase(ball)
