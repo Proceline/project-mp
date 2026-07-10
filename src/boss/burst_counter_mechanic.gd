@@ -3,15 +3,15 @@ class_name BurstCounterMechanic
 
 @export var burst_threshold: int = 25
 @export var counter_value: int = 10
-var pending_counter: bool = false
 
 func on_player_damage(amount: int, controller) -> void:
 	if amount >= burst_threshold:
-		pending_counter = true
+		controller.get_mechanic_state(self)["pending_counter"] = true
 
-func tick(delta: float, battle, controller) -> Array:
-	if pending_counter and controller.action_triggered_this_tick:
-		pending_counter = false
+func react_to_tick(events: Array, battle: BattleState, controller) -> Array:
+	var state: Dictionary = controller.get_mechanic_state(self)
+	if bool(state.get("pending_counter", false)) and _has_action_bar_event(events):
+		state["pending_counter"] = false
 		return [{
 			"type": "spawn_hazard",
 			"count": 1,
@@ -20,3 +20,9 @@ func tick(delta: float, battle, controller) -> Array:
 			"angle_hint": "boss_side",
 		}]
 	return []
+
+func _has_action_bar_event(events: Array) -> bool:
+	for event in events:
+		if String(event.get("source", "")) == "action_bar":
+			return true
+	return false
