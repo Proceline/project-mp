@@ -11,6 +11,9 @@ var core_radius: float = 58.0
 var core_collision_radius: float = 80.0
 var support_slop: float = 1.5
 var stable_support_dot: float = 0.94
+var two_point_support_dot: float = 0.72
+var contact_slide_step: float = 0.55
+var max_contact_motion_step: float = 3.0
 var rotation_speed: float = 2.4
 var hazard_warning_seconds: float = 1.25
 
@@ -128,11 +131,17 @@ func advance_orb_physics(delta: float) -> void:
 	release_unsupported_orbs()
 
 func release_unsupported_orbs() -> void:
+	var settled_snapshot := {}
+	for ball in balls:
+		if ball.settled:
+			settled_snapshot[ball.id] = true
+	var to_release: Array[BallState] = []
 	for ball in balls:
 		if not ball.settled:
 			continue
-		if _has_inward_support(ball):
-			continue
+		if not _has_inward_support(ball, settled_snapshot):
+			to_release.append(ball)
+	for ball in to_release:
 		ball.settled = false
 		ball.has_settle_target = true
 		ball.settle_target = Vector2.ZERO
@@ -198,17 +207,24 @@ func _resolve_contact_motion(ball: BallState, other: BallState, contact_normal: 
 			"settled": true,
 		}
 	return {
-		"position": contact_position + slide_direction.normalized() * 2.0,
+		"position": _limit_motion_step(ball.position, contact_position + slide_direction.normalized() * contact_slide_step),
 		"settled": false,
 	}
 
-func _has_inward_support(ball: BallState) -> bool:
+func _has_inward_support(ball: BallState, settled_snapshot: Dictionary = {}) -> bool:
 	var core_limit := _core_limit_for_ball(ball)
 	if ball.position.length() <= core_limit + support_slop:
 		return true
 	var inward := -_safe_direction(ball.position)
+	var tangent := Vector2(-inward.y, inward.x)
+	var has_left_support := false
+	var has_right_support := false
 	for other in balls:
-		if other == ball or not other.settled:
+		if other == ball:
+			continue
+		if not settled_snapshot.is_empty() and not settled_snapshot.has(other.id):
+			continue
+		if settled_snapshot.is_empty() and not other.settled:
 			continue
 		if other.position.length() >= ball.position.length():
 			continue
@@ -219,7 +235,20 @@ func _has_inward_support(ball: BallState) -> bool:
 		var blocker_direction := _safe_direction(offset)
 		if inward.dot(blocker_direction) >= stable_support_dot:
 			return true
+		if inward.dot(blocker_direction) >= two_point_support_dot:
+			if tangent.dot(blocker_direction) < 0.0:
+				has_left_support = true
+			else:
+				has_right_support = true
+	if has_left_support and has_right_support:
+		return true
 	return false
+
+func _limit_motion_step(from_position: Vector2, to_position: Vector2) -> Vector2:
+	var delta := to_position - from_position
+	if delta.length() <= max_contact_motion_step:
+		return to_position
+	return from_position + delta.normalized() * max_contact_motion_step
 
 func _safe_direction(vector: Vector2) -> Vector2:
 	if vector.length() <= 0.001:

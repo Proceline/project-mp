@@ -148,11 +148,35 @@ func test_incoming_orb_slides_when_single_contact_does_not_support_center_gravit
 	var incoming: BallState = BallState.new_ball(23, BallState.Kind.COLOR, Vector2(-180, 0))
 	playfield.add_ball(incoming)
 	var incoming_node: OrbNode = playfield.get_child(1) as OrbNode
+	var previous_position := incoming.position
+	var largest_step := 0.0
 	for i in range(20):
 		incoming_node._process(1.0 / 60.0)
+		largest_step = maxf(largest_step, incoming.position.distance_to(previous_position))
+		previous_position = incoming.position
 
 	runner.assert_true(not incoming.settled, "off-center single contact keeps sliding instead of locking")
 	runner.assert_true(incoming.position.length() < 180.0, "sliding contact still moves the orb inward")
+	runner.assert_true(largest_step <= 3.0, "contact slide is friction-limited instead of slippery")
+	_remove_playfield_from_tree(playfield)
+
+func test_two_point_contact_supports_settled_orb(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var left_support: BallState = BallState.new_ball(24, BallState.Kind.COLOR, Vector2(-118, -24))
+	var right_support: BallState = BallState.new_ball(25, BallState.Kind.COLOR, Vector2(-118, 24))
+	var carried: BallState = BallState.new_ball(26, BallState.Kind.COLOR, Vector2(-160, 0))
+	left_support.settled = true
+	right_support.settled = true
+	carried.settled = true
+	playfield.add_ball(left_support)
+	playfield.add_ball(right_support)
+	playfield.add_ball(carried)
+	var carried_start := carried.position
+
+	playfield.release_unsupported_orbs()
+
+	runner.assert_true(carried.settled, "two inner contacts hold a settled orb in place")
+	runner.assert_true(carried.position.distance_to(carried_start) < 0.001, "two-point support does not teleport the orb")
 	_remove_playfield_from_tree(playfield)
 
 func test_playfield_relaxes_overlapping_settled_balls(runner: TestRunner) -> void:
