@@ -14,10 +14,13 @@ func setup(ball_state: BallState) -> void:
 func _process(delta: float) -> void:
 	if state == null:
 		return
+	if velocity == Vector2.ZERO:
+		return
 	position += velocity * delta
 	velocity = velocity.move_toward(Vector2.ZERO, 260.0 * delta)
 	state.position = position
 	if velocity.length() < 8.0:
+		velocity = Vector2.ZERO
 		state.settled = true
 
 func _draw() -> void:
