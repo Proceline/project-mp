@@ -45,6 +45,7 @@ func _process(delta: float) -> void:
 		return
 	var rotation_input := Input.get_axis("rotate_left", "rotate_right")
 	playfield.rotate_settled(rotation_input * playfield.rotation_speed * delta)
+	playfield.advance_hazard_phases(delta)
 	if Input.is_action_just_pressed("fast_drop_player_orb"):
 		var ball := spawn_queue.fast_drop_current()
 		ball.position = Vector2(-320, -180)

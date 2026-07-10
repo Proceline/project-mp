@@ -33,16 +33,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	if state == null:
 		return
-	var color := Color.WHITE
-	if state.kind == BallState.Kind.COLOR:
-		color = [Color.RED, Color.DODGER_BLUE, Color.GOLD, Color.LIME_GREEN][max(state.color_id, 0) % 4]
-		if state.flashing:
-			var pulse := 0.75 + 0.25 * sin(Time.get_ticks_msec() / 90.0)
-			color = color.lerp(Color.WHITE, pulse * 0.35)
-	elif state.kind == BallState.Kind.COMBAT:
-		color = Color.MEDIUM_PURPLE
-	elif state.kind == BallState.Kind.HAZARD:
-		color = Color(1.0, 0.62, 0.2) if state.hazard_phase == BallState.HazardPhase.WARNING else Color(0.9, 0.18, 0.2)
+	var color := current_fill_color()
 	draw_circle(Vector2.ZERO, state.radius, color)
 	draw_arc(Vector2.ZERO, state.radius, 0.0, TAU, 48, color.lightened(0.25), 2.0)
 
@@ -60,6 +51,21 @@ func _draw() -> void:
 	if state.kind == BallState.Kind.COMBAT and state.value > 0:
 		_draw_centered_text(font, str(state.value), Vector2(0.0, state.radius - 3.0), 11, Color.BLACK)
 		_draw_centered_text(font, str(state.value), Vector2(0.0, state.radius - 4.0), 11, Color(1.0, 0.94, 0.65))
+
+func current_fill_color() -> Color:
+	if state == null:
+		return Color.WHITE
+	if state.kind == BallState.Kind.COLOR:
+		var color: Color = [Color.RED, Color.DODGER_BLUE, Color.GOLD, Color.LIME_GREEN][max(state.color_id, 0) % 4]
+		if state.flashing:
+			var pulse := 0.75 + 0.25 * sin(Time.get_ticks_msec() / 90.0)
+			return color.lerp(Color.WHITE, pulse * 0.35)
+		return color
+	if state.kind == BallState.Kind.COMBAT:
+		return Color.MEDIUM_PURPLE
+	if state.kind == BallState.Kind.HAZARD:
+		return Color(1.0, 0.62, 0.2) if state.hazard_phase == BallState.HazardPhase.WARNING else Color(0.9, 0.18, 0.2)
+	return Color.WHITE
 
 func _draw_centered_text(font: Font, text: String, baseline: Vector2, font_size: int, color: Color) -> void:
 	if font == null or text.is_empty():

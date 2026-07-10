@@ -8,6 +8,7 @@ var balls: Array[BallState] = []
 var orb_nodes_by_id: Dictionary = {}
 var danger_radius: float = 260.0
 var rotation_speed: float = 2.4
+var hazard_warning_seconds: float = 1.25
 
 func _ready() -> void:
 	queue_redraw()
@@ -27,6 +28,20 @@ func rotate_settled(angle_delta: float) -> void:
 			var node := _get_orb_node(ball.id)
 			if node != null:
 				node.position = rotated_position
+
+func advance_hazard_phases(delta: float) -> void:
+	if delta <= 0.0:
+		return
+	for ball in balls:
+		if ball.kind != BallState.Kind.HAZARD or ball.hazard_phase == BallState.HazardPhase.DANGER:
+			continue
+		ball.age_seconds += delta
+		if ball.age_seconds < hazard_warning_seconds:
+			continue
+		ball.hazard_phase = BallState.HazardPhase.DANGER
+		var node := _get_orb_node(ball.id)
+		if node != null:
+			node.queue_redraw()
 
 func check_boundary_explosions() -> Array[BallState]:
 	var exploded: Array[BallState] = []
