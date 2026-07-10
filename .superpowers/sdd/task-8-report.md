@@ -54,7 +54,7 @@ Result: `started=True still_running_after_3s=True`.
 ## Task 8 Review Fix Addendum
 
 - Review-fix base commit before this change: `71e853a87e263900fd0ac5e5a2d9dfc8fac7449b`.
-- Review-fix final commit: `402f92aa82a11e37b66185ec939c1cd7c10a1c7c`.
+- Review-fix implementation commit: `b1a2f2252e14102e6762721f1fe913c6a20965ce`.
 - Runtime change summary: hazards now accumulate deterministic warning age on `BallState`, `Playfield` advances spawned hazards from `WARNING` to `DANGER` after `hazard_warning_seconds`, `GameController` ticks that transition during runtime, and `OrbNode` exposes the exact fill color path used by `_draw()`.
 - Added automated coverage in `tests/playfield/test_spawn_and_hazards.gd` proving a spawned warning hazard remains warning before the threshold, becomes danger at the configured threshold, and maps reachable `DANGER` state to the red hazard fill color used by draw code.
 - Verification summary:
