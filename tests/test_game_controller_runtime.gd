@@ -75,10 +75,10 @@ func _instantiate_controller(runner: TestRunner) -> GameController:
 		return null
 	var tree := Engine.get_main_loop() as SceneTree
 	tree.root.add_child(controller)
-	controller.playfield = controller.get_node("Playfield") as Playfield
-	controller.spawn_queue = controller.get_node("SpawnQueue") as SpawnQueue
-	controller.hazard_spawner = controller.get_node("HazardSpawner") as HazardSpawner
-	controller.boss_controller = controller.get_node("BossController") as BossController
+	controller.playfield = controller.get_node("%Playfield") as Playfield
+	controller.spawn_queue = controller.get_node("%SpawnQueue") as SpawnQueue
+	controller.hazard_spawner = controller.get_node("%HazardSpawner") as HazardSpawner
+	controller.boss_controller = controller.get_node("%BossController") as BossController
 	return controller
 
 func _destroy_controller(controller: GameController) -> void:
