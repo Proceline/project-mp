@@ -1,0 +1,107 @@
+[gd_scene load_steps=8 format=3 uid="uid://orb_boss_main"]
+
+[ext_resource type="Script" path="res://src/game_controller.gd" id="1_game"]
+[ext_resource type="Script" path="res://src/playfield/playfield.gd" id="2_playfield"]
+[ext_resource type="Script" path="res://src/playfield/spawn_queue.gd" id="3_queue"]
+[ext_resource type="Script" path="res://src/playfield/hazard_spawner.gd" id="4_hazard"]
+[ext_resource type="Script" path="res://src/boss/boss_controller.gd" id="5_boss"]
+[ext_resource type="Script" path="res://src/ui/battle_ui.gd" id="6_ui"]
+
+[node name="GameController" type="Node2D"]
+script = ExtResource("1_game")
+
+[node name="Playfield" type="Node2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(420, 360)
+script = ExtResource("2_playfield")
+
+[node name="SpawnQueue" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("3_queue")
+
+[node name="HazardSpawner" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("4_hazard")
+
+[node name="BossController" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("5_boss")
+
+[node name="BattleUI" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+script = ExtResource("6_ui")
+
+[node name="PlayfieldShade" type="ColorRect" parent="BattleUI"]
+offset_left = 70.0
+offset_top = 60.0
+offset_right = 770.0
+offset_bottom = 660.0
+color = Color(0.07, 0.09, 0.14, 0.9)
+
+[node name="FieldRing" type="ColorRect" parent="BattleUI"]
+offset_left = 150.0
+offset_top = 90.0
+offset_right = 690.0
+offset_bottom = 630.0
+color = Color(0.12, 0.15, 0.22, 0.95)
+
+[node name="BossPanel" type="ColorRect" parent="BattleUI"]
+offset_left = 840.0
+offset_top = 40.0
+offset_right = 1220.0
+offset_bottom = 240.0
+color = Color(0.18, 0.08, 0.09, 0.95)
+
+[node name="PlayerHP" type="Label" parent="BattleUI"]
+unique_name_in_owner = true
+offset_left = 386.0
+offset_top = 330.0
+offset_right = 454.0
+offset_bottom = 382.0
+theme_override_font_sizes/font_size = 42
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "30"
+
+[node name="Shield" type="Label" parent="BattleUI"]
+unique_name_in_owner = true
+offset_left = 350.0
+offset_top = 386.0
+offset_right = 490.0
+offset_bottom = 410.0
+horizontal_alignment = 1
+text = ""
+
+[node name="BossHP" type="Label" parent="BattleUI"]
+unique_name_in_owner = true
+offset_left = 900.0
+offset_top = 54.0
+offset_right = 1180.0
+offset_bottom = 86.0
+text = "Boss HP 200/200"
+
+[node name="BossActionBar" type="ProgressBar" parent="BattleUI"]
+unique_name_in_owner = true
+offset_left = 900.0
+offset_top = 94.0
+offset_right = 1180.0
+offset_bottom = 118.0
+max_value = 100.0
+value = 0.0
+show_percentage = false
+
+[node name="Preview" type="Label" parent="BattleUI"]
+unique_name_in_owner = true
+offset_left = 40.0
+offset_top = 28.0
+offset_right = 640.0
+offset_bottom = 58.0
+text = "Next:"
+
+[node name="Status" type="Label" parent="BattleUI"]
+unique_name_in_owner = true
+offset_left = 900.0
+offset_top = 130.0
+offset_right = 1180.0
+offset_bottom = 160.0
+text = "active"
