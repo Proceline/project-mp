@@ -56,7 +56,7 @@ func advance_hazard_phases(delta: float) -> void:
 func check_boundary_explosions() -> Array[BallState]:
 	var exploded: Array[BallState] = []
 	for ball in balls:
-		if ball.kind == BallState.Kind.HAZARD and ball.settled and ball.position.length() > danger_radius:
+		if ball.kind == BallState.Kind.HAZARD and ball.is_on_board() and ball.position.length() > danger_radius:
 			exploded.append(ball)
 	for ball in exploded:
 		balls.erase(ball)
@@ -220,7 +220,7 @@ func relax_settled_balls() -> void:
 	_sync_orb_nodes_to_state()
 
 func _rotates_with_disk(ball: BallState) -> bool:
-	return ball.settled or ball.board_attached
+	return ball.is_on_board()
 
 func _sync_orb_nodes_to_state() -> void:
 	for ball in balls:

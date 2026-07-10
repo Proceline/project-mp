@@ -21,6 +21,9 @@ var board_attached: bool = false
 var has_settle_target: bool = false
 var settle_target: Vector2 = Vector2.ZERO
 
+func is_on_board() -> bool:
+	return settled or board_attached
+
 static func new_ball(ball_id: int, ball_kind: Kind, ball_position: Vector2) -> BallState:
 	var ball := new()
 	ball.id = ball_id

@@ -76,10 +76,25 @@ func test_playfield_boundary_ignores_falling_hazard_outside_radius(runner: TestR
 	playfield.danger_radius = 100.0
 	var hazard: BallState = BallState.new_ball(2, BallState.Kind.HAZARD, Vector2(160, 0))
 	hazard.settled = false
+	hazard.board_attached = false
 	playfield.add_ball(hazard)
 	var exploded: Array[BallState] = playfield.check_boundary_explosions()
 	runner.assert_eq(exploded.size(), 0, "falling hazard outside danger radius waits until it settles")
 	runner.assert_eq(playfield.balls.size(), 1, "falling hazard remains on the playfield")
+	playfield.free()
+
+func test_playfield_boundary_explodes_board_attached_hazard_before_locking(runner: TestRunner) -> void:
+	var playfield: Playfield = Playfield.new()
+	playfield.danger_radius = 100.0
+	var hazard: BallState = BallState.new_ball(3, BallState.Kind.HAZARD, Vector2(160, 0))
+	hazard.settled = false
+	hazard.board_attached = true
+	playfield.add_ball(hazard)
+
+	var exploded: Array[BallState] = playfield.check_boundary_explosions()
+
+	runner.assert_eq(exploded.size(), 1, "board-attached hazard outside danger radius explodes even before locking")
+	runner.assert_eq(playfield.balls.size(), 0, "exploded board-attached hazard is removed")
 	playfield.free()
 
 func test_playfield_rotation_persists_for_settled_orb_nodes(runner: TestRunner) -> void:

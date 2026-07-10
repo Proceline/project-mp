@@ -10,7 +10,7 @@ var minimum_chain_size: int = 5
 func find_color_groups(balls: Array[BallState]) -> Array:
 	var color_balls: Array[BallState] = []
 	for ball in balls:
-		if ball.kind == BallState.Kind.COLOR and ball.settled and not ball.flashing:
+		if ball.kind == BallState.Kind.COLOR and ball.is_on_board() and not ball.flashing:
 			color_balls.append(ball)
 
 	var visited: Dictionary = {}
@@ -59,7 +59,7 @@ func apply_chain_influence(chains: Array, balls: Array[BallState]) -> void:
 	for target in balls:
 		if target.kind == BallState.Kind.COLOR:
 			continue
-		if not target.settled:
+		if not target.is_on_board():
 			continue
 
 		var total := 0
@@ -92,6 +92,8 @@ func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictiona
 	for ball in balls:
 		if ball.kind != BallState.Kind.COMBAT or ball.value <= 0:
 			continue
+		if not ball.is_on_board():
+			continue
 		if not _is_touched_by_any_chain(chains, ball):
 			continue
 		if ball.combat_kind == BallState.CombatKind.ATTACK:
@@ -104,7 +106,7 @@ func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictiona
 	for ball in balls:
 		if ball.kind != BallState.Kind.HAZARD or ball.value > 0:
 			continue
-		if not ball.settled:
+		if not ball.is_on_board():
 			continue
 		if not _is_touched_by_any_chain(chains, ball):
 			continue
