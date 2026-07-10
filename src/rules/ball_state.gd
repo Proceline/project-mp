@@ -20,6 +20,7 @@ var settled: bool = false
 var board_attached: bool = false
 var has_settle_target: bool = false
 var settle_target: Vector2 = Vector2.ZERO
+var entry_duration_seconds: float = 0.0
 
 func is_on_board() -> bool:
 	return settled or board_attached

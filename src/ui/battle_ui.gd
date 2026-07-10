@@ -31,4 +31,6 @@ func _preview_text(preview: Array[BallState]) -> String:
 			parts.append("C%d" % ball.color_id)
 		elif ball.kind == BallState.Kind.COMBAT:
 			parts.append(["", "ATK", "SHD", "HEAL"][ball.combat_kind])
+		elif ball.kind == BallState.Kind.HAZARD:
+			parts.append("DMG%d" % ball.value)
 	return "Next: " + " ".join(parts)

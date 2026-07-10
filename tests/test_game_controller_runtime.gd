@@ -134,6 +134,53 @@ func test_action_bar_hazard_spawn_does_not_immediately_damage_player(runner: Tes
 	runner.assert_eq(controller.damage_events.size(), 0, "spawning hazards records no player-damage event")
 	_destroy_controller(controller)
 
+func test_action_bar_hazard_is_inserted_into_preview_before_dropping(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.playfield.balls = []
+	var volley := ActionBarVolleyMechanic.new()
+	volley.interval_seconds = 1.0
+	volley.count = 1
+	volley.value = 5
+	controller.boss_controller.configure([volley])
+	controller.spawn_queue.seed_preview()
+	var before_preview_size := controller.spawn_queue.preview.size()
+
+	controller.advance_boss_events(1.0)
+
+	var hazard_count := 0
+	for ball in controller.spawn_queue.preview:
+		if ball.kind == BallState.Kind.HAZARD:
+			hazard_count += 1
+	runner.assert_eq(hazard_count, 1, "boss action inserts a hazard into the preview queue")
+	runner.assert_eq(controller.spawn_queue.preview.size(), before_preview_size + 1, "queued hazard does not replace player preview balls")
+	runner.assert_eq(controller.playfield.balls.size(), 0, "boss action does not immediately add hazards to the playfield")
+	_destroy_controller(controller)
+
+func test_timed_drop_releases_queued_hazard_from_its_entry_angle(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.playfield.balls = []
+	controller.spawn_queue.seed_preview()
+	var hazard: BallState = controller.hazard_spawner.spawn_from_event({
+		"type": "spawn_hazard",
+		"count": 1,
+		"value": 5,
+		"source": "test",
+		"angle_degrees": -35.0,
+	})[0]
+	controller.spawn_queue.insert_preview_ball(hazard, 0)
+
+	controller.advance_player_orb_spawn(controller.player_auto_drop_seconds)
+
+	runner.assert_eq(controller.playfield.balls.size(), 1, "timed drop releases the queued hazard")
+	var dropped: BallState = controller.playfield.balls[0]
+	runner.assert_eq(dropped.kind, BallState.Kind.HAZARD, "released preview head remains a hazard")
+	runner.assert_true(dropped.position.distance_to(hazard.position) < 0.001, "hazard keeps its configured entry position")
+	_destroy_controller(controller)
+
 func _instantiate_controller(runner: TestRunner) -> GameController:
 	var packed: PackedScene = load("res://scenes/main.tscn")
 	runner.assert_true(packed != null, "main scene resource loads for runtime test")

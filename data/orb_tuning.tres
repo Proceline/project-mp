@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="OrbTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/config/orb_tuning.gd" id="1_orbtuning"]
+
+[resource]
+script = ExtResource("1_orbtuning")
+preview_size = 6
+player_entry_seconds = 3.0
+player_spawn_position = Vector2(-320, -180)
+hazard_entry_seconds = 3.0
+hazard_preview_insert_index = 2
+hazard_entry_angle_degrees = -35.0
+hazard_wide_start_angle_degrees = -70.0
+hazard_wide_step_degrees = 35.0
+hazard_entry_distance = 220.0
+hazard_warning_seconds = 1.25
+hazard_default_value = 5

@@ -32,7 +32,8 @@
 ## Orb Behavior Notes
 
 - Player-side orbs and combat orbs can be fast-dropped.
-- Boss hazard orbs are spawned by boss mechanics, not from the normal player preview queue.
+- Boss hazard events insert hazard orbs into the shared preview queue. They should not add hazards directly to the playfield.
+- Player fast-drop only releases player-side orbs. If a hazard orb is at the preview head, it waits for the timed queue drop.
 - Falling orbs move toward the center until they contact the core isolation ring or the orb pile.
 - Orbs touching the core isolation ring are locked.
 - A single orb support should not lock another orb unless the support is the core isolation ring; one-point ball support should slide inward when possible.
@@ -49,6 +50,7 @@
   - Danger phase: clearing removes it and deals its stored player damage.
   - If an on-board hazard orb moves outside the danger boundary, it explodes, is removed, and deals its stored damage.
 - Falling hazard orbs should not deal boundary damage before contacting the board.
+- Tunable orb values live in `data/orb_tuning.tres` through `src/config/orb_tuning.gd`; use this for preview insert index, entry angles, entry distance, and entry duration.
 
 ## Verification Commands
 

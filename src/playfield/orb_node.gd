@@ -15,6 +15,7 @@ const LABELS := {
 func setup(ball_state: BallState) -> void:
 	state = ball_state
 	position = state.position
+	_apply_entry_duration()
 	queue_redraw()
 
 func _process(delta: float) -> void:
@@ -56,6 +57,14 @@ func _move_toward_settle_target(delta: float) -> void:
 		return
 	position = proposed_position
 	state.position = position
+
+func _apply_entry_duration() -> void:
+	if state == null or state.entry_duration_seconds <= 0.0:
+		return
+	var travel_distance := state.position.distance_to(state.settle_target)
+	if travel_distance <= 0.001:
+		return
+	attraction_speed = travel_distance / state.entry_duration_seconds
 
 func _draw() -> void:
 	if state == null:

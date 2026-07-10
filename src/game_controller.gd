@@ -11,12 +11,14 @@ const HazardSpawner = preload("res://src/playfield/hazard_spawner.gd")
 const Playfield = preload("res://src/playfield/playfield.gd")
 const ChainResolver = preload("res://src/rules/chain_resolver.gd")
 const BattleUI = preload("res://src/ui/battle_ui.gd")
+const OrbTuning = preload("res://src/config/orb_tuning.gd")
 
 @onready var playfield: Playfield = %Playfield
 @onready var spawn_queue: SpawnQueue = %SpawnQueue
 @onready var hazard_spawner: HazardSpawner = %HazardSpawner
 @onready var boss_controller: BossController = %BossController
 @onready var ui: BattleUI = %BattleUI
+@export var orb_tuning: OrbTuning = preload("res://data/orb_tuning.tres")
 
 var battle := BattleState.new()
 var volley_mechanic: ActionBarVolleyMechanic
@@ -30,6 +32,7 @@ var player_auto_drop_timer: float = 0.0
 var damage_events: Array[Dictionary] = []
 
 func _ready() -> void:
+	_apply_orb_tuning()
 	volley_mechanic = ActionBarVolleyMechanic.new()
 	var phase70 := HpPhaseMechanic.new()
 	phase70.threshold_percent = 0.7
@@ -50,13 +53,11 @@ func _process(delta: float) -> void:
 	playfield.rotate_settled(rotation_input * playfield.rotation_speed * delta)
 	playfield.advance_hazard_phases(delta)
 	if Input.is_action_just_pressed("fast_drop_player_orb"):
-		_drop_player_orb()
-		player_auto_drop_timer = 0.0
+		if _drop_player_orb():
+			player_auto_drop_timer = 0.0
 	else:
 		advance_player_orb_spawn(delta)
-	for event in boss_controller.tick(delta, battle):
-		for hazard in hazard_spawner.spawn_from_event(event):
-			playfield.add_ball(hazard)
+	advance_boss_events(delta)
 	for exploded in playfield.check_boundary_explosions():
 		var damage := _hazard_damage(exploded)
 		_apply_player_damage(damage, "boundary_explosion")
@@ -72,12 +73,43 @@ func advance_player_orb_spawn(delta: float) -> void:
 	if player_auto_drop_timer < player_auto_drop_seconds:
 		return
 	player_auto_drop_timer = 0.0
-	_drop_player_orb()
+	_drop_next_queued_orb()
 
-func _drop_player_orb() -> void:
+func advance_boss_events(delta: float) -> void:
+	for event in boss_controller.tick(delta, battle):
+		_queue_hazards_from_event(event)
+
+func _drop_player_orb() -> bool:
 	var ball := spawn_queue.fast_drop_current()
-	ball.position = Vector2(-320, -180)
+	if ball == null:
+		return false
+	_prepare_player_entry(ball)
 	playfield.add_ball(ball)
+	return true
+
+func _drop_next_queued_orb() -> void:
+	var ball := spawn_queue.pop_next_ball()
+	if ball.kind != BallState.Kind.HAZARD:
+		_prepare_player_entry(ball)
+	playfield.add_ball(ball)
+
+func _prepare_player_entry(ball: BallState) -> void:
+	ball.position = orb_tuning.player_spawn_position
+	ball.entry_duration_seconds = orb_tuning.player_entry_seconds
+
+func _queue_hazards_from_event(event: Dictionary) -> void:
+	if String(event.get("type", "")) != "spawn_hazard":
+		return
+	var hazards := hazard_spawner.spawn_from_event(event)
+	var insert_index := int(event.get("insert_index", orb_tuning.hazard_preview_insert_index))
+	spawn_queue.insert_preview_balls(hazards, insert_index)
+
+func _apply_orb_tuning() -> void:
+	if orb_tuning == null:
+		return
+	spawn_queue.tuning = orb_tuning
+	hazard_spawner.tuning = orb_tuning
+	playfield.hazard_warning_seconds = orb_tuning.hazard_warning_seconds
 
 func _boss_action_ratio() -> float:
 	if volley_mechanic == null or volley_mechanic.interval_seconds <= 0.0:

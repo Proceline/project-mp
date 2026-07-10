@@ -14,6 +14,41 @@ func test_spawn_queue_contains_only_player_side_orbs(runner: TestRunner) -> void
 	runner.assert_true(ball.kind != BallState.Kind.HAZARD, "fast drop never returns hazard orbs")
 	queue.free()
 
+func test_spawn_queue_inserts_hazard_at_configured_preview_index(runner: TestRunner) -> void:
+	var queue: SpawnQueue = SpawnQueue.new()
+	queue.seed_preview()
+	var hazard: BallState = BallState.new_ball(900, BallState.Kind.HAZARD, Vector2(120, 0))
+
+	queue.insert_preview_ball(hazard, 2)
+
+	runner.assert_eq(queue.preview[2].id, 900, "hazard is inserted at the configured preview index")
+	runner.assert_eq(queue.preview.size(), 7, "inserting a hazard keeps the existing player preview sequence")
+	queue.free()
+
+func test_fast_drop_waits_when_hazard_is_preview_head(runner: TestRunner) -> void:
+	var queue: SpawnQueue = SpawnQueue.new()
+	queue.seed_preview()
+	var hazard: BallState = BallState.new_ball(901, BallState.Kind.HAZARD, Vector2(120, 0))
+	queue.insert_preview_ball(hazard, 0)
+
+	var dropped: BallState = queue.fast_drop_current()
+
+	runner.assert_true(dropped == null, "player fast drop does not release a hazard preview head")
+	runner.assert_eq(queue.preview[0].id, 901, "hazard remains at the head for the timed drop")
+	queue.free()
+
+func test_timed_drop_can_release_hazard_preview_head(runner: TestRunner) -> void:
+	var queue: SpawnQueue = SpawnQueue.new()
+	queue.seed_preview()
+	var hazard: BallState = BallState.new_ball(902, BallState.Kind.HAZARD, Vector2(120, 0))
+	queue.insert_preview_ball(hazard, 0)
+
+	var dropped: BallState = queue.pop_next_ball()
+
+	runner.assert_eq(dropped.id, 902, "timed drop releases the hazard when it reaches the preview head")
+	runner.assert_eq(queue.preview.size(), 6, "queue is refilled after a timed drop")
+	queue.free()
+
 func test_hazard_spawner_creates_warning_hazards(runner: TestRunner) -> void:
 	var spawner: HazardSpawner = HazardSpawner.new()
 	var hazards: Array[BallState] = spawner.spawn_from_event({
