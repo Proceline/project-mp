@@ -27,6 +27,27 @@ func test_hazard_spawner_creates_warning_hazards(runner: TestRunner) -> void:
 	runner.assert_eq(hazards[0].hazard_phase, BallState.HazardPhase.WARNING, "new hazards start in warning phase")
 	spawner.free()
 
+func test_hazard_spawner_places_default_hazards_inside_playfield_boundary(runner: TestRunner) -> void:
+	var spawner: HazardSpawner = HazardSpawner.new()
+	var playfield: Playfield = Playfield.new()
+	var hazards: Array[BallState] = spawner.spawn_from_event({
+		"type": "spawn_hazard",
+		"count": 2,
+		"value": 7,
+		"source": "test",
+		"angle_hint": "boss_side",
+	})
+
+	for hazard in hazards:
+		runner.assert_true(hazard.position.length() < playfield.danger_radius, "default spawned hazards begin inside danger boundary")
+		playfield.add_ball(hazard)
+	var exploded: Array[BallState] = playfield.check_boundary_explosions()
+	runner.assert_eq(exploded.size(), 0, "default spawned hazards do not immediately explode")
+	runner.assert_eq(playfield.balls.size(), hazards.size(), "default spawned hazards remain visible after boundary check")
+
+	spawner.free()
+	playfield.free()
+
 func test_playfield_advances_warning_hazard_to_danger_after_threshold(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
 	playfield.hazard_warning_seconds = 0.5

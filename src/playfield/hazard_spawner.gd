@@ -23,5 +23,5 @@ func _spawn_position(angle_hint: String, index: int, count: int) -> Vector2:
 	var base_angle := deg_to_rad(-35.0)
 	if angle_hint == "wide" and count > 1:
 		base_angle = deg_to_rad(-70.0 + 35.0 * index)
-	var distance := 520.0
+	var distance := 220.0
 	return Vector2(cos(base_angle), sin(base_angle)) * distance
