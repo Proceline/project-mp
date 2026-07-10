@@ -109,8 +109,9 @@ func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dic
 			"position": incoming_direction * core_limit,
 			"settled": true,
 		}
+	var contacts: Array[Dictionary] = []
 	for other in balls:
-		if other == ball or not other.settled:
+		if other == ball:
 			continue
 		var minimum_distance := ball.radius + other.radius
 		var offset := proposed_position - other.position
@@ -119,7 +120,13 @@ func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dic
 		var push_direction := offset.normalized()
 		if push_direction == Vector2.ZERO:
 			push_direction = -incoming_direction
-		return _resolve_contact_motion(ball, other, push_direction, minimum_distance)
+		contacts.append({
+			"other": other,
+			"normal": push_direction,
+			"minimum_distance": minimum_distance,
+		})
+	if not contacts.is_empty():
+		return _resolve_contact_motion(ball, contacts)
 	return {
 		"position": proposed_position,
 		"settled": false,
@@ -147,32 +154,6 @@ func release_unsupported_orbs() -> void:
 		ball.settle_target = Vector2.ZERO
 
 func relax_settled_balls() -> void:
-	var core_limit_by_id := {}
-	for iteration in range(6):
-		for ball in balls:
-			if not ball.settled:
-				continue
-			var core_limit: float = float(core_limit_by_id.get(ball.id, _core_limit_for_ball(ball)))
-			core_limit_by_id[ball.id] = core_limit
-			if ball.position.length() < core_limit:
-				ball.position = _safe_direction(ball.position) * core_limit
-		for i in range(balls.size()):
-			var first := balls[i]
-			if not first.settled:
-				continue
-			for j in range(i + 1, balls.size()):
-				var second := balls[j]
-				if not second.settled:
-					continue
-				var minimum_distance := first.radius + second.radius
-				var offset := second.position - first.position
-				var distance := offset.length()
-				if distance >= minimum_distance:
-					continue
-				var direction := _safe_direction(offset)
-				var correction := (minimum_distance - distance) * 0.5
-				first.position -= direction * correction
-				second.position += direction * correction
 	for ball in balls:
 		if not ball.settled:
 			continue
@@ -190,26 +171,56 @@ func _sync_orb_nodes_to_state() -> void:
 func _core_limit_for_ball(ball: BallState) -> float:
 	return core_collision_radius + ball.radius
 
-func _resolve_contact_motion(ball: BallState, other: BallState, contact_normal: Vector2, minimum_distance: float) -> Dictionary:
+func _resolve_contact_motion(ball: BallState, contacts: Array[Dictionary]) -> Dictionary:
 	var inward := -_safe_direction(ball.position)
-	var blocker_direction := -contact_normal
-	var support_strength := inward.dot(blocker_direction)
-	var contact_position := other.position + contact_normal * minimum_distance
-	if support_strength >= stable_support_dot:
+	if _contacts_support_inward(inward, contacts):
 		return {
-			"position": contact_position,
+			"position": _average_contact_position(contacts),
 			"settled": true,
 		}
+	var primary: Dictionary = contacts[0]
+	var blocker_direction: Vector2 = -Vector2(primary.normal)
+	var support_strength := inward.dot(blocker_direction)
+	var contact_position := _contact_position(primary)
 	var slide_direction := inward - blocker_direction * support_strength
 	if slide_direction.length() <= 0.001:
-		return {
-			"position": contact_position,
-			"settled": true,
-		}
+		slide_direction = _fallback_slide_direction(inward, blocker_direction)
 	return {
 		"position": _limit_motion_step(ball.position, contact_position + slide_direction.normalized() * contact_slide_step),
 		"settled": false,
 	}
+
+func _contacts_support_inward(inward: Vector2, contacts: Array[Dictionary]) -> bool:
+	if contacts.size() < 2:
+		return false
+	var tangent := Vector2(-inward.y, inward.x)
+	var has_left_support := false
+	var has_right_support := false
+	for contact in contacts:
+		var blocker_direction := -Vector2(contact.normal)
+		if inward.dot(blocker_direction) < two_point_support_dot:
+			continue
+		if tangent.dot(blocker_direction) < 0.0:
+			has_left_support = true
+		else:
+			has_right_support = true
+	return has_left_support and has_right_support
+
+func _average_contact_position(contacts: Array[Dictionary]) -> Vector2:
+	var position_sum := Vector2.ZERO
+	for contact in contacts:
+		position_sum += _contact_position(contact)
+	return position_sum / float(contacts.size())
+
+func _contact_position(contact: Dictionary) -> Vector2:
+	var other := contact.other as BallState
+	return other.position + Vector2(contact.normal) * float(contact.minimum_distance)
+
+func _fallback_slide_direction(inward: Vector2, blocker_direction: Vector2) -> Vector2:
+	var tangent := Vector2(-inward.y, inward.x)
+	if tangent.dot(blocker_direction) < 0.0:
+		return -tangent
+	return tangent
 
 func _has_inward_support(ball: BallState, settled_snapshot: Dictionary = {}) -> bool:
 	var core_limit := _core_limit_for_ball(ball)

@@ -53,8 +53,6 @@ func _move_toward_settle_target(delta: float) -> void:
 		state.settled = bool(resolved.settled)
 		if state.settled:
 			velocity = Vector2.ZERO
-			if parent_playfield.has_method("relax_settled_balls"):
-				parent_playfield.relax_settled_balls()
 		return
 	position = proposed_position
 	state.position = position

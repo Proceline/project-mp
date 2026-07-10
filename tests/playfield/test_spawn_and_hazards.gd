@@ -122,7 +122,7 @@ func test_orb_node_moves_toward_center_and_stops_at_core_ring(runner: TestRunner
 	runner.assert_true(ball.position.distance_to(settled_position) > 1.0, "settled orb rotates with playfield")
 	_remove_playfield_from_tree(playfield)
 
-func test_incoming_orb_stops_against_settled_ball_without_overlap(runner: TestRunner) -> void:
+func test_single_ball_contact_does_not_lock_incoming_orb(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
 	var blocker: BallState = BallState.new_ball(20, BallState.Kind.COLOR, Vector2(-120, 0))
 	blocker.settled = true
@@ -131,11 +131,11 @@ func test_incoming_orb_stops_against_settled_ball_without_overlap(runner: TestRu
 	var incoming: BallState = BallState.new_ball(21, BallState.Kind.COLOR, Vector2(-180, 0))
 	playfield.add_ball(incoming)
 	var incoming_node: OrbNode = playfield.get_child(1) as OrbNode
-	for i in range(90):
+	for i in range(20):
 		incoming_node._process(1.0 / 60.0)
 
 	var minimum_distance: float = blocker.radius + incoming.radius
-	runner.assert_true(incoming.settled, "incoming orb settles when it contacts another ball")
+	runner.assert_true(not incoming.settled, "single ball contact keeps moving instead of locking")
 	runner.assert_true(incoming.position.distance_to(blocker.position) >= minimum_distance - 0.1, "settled balls do not overlap")
 	_remove_playfield_from_tree(playfield)
 
@@ -179,21 +179,41 @@ func test_two_point_contact_supports_settled_orb(runner: TestRunner) -> void:
 	runner.assert_true(carried.position.distance_to(carried_start) < 0.001, "two-point support does not teleport the orb")
 	_remove_playfield_from_tree(playfield)
 
-func test_playfield_relaxes_overlapping_settled_balls(runner: TestRunner) -> void:
+func test_two_ball_contact_locks_incoming_orb(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
-	var first: BallState = BallState.new_ball(30, BallState.Kind.COLOR, Vector2(-130, 0))
-	var second: BallState = BallState.new_ball(31, BallState.Kind.COLOR, Vector2(-150, 0))
+	var left_support: BallState = BallState.new_ball(30, BallState.Kind.COLOR, Vector2(-118, -24))
+	var right_support: BallState = BallState.new_ball(31, BallState.Kind.COLOR, Vector2(-118, 24))
+	left_support.settled = true
+	right_support.settled = true
+	playfield.add_ball(left_support)
+	playfield.add_ball(right_support)
+
+	var incoming: BallState = BallState.new_ball(32, BallState.Kind.COLOR, Vector2(-180, 0))
+	playfield.add_ball(incoming)
+	var incoming_node: OrbNode = playfield.get_child(2) as OrbNode
+	for i in range(90):
+		incoming_node._process(1.0 / 60.0)
+
+	runner.assert_true(incoming.settled, "two inner support contacts lock the incoming orb")
+	runner.assert_true(left_support.position.distance_to(Vector2(-118, -24)) < 0.001, "left support remains locked in place")
+	runner.assert_true(right_support.position.distance_to(Vector2(-118, 24)) < 0.001, "right support remains locked in place")
+	_remove_playfield_from_tree(playfield)
+
+func test_global_relax_does_not_move_locked_orbs(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var first: BallState = BallState.new_ball(33, BallState.Kind.COLOR, Vector2(-130, 0))
+	var second: BallState = BallState.new_ball(34, BallState.Kind.COLOR, Vector2(-150, 0))
 	first.settled = true
 	second.settled = true
 	playfield.add_ball(first)
 	playfield.add_ball(second)
+	var first_start := first.position
+	var second_start := second.position
 
 	playfield.relax_settled_balls()
 
-	var minimum_distance := first.radius + second.radius
-	runner.assert_true(first.position.distance_to(second.position) >= minimum_distance - 0.1, "relaxation separates overlapping settled balls")
-	runner.assert_true(first.position.length() >= playfield.core_collision_radius + first.radius - 0.1, "relaxation keeps first ball outside core")
-	runner.assert_true(second.position.length() >= playfield.core_collision_radius + second.radius - 0.1, "relaxation keeps second ball outside core")
+	runner.assert_true(first.position.distance_to(first_start) < 0.001, "locked orb is not globally pushed by relaxation")
+	runner.assert_true(second.position.distance_to(second_start) < 0.001, "other locked orb is not globally pushed by relaxation")
 	_remove_playfield_from_tree(playfield)
 
 func test_playfield_keeps_orb_edge_outside_visual_core_isolation(runner: TestRunner) -> void:
