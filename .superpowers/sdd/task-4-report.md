@@ -51,3 +51,23 @@ Exact tests run:
 Exact test result/output summary:
 - Red run failed on the new regression checks: large delta emitted only one action-bar event, a shared `HpPhaseMechanic` only fired for the first controller, and the burst counter failed when configured before the volley mechanic.
 - Final verification run completed with exit code `0` and printed only the Godot engine banner.
+
+## Task 4 Re-Review Typing Fix
+
+Status: complete
+
+Files changed:
+- `src/boss/boss_controller.gd`
+- `src/boss/boss_mechanic.gd`
+- `src/boss/action_bar_volley_mechanic.gd`
+- `src/boss/hp_phase_mechanic.gd`
+- `src/boss/burst_counter_mechanic.gd`
+
+Review fix:
+- Tried the brief's requested `Array[BossMechanic]` API first, but this Godot parse pass would not resolve the boss class names across the cyclic boss scripts. The safe fallback that compiled cleanly was a preloaded `BossMechanic` alias in `boss_controller.gd`, a typed `Array[BossMechanic]` configure signature there, and `Object` controller parameters in the mechanics with dynamic `get_mechanic_state` calls at the boundary.
+
+Exact test command:
+- `& 'D:\Godot_v4.7-stable_mono_win64\Godot_v4.7-stable_mono_win64\Godot_v4.7-stable_mono_win64_console.exe' --headless --path 'D:\ProjectCI_Git\project-mp\.worktrees\pve-orb-boss-demo' --script res://tests/run_all.gd`
+
+Exact test result/output summary:
+- Final verification run completed with exit code `0` and printed only the Godot engine banner.

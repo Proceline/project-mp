@@ -5,8 +5,8 @@ class_name ActionBarVolleyMechanic
 @export var count: int = 2
 @export var value: int = 5
 
-func tick(delta: float, battle: BattleState, controller) -> Array:
-	var state: Dictionary = controller.get_mechanic_state(self)
+func tick(delta: float, battle: BattleState, controller: Object) -> Array:
+	var state: Dictionary = controller.call("get_mechanic_state", self)
 	var elapsed := float(state.get("elapsed", 0.0)) + delta
 	var events: Array = []
 	if interval_seconds <= 0.0:

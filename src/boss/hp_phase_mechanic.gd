@@ -5,8 +5,8 @@ class_name HpPhaseMechanic
 @export var count: int = 3
 @export var value: int = 8
 
-func tick(delta: float, battle: BattleState, controller) -> Array:
-	var state: Dictionary = controller.get_mechanic_state(self)
+func tick(delta: float, battle: BattleState, controller: Object) -> Array:
+	var state: Dictionary = controller.call("get_mechanic_state", self)
 	if bool(state.get("fired", false)):
 		return []
 	var current_percent := float(battle.boss_hp) / float(max(battle.boss_max_hp, 1))
