@@ -2,8 +2,8 @@
 
 ## Current Stable Prototype Node
 
-- Stable checkpoint: `1a6a7d9 fix: let board-attached orbs participate in rules`
-- This is the current rollback/reference point for the Godot prototype after the first major orb physics and rule-state pass.
+- Stable checkpoint: `2f9387b feat: render preview queue as orb icons`
+- This is the current rollback/reference point for the Godot prototype after the first major orb physics, queued boss hazard, and preview UI pass.
 
 ## Project Context
 
@@ -34,6 +34,7 @@
 - Player-side orbs and combat orbs can be fast-dropped.
 - Boss hazard events insert hazard orbs into the shared preview queue. They should not add hazards directly to the playfield.
 - Player fast-drop only releases player-side orbs. If a hazard orb is at the preview head, it waits for the timed queue drop.
+- The preview queue should render as orb icons, not text codes such as `C0` or `DMG5`.
 - Falling orbs move toward the center until they contact the core isolation ring or the orb pile.
 - Orbs touching the core isolation ring are locked.
 - A single orb support should not lock another orb unless the support is the core isolation ring; one-point ball support should slide inward when possible.
