@@ -80,6 +80,30 @@ func test_player_orbs_auto_drop_without_space(runner: TestRunner) -> void:
 	runner.assert_true(dropped.has_settle_target, "auto dropped orb receives a settle target")
 	_destroy_controller(controller)
 
+func test_falling_hazards_do_not_damage_player_before_boundary_or_clear(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.battle.player_hp = 30
+	controller.playfield.balls = []
+
+	for hazard in controller.hazard_spawner.spawn_from_event({
+		"type": "spawn_hazard",
+		"count": 6,
+		"value": 5,
+		"source": "test",
+		"angle_hint": "boss_side",
+	}):
+		controller.playfield.add_ball(hazard)
+
+	controller.playfield.advance_hazard_phases(controller.playfield.hazard_warning_seconds + 0.1)
+	for exploded in controller.playfield.check_boundary_explosions():
+		controller.battle.apply_player_damage(max(exploded.hazard_damage, 1))
+	controller.advance_chain_resolution(2.0)
+
+	runner.assert_eq(controller.battle.player_hp, 30, "falling hazards do not damage before boundary explosion or settled clear")
+	_destroy_controller(controller)
+
 func _instantiate_controller(runner: TestRunner) -> GameController:
 	var packed: PackedScene = load("res://scenes/main.tscn")
 	runner.assert_true(packed != null, "main scene resource loads for runtime test")

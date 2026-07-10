@@ -17,6 +17,7 @@ var hazard_damage: int = 0
 var age_seconds: float = 0.0
 var flashing: bool = false
 var settled: bool = false
+var board_attached: bool = false
 var has_settle_target: bool = false
 var settle_target: Vector2 = Vector2.ZERO
 

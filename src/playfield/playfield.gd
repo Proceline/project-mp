@@ -108,6 +108,7 @@ func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dic
 		return _resolve_contact_motion(ball, swept_contacts)
 	var core_limit := _core_limit_for_ball(ball)
 	if proposed_position.length() <= core_limit:
+		ball.board_attached = true
 		return {
 			"position": incoming_direction * core_limit,
 			"settled": true,
@@ -219,7 +220,7 @@ func relax_settled_balls() -> void:
 	_sync_orb_nodes_to_state()
 
 func _rotates_with_disk(ball: BallState) -> bool:
-	return ball.position.length() <= danger_radius + ball.radius
+	return ball.settled or ball.board_attached
 
 func _sync_orb_nodes_to_state() -> void:
 	for ball in balls:
@@ -231,6 +232,7 @@ func _core_limit_for_ball(ball: BallState) -> float:
 	return core_collision_radius + ball.radius
 
 func _resolve_contact_motion(ball: BallState, contacts: Array[Dictionary]) -> Dictionary:
+	ball.board_attached = true
 	var inward := -_safe_direction(ball.position)
 	if _contacts_support_inward(inward, contacts):
 		return {
