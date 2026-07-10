@@ -3,12 +3,14 @@ class_name BattleUI
 
 const BallState = preload("res://src/rules/ball_state.gd")
 const BattleState = preload("res://src/rules/battle_state.gd")
+const PreviewOrbIcon = preload("res://src/ui/preview_orb_icon.gd")
 
 @onready var player_hp_label: Label = %PlayerHP
 @onready var shield_marks_label: Label = %ShieldMarks
 @onready var boss_hp_label: Label = %BossHP
 @onready var boss_action_bar: ProgressBar = %BossActionBar
 @onready var preview_label: Label = %Preview
+@onready var preview_row: HBoxContainer = %PreviewRow
 @onready var status_label: Label = %Status
 
 func update_from_state(battle: BattleState, boss_action_ratio: float, preview: Array[BallState]) -> void:
@@ -21,16 +23,15 @@ func update_from_state(battle: BattleState, boss_action_ratio: float, preview: A
 	shield_marks_label.visible = battle.player_shield > 0
 	boss_hp_label.text = "Boss HP %d/%d" % [battle.boss_hp, battle.boss_max_hp]
 	boss_action_bar.value = clampf(boss_action_ratio * 100.0, 0.0, 100.0)
-	preview_label.text = _preview_text(preview)
+	preview_label.text = "Next:"
+	_update_preview_icons(preview)
 	status_label.text = battle.result()
 
-func _preview_text(preview: Array[BallState]) -> String:
-	var parts: Array[String] = []
+func _update_preview_icons(preview: Array[BallState]) -> void:
+	for child in preview_row.get_children():
+		preview_row.remove_child(child)
+		child.queue_free()
 	for ball in preview:
-		if ball.kind == BallState.Kind.COLOR:
-			parts.append("C%d" % ball.color_id)
-		elif ball.kind == BallState.Kind.COMBAT:
-			parts.append(["", "ATK", "SHD", "HEAL"][ball.combat_kind])
-		elif ball.kind == BallState.Kind.HAZARD:
-			parts.append("DMG%d" % ball.value)
-	return "Next: " + " ".join(parts)
+		var icon := PreviewOrbIcon.new()
+		icon.setup(ball)
+		preview_row.add_child(icon)
