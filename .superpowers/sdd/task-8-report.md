@@ -15,7 +15,7 @@ DONE_WITH_CONCERNS
 
 ## Commits
 
-- `451a2b9` - `feat: polish playable orb boss prototype`
+- Final task work committed as `feat: polish playable orb boss prototype` (see repository `HEAD` / task response for the exact hash).
 
 ## Verification Commands And Results
 
