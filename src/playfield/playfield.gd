@@ -9,16 +9,18 @@ var orb_nodes_by_id: Dictionary = {}
 var danger_radius: float = 260.0
 var rotation_speed: float = 2.4
 var hazard_warning_seconds: float = 1.25
+var _next_settle_slot: int = 0
 
 func _ready() -> void:
 	queue_redraw()
 	for ball in balls:
+		_assign_settle_target_if_needed(ball)
 		_ensure_orb_node(ball)
 
 func add_ball(ball: BallState) -> void:
+	_assign_settle_target_if_needed(ball)
 	balls.append(ball)
-	if is_inside_tree():
-		_ensure_orb_node(ball)
+	_ensure_orb_node(ball)
 
 func rotate_settled(angle_delta: float) -> void:
 	for ball in balls:
@@ -81,6 +83,20 @@ func _remove_orb_node(ball_id: int) -> void:
 	if node.get_parent() == self:
 		remove_child(node)
 	node.queue_free()
+
+func _assign_settle_target_if_needed(ball: BallState) -> void:
+	if ball.settled or ball.has_settle_target:
+		return
+	var slot := _next_settle_slot
+	_next_settle_slot += 1
+	var layer := slot / 10
+	var index_in_layer := slot % 10
+	var radius := minf(88.0 + float(layer) * ball.radius * 1.85, danger_radius - ball.radius * 1.35)
+	var angle_offset := -0.35 if ball.kind != BallState.Kind.HAZARD else -0.8
+	var angle := angle_offset + TAU * float(index_in_layer) / 10.0 + float(layer) * 0.31
+	ball.settle_target = Vector2(cos(angle), sin(angle)) * radius
+	ball.has_settle_target = true
+	ball.settled = false
 
 func _draw() -> void:
 	draw_circle(Vector2.ZERO, danger_radius, Color(0.9, 0.1, 0.1, 0.12))

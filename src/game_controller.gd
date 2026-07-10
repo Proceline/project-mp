@@ -25,6 +25,8 @@ var active_chains: Array = []
 var chain_timer: float = 0.0
 var chain_flash_seconds: float = 1.2
 var chain_effects_applied: bool = false
+var player_auto_drop_seconds: float = 2.0
+var player_auto_drop_timer: float = 0.0
 
 func _ready() -> void:
 	volley_mechanic = ActionBarVolleyMechanic.new()
@@ -47,9 +49,10 @@ func _process(delta: float) -> void:
 	playfield.rotate_settled(rotation_input * playfield.rotation_speed * delta)
 	playfield.advance_hazard_phases(delta)
 	if Input.is_action_just_pressed("fast_drop_player_orb"):
-		var ball := spawn_queue.fast_drop_current()
-		ball.position = Vector2(-320, -180)
-		playfield.add_ball(ball)
+		_drop_player_orb()
+		player_auto_drop_timer = 0.0
+	else:
+		advance_player_orb_spawn(delta)
 	for event in boss_controller.tick(delta, battle):
 		for hazard in hazard_spawner.spawn_from_event(event):
 			playfield.add_ball(hazard)
@@ -61,6 +64,18 @@ func _process(delta: float) -> void:
 
 func advance_chain_resolution(delta: float) -> void:
 	_tick_chains(delta)
+
+func advance_player_orb_spawn(delta: float) -> void:
+	player_auto_drop_timer += delta
+	if player_auto_drop_timer < player_auto_drop_seconds:
+		return
+	player_auto_drop_timer = 0.0
+	_drop_player_orb()
+
+func _drop_player_orb() -> void:
+	var ball := spawn_queue.fast_drop_current()
+	ball.position = Vector2(-320, -180)
+	playfield.add_ball(ball)
 
 func _boss_action_ratio() -> float:
 	if volley_mechanic == null or volley_mechanic.interval_seconds <= 0.0:

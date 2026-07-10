@@ -16,8 +16,10 @@ var hazard_phase: HazardPhase = HazardPhase.WARNING
 var age_seconds: float = 0.0
 var flashing: bool = false
 var settled: bool = false
+var has_settle_target: bool = false
+var settle_target: Vector2 = Vector2.ZERO
 
-static func new_ball(ball_id: int, ball_kind: Kind, ball_position: Vector2):
+static func new_ball(ball_id: int, ball_kind: Kind, ball_position: Vector2) -> BallState:
 	var ball := new()
 	ball.id = ball_id
 	ball.kind = ball_kind

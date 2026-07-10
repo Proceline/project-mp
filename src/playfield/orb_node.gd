@@ -5,6 +5,7 @@ const BallState = preload("res://src/rules/ball_state.gd")
 
 var state: BallState
 var velocity: Vector2 = Vector2.ZERO
+var attraction_speed: float = 360.0
 const LABELS := {
 	BallState.CombatKind.ATTACK: "ATK",
 	BallState.CombatKind.SHIELD: "SHD",
@@ -21,6 +22,9 @@ func _process(delta: float) -> void:
 		return
 	if state.flashing:
 		queue_redraw()
+	if state.has_settle_target and not state.settled:
+		_move_toward_settle_target(delta)
+		return
 	if velocity == Vector2.ZERO:
 		return
 	position += velocity * delta
@@ -29,6 +33,19 @@ func _process(delta: float) -> void:
 	if velocity.length() < 8.0:
 		velocity = Vector2.ZERO
 		state.settled = true
+
+func _move_toward_settle_target(delta: float) -> void:
+	var to_target := state.settle_target - position
+	var distance := to_target.length()
+	if distance <= 2.0:
+		position = state.settle_target
+		state.position = position
+		velocity = Vector2.ZERO
+		state.settled = true
+		return
+	var step := minf(attraction_speed * delta, distance)
+	position += to_target.normalized() * step
+	state.position = position
 
 func _draw() -> void:
 	if state == null:

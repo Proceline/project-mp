@@ -64,6 +64,22 @@ func test_chain_resolution_applies_effects_once_and_clears_orbs(runner: TestRunn
 	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp - 9, "resolved chain does not apply damage twice")
 	_destroy_controller(controller)
 
+func test_player_orbs_auto_drop_without_space(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	var before_count := controller.playfield.balls.size()
+
+	controller.advance_player_orb_spawn(controller.player_auto_drop_seconds - 0.01)
+	runner.assert_eq(controller.playfield.balls.size(), before_count, "auto drop waits for its timer")
+
+	controller.advance_player_orb_spawn(0.02)
+	runner.assert_eq(controller.playfield.balls.size(), before_count + 1, "auto drop adds a player-side orb when timer expires")
+	var dropped: BallState = controller.playfield.balls[-1]
+	runner.assert_true(dropped.kind != BallState.Kind.HAZARD, "auto drop uses the player-side queue")
+	runner.assert_true(dropped.has_settle_target, "auto dropped orb receives a settle target")
+	_destroy_controller(controller)
+
 func _instantiate_controller(runner: TestRunner) -> GameController:
 	var packed: PackedScene = load("res://scenes/main.tscn")
 	runner.assert_true(packed != null, "main scene resource loads for runtime test")
@@ -79,6 +95,7 @@ func _instantiate_controller(runner: TestRunner) -> GameController:
 	controller.spawn_queue = controller.get_node("%SpawnQueue") as SpawnQueue
 	controller.hazard_spawner = controller.get_node("%HazardSpawner") as HazardSpawner
 	controller.boss_controller = controller.get_node("%BossController") as BossController
+	controller.ui = controller.get_node("%BattleUI")
 	return controller
 
 func _destroy_controller(controller: GameController) -> void:

@@ -87,6 +87,39 @@ func test_playfield_rotation_persists_for_settled_orb_nodes(runner: TestRunner) 
 	runner.assert_true(orb.position.distance_to(expected) < 0.001, "rotation updates settled orb node position")
 	playfield.free()
 
+func test_playfield_assigns_distinct_settle_targets_for_new_orbs(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var first: BallState = BallState.new_ball(10, BallState.Kind.COLOR, Vector2(-320, -180))
+	var second: BallState = BallState.new_ball(11, BallState.Kind.COLOR, Vector2(-320, -180))
+
+	playfield.add_ball(first)
+	playfield.add_ball(second)
+
+	runner.assert_true(first.has_settle_target, "first new orb receives a settle target")
+	runner.assert_true(second.has_settle_target, "second new orb receives a settle target")
+	runner.assert_true(first.settle_target.distance_to(second.settle_target) > first.radius, "new orbs get distinct settle targets instead of replacing each other")
+	runner.assert_true(not first.settled, "newly added orb starts moving before it settles")
+	_remove_playfield_from_tree(playfield)
+
+func test_orb_node_moves_toward_settle_target_and_then_rotates(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var ball: BallState = BallState.new_ball(12, BallState.Kind.COLOR, Vector2(-120, 0))
+	playfield.add_ball(ball)
+	runner.assert_true(playfield.get_child_count() > 0, "adding a ball creates an orb node")
+	var orb: OrbNode = playfield.get_child(0) as OrbNode
+	var target: Vector2 = ball.settle_target
+	var start_distance := ball.position.distance_to(target)
+
+	for i in range(90):
+		orb._process(1.0 / 60.0)
+
+	runner.assert_true(ball.position.distance_to(target) < start_distance, "orb moves inward toward assigned settle target")
+	runner.assert_true(ball.settled, "orb settles after reaching target")
+	var settled_position := ball.position
+	playfield.rotate_settled(PI * 0.5)
+	runner.assert_true(ball.position.distance_to(settled_position) > 1.0, "settled orb rotates with playfield")
+	_remove_playfield_from_tree(playfield)
+
 func test_playfield_boundary_explosion_removes_hazard_node(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
 	playfield.danger_radius = 100.0
