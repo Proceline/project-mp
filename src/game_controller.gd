@@ -27,6 +27,7 @@ var chain_flash_seconds: float = 1.2
 var chain_effects_applied: bool = false
 var player_auto_drop_seconds: float = 3.0
 var player_auto_drop_timer: float = 0.0
+var damage_events: Array[Dictionary] = []
 
 func _ready() -> void:
 	volley_mechanic = ActionBarVolleyMechanic.new()
@@ -58,7 +59,7 @@ func _process(delta: float) -> void:
 			playfield.add_ball(hazard)
 	for exploded in playfield.check_boundary_explosions():
 		var damage := _hazard_damage(exploded)
-		battle.apply_player_damage(damage)
+		_apply_player_damage(damage, "boundary_explosion")
 		boss_controller.notify_player_damage(damage)
 	advance_chain_resolution(delta)
 	ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview)
@@ -113,7 +114,7 @@ func _apply_chain_result(result: Dictionary) -> void:
 	if int(result.heal) > 0:
 		battle.heal_player(int(result.heal))
 	if int(result.player_damage) > 0:
-		battle.apply_player_damage(int(result.player_damage))
+		_apply_player_damage(int(result.player_damage), "danger_hazard_clear")
 		boss_controller.notify_player_damage(int(result.player_damage))
 	_remove_balls_by_id(result.cleared_color_ids)
 	_remove_balls_by_id(result.removed_ball_ids)
@@ -133,3 +134,12 @@ func _hazard_damage(ball: BallState) -> int:
 	if ball.hazard_damage > 0:
 		return ball.hazard_damage
 	return max(ball.value, 1)
+
+func _apply_player_damage(amount: int, source: String) -> void:
+	battle.apply_player_damage(amount)
+	damage_events.append({
+		"amount": amount,
+		"source": source,
+		"hp_after": battle.player_hp,
+	})
+	print("player_damage source=%s amount=%d hp_after=%d" % [source, amount, battle.player_hp])

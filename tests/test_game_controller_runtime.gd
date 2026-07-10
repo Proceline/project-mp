@@ -1,6 +1,7 @@
 extends RefCounted
 
 const BallState = preload("res://src/rules/ball_state.gd")
+const ActionBarVolleyMechanic = preload("res://src/boss/action_bar_volley_mechanic.gd")
 const BurstCounterMechanic = preload("res://src/boss/burst_counter_mechanic.gd")
 const BossController = preload("res://src/boss/boss_controller.gd")
 const GameController = preload("res://src/game_controller.gd")
@@ -102,6 +103,35 @@ func test_falling_hazards_do_not_damage_player_before_boundary_or_clear(runner: 
 	controller.advance_chain_resolution(2.0)
 
 	runner.assert_eq(controller.battle.player_hp, 30, "falling hazards do not damage before boundary explosion or settled clear")
+	_destroy_controller(controller)
+
+func test_action_bar_hazard_spawn_does_not_immediately_damage_player(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.battle.player_hp = 30
+	controller.playfield.balls = []
+	var volley := ActionBarVolleyMechanic.new()
+	volley.interval_seconds = 1.0
+	volley.count = 2
+	volley.value = 5
+	controller.boss_controller.configure([volley])
+
+	for i in range(3):
+		for event in controller.boss_controller.tick(1.0, controller.battle):
+			for hazard in controller.hazard_spawner.spawn_from_event(event):
+				controller.playfield.add_ball(hazard)
+		for exploded in controller.playfield.check_boundary_explosions():
+			controller._apply_player_damage(max(exploded.hazard_damage, 1), "boundary_explosion")
+		controller.advance_chain_resolution(0.0)
+
+	var hazard_count := 0
+	for ball in controller.playfield.balls:
+		if ball.kind == BallState.Kind.HAZARD:
+			hazard_count += 1
+	runner.assert_eq(hazard_count, 6, "three action-bar volleys spawn six hazards")
+	runner.assert_eq(controller.battle.player_hp, 30, "spawning six hazards does not directly damage the player")
+	runner.assert_eq(controller.damage_events.size(), 0, "spawning hazards records no player-damage event")
 	_destroy_controller(controller)
 
 func _instantiate_controller(runner: TestRunner) -> GameController:
