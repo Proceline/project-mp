@@ -10,6 +10,7 @@ var danger_radius: float = 260.0
 var core_radius: float = 58.0
 var core_collision_radius: float = 80.0
 var support_slop: float = 1.5
+var stable_support_dot: float = 0.94
 var rotation_speed: float = 2.4
 var hazard_warning_seconds: float = 1.25
 
@@ -115,10 +116,7 @@ func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dic
 		var push_direction := offset.normalized()
 		if push_direction == Vector2.ZERO:
 			push_direction = -incoming_direction
-		return {
-			"position": other.position + push_direction * minimum_distance,
-			"settled": true,
-		}
+		return _resolve_contact_motion(ball, other, push_direction, minimum_distance)
 	return {
 		"position": proposed_position,
 		"settled": false,
@@ -183,6 +181,27 @@ func _sync_orb_nodes_to_state() -> void:
 func _core_limit_for_ball(ball: BallState) -> float:
 	return core_collision_radius + ball.radius
 
+func _resolve_contact_motion(ball: BallState, other: BallState, contact_normal: Vector2, minimum_distance: float) -> Dictionary:
+	var inward := -_safe_direction(ball.position)
+	var blocker_direction := -contact_normal
+	var support_strength := inward.dot(blocker_direction)
+	var contact_position := other.position + contact_normal * minimum_distance
+	if support_strength >= stable_support_dot:
+		return {
+			"position": contact_position,
+			"settled": true,
+		}
+	var slide_direction := inward - blocker_direction * support_strength
+	if slide_direction.length() <= 0.001:
+		return {
+			"position": contact_position,
+			"settled": true,
+		}
+	return {
+		"position": contact_position + slide_direction.normalized() * 2.0,
+		"settled": false,
+	}
+
 func _has_inward_support(ball: BallState) -> bool:
 	var core_limit := _core_limit_for_ball(ball)
 	if ball.position.length() <= core_limit + support_slop:
@@ -194,9 +213,11 @@ func _has_inward_support(ball: BallState) -> bool:
 		if other.position.length() >= ball.position.length():
 			continue
 		var offset := other.position - ball.position
-		if offset.dot(inward) <= 0.0:
+		var distance := offset.length()
+		if distance > ball.radius + other.radius + support_slop:
 			continue
-		if offset.length() <= ball.radius + other.radius + support_slop:
+		var blocker_direction := _safe_direction(offset)
+		if inward.dot(blocker_direction) >= stable_support_dot:
 			return true
 	return false
 

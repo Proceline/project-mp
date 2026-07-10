@@ -139,6 +139,22 @@ func test_incoming_orb_stops_against_settled_ball_without_overlap(runner: TestRu
 	runner.assert_true(incoming.position.distance_to(blocker.position) >= minimum_distance - 0.1, "settled balls do not overlap")
 	_remove_playfield_from_tree(playfield)
 
+func test_incoming_orb_slides_when_single_contact_does_not_support_center_gravity(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var blocker: BallState = BallState.new_ball(22, BallState.Kind.COLOR, Vector2(-118, 24))
+	blocker.settled = true
+	playfield.add_ball(blocker)
+
+	var incoming: BallState = BallState.new_ball(23, BallState.Kind.COLOR, Vector2(-180, 0))
+	playfield.add_ball(incoming)
+	var incoming_node: OrbNode = playfield.get_child(1) as OrbNode
+	for i in range(20):
+		incoming_node._process(1.0 / 60.0)
+
+	runner.assert_true(not incoming.settled, "off-center single contact keeps sliding instead of locking")
+	runner.assert_true(incoming.position.length() < 180.0, "sliding contact still moves the orb inward")
+	_remove_playfield_from_tree(playfield)
+
 func test_playfield_relaxes_overlapping_settled_balls(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
 	var first: BallState = BallState.new_ball(30, BallState.Kind.COLOR, Vector2(-130, 0))
