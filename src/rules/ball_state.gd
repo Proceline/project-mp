@@ -1,0 +1,24 @@
+extends RefCounted
+class_name BallState
+
+enum Kind { COLOR, COMBAT, HAZARD }
+enum CombatKind { NONE, ATTACK, SHIELD, HEAL }
+enum HazardPhase { WARNING, DANGER }
+
+var id: int
+var kind: Kind
+var position: Vector2
+var radius: float = 24.0
+var color_id: int = -1
+var value: int = 0
+var combat_kind: CombatKind = CombatKind.NONE
+var hazard_phase: HazardPhase = HazardPhase.WARNING
+var flashing: bool = false
+var settled: bool = false
+
+static func new_ball(ball_id: int, ball_kind: Kind, ball_position: Vector2) -> BallState:
+	var ball := BallState.new()
+	ball.id = ball_id
+	ball.kind = ball_kind
+	ball.position = ball_position
+	return ball
