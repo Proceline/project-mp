@@ -1,7 +1,7 @@
 extends "res://src/boss/boss_mechanic.gd"
 class_name ActionBarVolleyMechanic
 
-@export var interval_seconds: float = 6.0
+@export var interval_seconds: float = 10.0
 @export var count: int = 2
 @export var value: int = 5
 

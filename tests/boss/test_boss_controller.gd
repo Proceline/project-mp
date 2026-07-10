@@ -20,6 +20,15 @@ func test_action_bar_volley_emits_hazard_event(runner: TestRunner) -> void:
 	runner.assert_eq(events[0].count, 2, "volley count comes from mechanic")
 	boss.free()
 
+func test_action_bar_volley_default_cadence_is_slow(runner: TestRunner) -> void:
+	var battle := BattleState.new()
+	var boss := BossController.new()
+	var volley := ActionBarVolleyMechanic.new()
+	boss.configure([volley])
+	runner.assert_eq(boss.tick(6.0, battle).size(), 0, "default volley waits longer than the old fast cadence")
+	runner.assert_eq(boss.tick(4.0, battle).size(), 1, "default volley emits at the slower cadence")
+	boss.free()
+
 func test_action_bar_volley_preserves_large_delta_overflow(runner: TestRunner) -> void:
 	var battle := BattleState.new()
 	var boss := BossController.new()
