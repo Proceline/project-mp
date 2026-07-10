@@ -52,3 +52,19 @@ func test_hazard_orb_reduces_from_multiple_chains(runner) -> void:
 		chain_b.members.append(_color_ball(20 + i, 2, Vector2(i * 30, 20)))
 	resolver.apply_chain_influence([chain_a, chain_b], [hazard])
 	runner.assert_eq(hazard.value, 6, "hazard value is reduced by both chains")
+
+func test_unsettled_hazard_is_not_reduced_by_chain(runner) -> void:
+	var resolver := ChainResolver.new()
+	var hazard := _hazard_ball(201, 5, Vector2(80, 0))
+	hazard.settled = false
+	hazard.hazard_phase = BallState.HazardPhase.DANGER
+	var chain: Dictionary = {"color_id": 1, "members": [], "strength": 5}
+	for i in range(5):
+		chain.members.append(_color_ball(i, 1, Vector2(i * 30, 0)))
+
+	resolver.apply_chain_influence([chain], [hazard])
+	var result := resolver.resolve_finished_chains([chain], [hazard])
+
+	runner.assert_eq(hazard.value, 5, "unsettled hazard keeps its value while still moving")
+	runner.assert_eq(result.player_damage, 0, "unsettled hazard cannot deal hidden clear damage")
+	runner.assert_true(not result.removed_ball_ids.has(201), "unsettled hazard is not removed by a chain")

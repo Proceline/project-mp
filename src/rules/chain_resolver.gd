@@ -59,6 +59,8 @@ func apply_chain_influence(chains: Array, balls: Array[BallState]) -> void:
 	for target in balls:
 		if target.kind == BallState.Kind.COLOR:
 			continue
+		if not target.settled:
+			continue
 
 		var total := 0
 		for chain in chains:
@@ -101,6 +103,8 @@ func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictiona
 		result.removed_ball_ids.append(ball.id)
 	for ball in balls:
 		if ball.kind != BallState.Kind.HAZARD or ball.value > 0:
+			continue
+		if not ball.settled:
 			continue
 		if not _is_touched_by_any_chain(chains, ball):
 			continue

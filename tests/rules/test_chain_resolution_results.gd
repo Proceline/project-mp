@@ -8,12 +8,15 @@ func test_finished_chain_converts_combat_values_to_results(runner) -> void:
 	var attack: BallState = BallState.new_ball(20, BallState.Kind.COMBAT, Vector2(30, 0))
 	attack.combat_kind = BallState.CombatKind.ATTACK
 	attack.value = 9
+	attack.settled = true
 	var shield: BallState = BallState.new_ball(21, BallState.Kind.COMBAT, Vector2(60, 0))
 	shield.combat_kind = BallState.CombatKind.SHIELD
 	shield.value = 4
+	shield.settled = true
 	var heal: BallState = BallState.new_ball(22, BallState.Kind.COMBAT, Vector2(90, 0))
 	heal.combat_kind = BallState.CombatKind.HEAL
 	heal.value = 6
+	heal.settled = true
 	var chain := {"color_id": 1, "members": [], "strength": 5}
 	for i in range(5):
 		var color: BallState = BallState.new_ball(i, BallState.Kind.COLOR, Vector2(i * 20, 0))
@@ -37,6 +40,7 @@ func test_finished_chain_removes_cleared_warning_hazard_without_damage(runner) -
 	hazard.value = 0
 	hazard.hazard_damage = 7
 	hazard.hazard_phase = BallState.HazardPhase.WARNING
+	hazard.settled = true
 	var chain := _touching_chain()
 
 	var result: Dictionary = resolver.resolve_finished_chains([chain], [hazard])
@@ -51,6 +55,7 @@ func test_finished_chain_removes_cleared_danger_hazard_with_damage(runner) -> vo
 	hazard.value = 0
 	hazard.hazard_damage = 7
 	hazard.hazard_phase = BallState.HazardPhase.DANGER
+	hazard.settled = true
 	var chain := _touching_chain()
 
 	var result: Dictionary = resolver.resolve_finished_chains([chain], [hazard])

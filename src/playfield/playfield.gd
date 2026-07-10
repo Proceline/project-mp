@@ -30,7 +30,7 @@ func add_ball(ball: BallState) -> void:
 
 func rotate_settled(angle_delta: float) -> void:
 	for ball in balls:
-		if ball.settled:
+		if _rotates_with_disk(ball):
 			var rotated_position := ball.position.rotated(angle_delta)
 			ball.position = rotated_position
 			var node := _get_orb_node(ball.id)
@@ -217,6 +217,9 @@ func relax_settled_balls() -> void:
 		if ball.position.length() < core_limit:
 			ball.position = _safe_direction(ball.position) * core_limit
 	_sync_orb_nodes_to_state()
+
+func _rotates_with_disk(ball: BallState) -> bool:
+	return ball.position.length() <= danger_radius + ball.radius
 
 func _sync_orb_nodes_to_state() -> void:
 	for ball in balls:

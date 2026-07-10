@@ -87,6 +87,24 @@ func test_playfield_rotation_persists_for_settled_orb_nodes(runner: TestRunner) 
 	runner.assert_true(orb.position.distance_to(expected) < 0.001, "rotation updates settled orb node position")
 	playfield.free()
 
+func test_playfield_rotation_carries_active_board_orbs(runner: TestRunner) -> void:
+	var playfield: Playfield = Playfield.new()
+	var ball: BallState = BallState.new_ball(2, BallState.Kind.COLOR, Vector2(160, 0))
+	ball.has_settle_target = true
+	ball.settle_target = Vector2.ZERO
+	ball.settled = false
+	playfield.balls.append(ball)
+	var orb := OrbNode.new()
+	orb.setup(ball)
+	playfield.add_child(orb)
+
+	playfield.rotate_settled(PI * 0.5)
+
+	var expected := Vector2(0, 160)
+	runner.assert_true(ball.position.distance_to(expected) < 0.001, "active board orb rotates with the disk")
+	runner.assert_true(orb.position.distance_to(expected) < 0.001, "active board orb node rotates with the disk")
+	playfield.free()
+
 func test_playfield_assigns_center_target_for_new_orbs(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
 	var first: BallState = BallState.new_ball(10, BallState.Kind.COLOR, Vector2(-320, -180))
