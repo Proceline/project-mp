@@ -103,6 +103,9 @@ func _assign_settle_target_if_needed(ball: BallState) -> void:
 
 func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dictionary:
 	var incoming_direction := _incoming_direction(ball, proposed_position)
+	var swept_contacts := _sweep_contacts(ball, proposed_position)
+	if not swept_contacts.is_empty():
+		return _resolve_contact_motion(ball, swept_contacts)
 	var core_limit := _core_limit_for_ball(ball)
 	if proposed_position.length() <= core_limit:
 		return {
@@ -131,6 +134,59 @@ func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dic
 		"position": proposed_position,
 		"settled": false,
 	}
+
+func _sweep_contacts(ball: BallState, proposed_position: Vector2) -> Array[Dictionary]:
+	var start_position := ball.position
+	var travel := proposed_position - start_position
+	var earliest_t := INF
+	var contacts: Array[Dictionary] = []
+	for other in balls:
+		if other == ball:
+			continue
+		var minimum_distance := ball.radius + other.radius
+		var start_offset := start_position - other.position
+		var start_distance := start_offset.length()
+		if start_distance < minimum_distance:
+			var normal := _safe_direction(start_offset)
+			contacts.append({
+				"other": other,
+				"normal": normal,
+				"minimum_distance": minimum_distance,
+				"penetrating": true,
+			})
+			earliest_t = 0.0
+			continue
+		if travel.length_squared() <= 0.000001:
+			continue
+		var a := travel.length_squared()
+		var b := 2.0 * start_offset.dot(travel)
+		var c := start_offset.length_squared() - minimum_distance * minimum_distance
+		var discriminant := b * b - 4.0 * a * c
+		if discriminant < 0.0:
+			continue
+		var t := (-b - sqrt(discriminant)) / (2.0 * a)
+		if t < 0.0 or t > 1.0:
+			continue
+		if t > earliest_t + 0.001:
+			continue
+		var contact_position := start_position + travel * t
+		var contact := {
+			"other": other,
+			"normal": _safe_direction(contact_position - other.position),
+			"minimum_distance": minimum_distance,
+			"penetrating": false,
+		}
+		if t < earliest_t - 0.001:
+			earliest_t = t
+			contacts.clear()
+		contacts.append(contact)
+	if earliest_t > 0.0:
+		var earliest_contacts: Array[Dictionary] = []
+		for contact in contacts:
+			if not bool(contact.get("penetrating", false)):
+				earliest_contacts.append(contact)
+		return earliest_contacts
+	return contacts
 
 func advance_orb_physics(delta: float) -> void:
 	if delta <= 0.0:
@@ -178,6 +234,11 @@ func _resolve_contact_motion(ball: BallState, contacts: Array[Dictionary]) -> Di
 			"position": _average_contact_position(contacts),
 			"settled": true,
 		}
+	if _has_penetrating_contact(contacts):
+		return {
+			"position": _average_contact_position(contacts),
+			"settled": false,
+		}
 	var primary: Dictionary = contacts[0]
 	var blocker_direction: Vector2 = -Vector2(primary.normal)
 	var support_strength := inward.dot(blocker_direction)
@@ -189,6 +250,12 @@ func _resolve_contact_motion(ball: BallState, contacts: Array[Dictionary]) -> Di
 		"position": _limit_motion_step(ball.position, contact_position + slide_direction.normalized() * contact_slide_step),
 		"settled": false,
 	}
+
+func _has_penetrating_contact(contacts: Array[Dictionary]) -> bool:
+	for contact in contacts:
+		if bool(contact.get("penetrating", false)):
+			return true
+	return false
 
 func _contacts_support_inward(inward: Vector2, contacts: Array[Dictionary]) -> bool:
 	if contacts.size() < 2:

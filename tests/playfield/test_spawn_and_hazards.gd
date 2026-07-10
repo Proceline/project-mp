@@ -139,6 +139,37 @@ func test_single_ball_contact_does_not_lock_incoming_orb(runner: TestRunner) -> 
 	runner.assert_true(incoming.position.distance_to(blocker.position) >= minimum_distance - 0.1, "settled balls do not overlap")
 	_remove_playfield_from_tree(playfield)
 
+func test_fast_incoming_orb_does_not_tunnel_through_settled_ball(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var blocker: BallState = BallState.new_ball(27, BallState.Kind.COLOR, Vector2(-130, 0))
+	blocker.settled = true
+	playfield.add_ball(blocker)
+
+	var incoming: BallState = BallState.new_ball(28, BallState.Kind.COLOR, Vector2(-190, 0))
+	playfield.add_ball(incoming)
+
+	var resolved: Dictionary = playfield.resolve_incoming_motion(incoming, Vector2(-70, 0))
+	var resolved_position: Vector2 = resolved.position
+
+	runner.assert_true(resolved_position.distance_to(blocker.position) >= incoming.radius + blocker.radius - 0.1, "fast orb sweep stops before overlap")
+	runner.assert_true(resolved_position.x <= blocker.position.x - incoming.radius - blocker.radius + 0.1, "fast orb remains on the approach side")
+	_remove_playfield_from_tree(playfield)
+
+func test_overlapping_dynamic_orb_is_pushed_out_before_sliding(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var blocker: BallState = BallState.new_ball(29, BallState.Kind.COLOR, Vector2(-118, 24))
+	blocker.settled = true
+	playfield.add_ball(blocker)
+
+	var incoming: BallState = BallState.new_ball(35, BallState.Kind.COLOR, Vector2(-150, 10))
+	playfield.add_ball(incoming)
+
+	var resolved: Dictionary = playfield.resolve_incoming_motion(incoming, Vector2(-148, 10))
+	var resolved_position: Vector2 = resolved.position
+
+	runner.assert_true(resolved_position.distance_to(blocker.position) >= incoming.radius + blocker.radius - 0.1, "overlapping orb is depenetrated before further motion")
+	_remove_playfield_from_tree(playfield)
+
 func test_incoming_orb_slides_when_single_contact_does_not_support_center_gravity(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
 	var blocker: BallState = BallState.new_ball(22, BallState.Kind.COLOR, Vector2(-118, 24))
