@@ -46,11 +46,27 @@ offset_bottom = 630.0
 color = Color(0.12, 0.15, 0.22, 0.95)
 
 [node name="BossPanel" type="ColorRect" parent="BattleUI"]
-offset_left = 840.0
-offset_top = 40.0
-offset_right = 1220.0
-offset_bottom = 240.0
-color = Color(0.18, 0.08, 0.09, 0.95)
+offset_left = 860.0
+offset_top = 24.0
+offset_right = 1240.0
+offset_bottom = 700.0
+color = Color(0.16, 0.08, 0.12, 0.82)
+
+[node name="BossName" type="Label" parent="BattleUI"]
+offset_left = 900.0
+offset_top = 180.0
+offset_right = 1180.0
+offset_bottom = 214.0
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+text = "Resonance Warden"
+
+[node name="BossBody" type="ColorRect" parent="BattleUI"]
+offset_left = 960.0
+offset_top = 250.0
+offset_right = 1120.0
+offset_bottom = 500.0
+color = Color(0.45, 0.12, 0.2, 1.0)
 
 [node name="PlayerHP" type="Label" parent="BattleUI"]
 unique_name_in_owner = true

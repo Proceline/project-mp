@@ -13,7 +13,11 @@ const BattleState = preload("res://src/rules/battle_state.gd")
 
 func update_from_state(battle: BattleState, boss_action_ratio: float, preview: Array[BallState]) -> void:
 	player_hp_label.text = str(battle.player_hp)
-	shield_marks_label.text = _shield_marks_text(battle.player_shield)
+	var marks: int = mini(battle.player_shield, 20)
+	if marks > 0:
+		shield_marks_label.text = "".rpad(marks, "|")
+	else:
+		shield_marks_label.text = ""
 	shield_marks_label.visible = battle.player_shield > 0
 	boss_hp_label.text = "Boss HP %d/%d" % [battle.boss_hp, battle.boss_max_hp]
 	boss_action_bar.value = clampf(boss_action_ratio * 100.0, 0.0, 100.0)
@@ -28,8 +32,3 @@ func _preview_text(preview: Array[BallState]) -> String:
 		elif ball.kind == BallState.Kind.COMBAT:
 			parts.append(["", "ATK", "SHD", "HEAL"][ball.combat_kind])
 	return "Next: " + " ".join(parts)
-
-func _shield_marks_text(shield: int) -> String:
-	if shield <= 0:
-		return ""
-	return "|".repeat(min(shield, 12))

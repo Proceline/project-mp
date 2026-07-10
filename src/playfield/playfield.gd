@@ -10,6 +10,7 @@ var danger_radius: float = 260.0
 var rotation_speed: float = 2.4
 
 func _ready() -> void:
+	queue_redraw()
 	for ball in balls:
 		_ensure_orb_node(ball)
 
@@ -65,3 +66,13 @@ func _remove_orb_node(ball_id: int) -> void:
 	if node.get_parent() == self:
 		remove_child(node)
 	node.queue_free()
+
+func _draw() -> void:
+	draw_circle(Vector2.ZERO, danger_radius, Color(0.9, 0.1, 0.1, 0.12))
+	draw_arc(Vector2.ZERO, danger_radius, 0.0, TAU, 128, Color(0.9, 0.2, 0.2), 3.0)
+	draw_arc(Vector2.ZERO, danger_radius * 0.72, 0.0, TAU, 128, Color(0.2, 0.8, 1.0), 2.0)
+	for i in range(12):
+		var angle := TAU * float(i) / 12.0
+		var inner := Vector2(cos(angle), sin(angle)) * 42.0
+		var outer := Vector2(cos(angle), sin(angle)) * 68.0
+		draw_line(inner, outer, Color(0.7, 0.9, 1.0, 0.85), 2.0)
