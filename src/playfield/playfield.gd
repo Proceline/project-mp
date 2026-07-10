@@ -8,6 +8,8 @@ var balls: Array[BallState] = []
 var orb_nodes_by_id: Dictionary = {}
 var danger_radius: float = 260.0
 var core_radius: float = 58.0
+var core_collision_radius: float = 80.0
+var settled_center_pressure_speed: float = 48.0
 var rotation_speed: float = 2.4
 var hazard_warning_seconds: float = 1.25
 
@@ -16,6 +18,9 @@ func _ready() -> void:
 	for ball in balls:
 		_assign_settle_target_if_needed(ball)
 		_ensure_orb_node(ball)
+
+func _process(delta: float) -> void:
+	advance_orb_physics(delta)
 
 func add_ball(ball: BallState) -> void:
 	_assign_settle_target_if_needed(ball)
@@ -94,7 +99,7 @@ func _assign_settle_target_if_needed(ball: BallState) -> void:
 
 func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dictionary:
 	var incoming_direction := _incoming_direction(ball, proposed_position)
-	var core_limit := core_radius + ball.radius
+	var core_limit := _core_limit_for_ball(ball)
 	if proposed_position.length() <= core_limit:
 		return {
 			"position": incoming_direction * core_limit,
@@ -119,13 +124,30 @@ func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dic
 		"settled": false,
 	}
 
+func advance_orb_physics(delta: float) -> void:
+	if delta <= 0.0:
+		return
+	var moved := false
+	for ball in balls:
+		if not ball.settled:
+			continue
+		var distance := ball.position.length()
+		var core_limit := _core_limit_for_ball(ball)
+		if distance <= core_limit + 0.001:
+			continue
+		var step := minf(settled_center_pressure_speed * delta, distance - core_limit)
+		ball.position -= _safe_direction(ball.position) * step
+		moved = true
+	if moved:
+		relax_settled_balls()
+
 func relax_settled_balls() -> void:
 	var core_limit_by_id := {}
 	for iteration in range(6):
 		for ball in balls:
 			if not ball.settled:
 				continue
-			var core_limit: float = float(core_limit_by_id.get(ball.id, core_radius + ball.radius))
+			var core_limit: float = float(core_limit_by_id.get(ball.id, _core_limit_for_ball(ball)))
 			core_limit_by_id[ball.id] = core_limit
 			if ball.position.length() < core_limit:
 				ball.position = _safe_direction(ball.position) * core_limit
@@ -151,7 +173,7 @@ func relax_settled_balls() -> void:
 	for ball in balls:
 		if not ball.settled:
 			continue
-		var core_limit: float = core_radius + ball.radius
+		var core_limit: float = _core_limit_for_ball(ball)
 		if ball.position.length() < core_limit:
 			ball.position = _safe_direction(ball.position) * core_limit
 	_sync_orb_nodes_to_state()
@@ -163,8 +185,8 @@ func _sync_orb_nodes_to_state() -> void:
 			node.position = ball.position
 
 func _separate_core_bound_pair(first: BallState, second: BallState, minimum_distance: float) -> bool:
-	var first_core_limit: float = core_radius + first.radius
-	var second_core_limit: float = core_radius + second.radius
+	var first_core_limit: float = _core_limit_for_ball(first)
+	var second_core_limit: float = _core_limit_for_ball(second)
 	var first_core_band: float = first_core_limit + first.radius
 	var second_core_band: float = second_core_limit + second.radius
 	if first.position.length() > first_core_band or second.position.length() > second_core_band:
@@ -179,6 +201,9 @@ func _separate_core_bound_pair(first: BallState, second: BallState, minimum_dist
 	first.position = Vector2(cos(average_angle - separation_angle * 0.5), sin(average_angle - separation_angle * 0.5)) * first_core_limit
 	second.position = Vector2(cos(average_angle + separation_angle * 0.5), sin(average_angle + separation_angle * 0.5)) * second_core_limit
 	return true
+
+func _core_limit_for_ball(ball: BallState) -> float:
+	return core_collision_radius + ball.radius
 
 func _safe_direction(vector: Vector2) -> Vector2:
 	if vector.length() <= 0.001:
@@ -195,11 +220,11 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, danger_radius, Color(0.9, 0.1, 0.1, 0.12))
 	draw_arc(Vector2.ZERO, danger_radius, 0.0, TAU, 128, Color(0.9, 0.2, 0.2), 3.0)
 	draw_arc(Vector2.ZERO, danger_radius * 0.72, 0.0, TAU, 128, Color(0.2, 0.8, 1.0), 2.0)
-	draw_circle(Vector2.ZERO, core_radius + 10.0, Color(0.02, 0.03, 0.07, 0.78))
-	draw_arc(Vector2.ZERO, core_radius + 10.0, 0.0, TAU, 96, Color(0.95, 0.95, 1.0, 0.9), 4.0)
-	draw_arc(Vector2.ZERO, core_radius + 22.0, 0.0, TAU, 96, Color(0.5, 0.75, 1.0, 0.7), 2.0)
+	draw_circle(Vector2.ZERO, core_radius, Color(0.02, 0.03, 0.07, 0.78))
+	draw_arc(Vector2.ZERO, core_collision_radius, 0.0, TAU, 96, Color(0.95, 0.95, 1.0, 0.9), 4.0)
+	draw_arc(Vector2.ZERO, core_collision_radius + 10.0, 0.0, TAU, 96, Color(0.5, 0.75, 1.0, 0.7), 2.0)
 	for i in range(12):
 		var angle := TAU * float(i) / 12.0
 		var inner := Vector2(cos(angle), sin(angle)) * 42.0
-		var outer := Vector2(cos(angle), sin(angle)) * 68.0
+		var outer := Vector2(cos(angle), sin(angle)) * (core_collision_radius - 8.0)
 		draw_line(inner, outer, Color(0.7, 0.9, 1.0, 0.85), 2.0)

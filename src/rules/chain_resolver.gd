@@ -78,8 +78,11 @@ func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictiona
 		"attack": 0,
 		"shield": 0,
 		"heal": 0,
+		"player_damage": 0,
 		"cleared_color_ids": [],
 		"removed_ball_ids": [],
+		"hazard_removed_in_warning": [],
+		"hazard_removed_in_danger": [],
 	}
 	for chain in chains:
 		for member in chain.members:
@@ -96,6 +99,17 @@ func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictiona
 		elif ball.combat_kind == BallState.CombatKind.HEAL:
 			result.heal += ball.value
 		result.removed_ball_ids.append(ball.id)
+	for ball in balls:
+		if ball.kind != BallState.Kind.HAZARD or ball.value > 0:
+			continue
+		if not _is_touched_by_any_chain(chains, ball):
+			continue
+		result.removed_ball_ids.append(ball.id)
+		if ball.hazard_phase == BallState.HazardPhase.DANGER:
+			result.hazard_removed_in_danger.append(ball.id)
+			result.player_damage += max(ball.hazard_damage, 1)
+		else:
+			result.hazard_removed_in_warning.append(ball.id)
 	return result
 
 func _is_touched_by_any_chain(chains: Array, target: BallState) -> bool:

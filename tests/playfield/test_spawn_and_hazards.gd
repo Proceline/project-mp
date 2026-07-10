@@ -72,7 +72,7 @@ func test_playfield_boundary_reports_outside_hazard(runner: TestRunner) -> void:
 
 func test_playfield_rotation_persists_for_settled_orb_nodes(runner: TestRunner) -> void:
 	var playfield: Playfield = Playfield.new()
-	var ball: BallState = BallState.new_ball(1, BallState.Kind.COLOR, Vector2(96, 0))
+	var ball: BallState = BallState.new_ball(1, BallState.Kind.COLOR, Vector2(120, 0))
 	ball.settled = true
 	playfield.balls.append(ball)
 	var orb := OrbNode.new()
@@ -82,7 +82,7 @@ func test_playfield_rotation_persists_for_settled_orb_nodes(runner: TestRunner) 
 	playfield.rotate_settled(PI * 0.5)
 	orb._process(0.0)
 
-	var expected := Vector2(0, 96)
+	var expected := Vector2(0, 120)
 	runner.assert_true(ball.position.distance_to(expected) < 0.001, "rotation keeps settled state position")
 	runner.assert_true(orb.position.distance_to(expected) < 0.001, "rotation updates settled orb node position")
 	playfield.free()
@@ -113,7 +113,7 @@ func test_orb_node_moves_toward_center_and_stops_at_core_ring(runner: TestRunner
 	for i in range(90):
 		orb._process(1.0 / 60.0)
 
-	var core_limit: float = playfield.core_radius + ball.radius
+	var core_limit: float = playfield.core_collision_radius + ball.radius
 	runner.assert_true(ball.position.length() < start_distance, "orb moves inward toward center")
 	runner.assert_true(ball.position.length() >= core_limit - 0.1, "orb does not penetrate the HP core ring")
 	runner.assert_true(ball.settled, "orb settles at the first blocker")
@@ -124,7 +124,7 @@ func test_orb_node_moves_toward_center_and_stops_at_core_ring(runner: TestRunner
 
 func test_incoming_orb_stops_against_settled_ball_without_overlap(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
-	var blocker: BallState = BallState.new_ball(20, BallState.Kind.COLOR, Vector2(-96, 0))
+	var blocker: BallState = BallState.new_ball(20, BallState.Kind.COLOR, Vector2(-120, 0))
 	blocker.settled = true
 	playfield.add_ball(blocker)
 
@@ -152,8 +152,32 @@ func test_playfield_relaxes_overlapping_settled_balls(runner: TestRunner) -> voi
 
 	var minimum_distance := first.radius + second.radius
 	runner.assert_true(first.position.distance_to(second.position) >= minimum_distance - 0.1, "relaxation separates overlapping settled balls")
-	runner.assert_true(first.position.length() >= playfield.core_radius + first.radius - 0.1, "relaxation keeps first ball outside core")
-	runner.assert_true(second.position.length() >= playfield.core_radius + second.radius - 0.1, "relaxation keeps second ball outside core")
+	runner.assert_true(first.position.length() >= playfield.core_collision_radius + first.radius - 0.1, "relaxation keeps first ball outside core")
+	runner.assert_true(second.position.length() >= playfield.core_collision_radius + second.radius - 0.1, "relaxation keeps second ball outside core")
+	_remove_playfield_from_tree(playfield)
+
+func test_playfield_keeps_orb_edge_outside_visual_core_isolation(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var ball: BallState = BallState.new_ball(40, BallState.Kind.COLOR, Vector2(playfield.core_collision_radius, 0))
+	ball.settled = true
+	playfield.add_ball(ball)
+
+	playfield.relax_settled_balls()
+
+	runner.assert_true(ball.position.length() - ball.radius >= playfield.core_collision_radius - 0.1, "orb edge stays outside the visible core isolation ring")
+	_remove_playfield_from_tree(playfield)
+
+func test_settled_orbs_continue_drifting_toward_core_until_blocked(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var ball: BallState = BallState.new_ball(41, BallState.Kind.COLOR, Vector2(180, 0))
+	ball.settled = true
+	playfield.add_ball(ball)
+
+	playfield.advance_orb_physics(0.5)
+
+	var core_limit: float = playfield.core_collision_radius + ball.radius
+	runner.assert_true(ball.position.length() < 180.0, "settled orb keeps drifting inward under center pressure")
+	runner.assert_true(ball.position.length() >= core_limit - 0.1, "settled orb stops outside the core isolation ring")
 	_remove_playfield_from_tree(playfield)
 
 func test_playfield_boundary_explosion_removes_hazard_node(runner: TestRunner) -> void:

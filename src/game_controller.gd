@@ -57,8 +57,9 @@ func _process(delta: float) -> void:
 		for hazard in hazard_spawner.spawn_from_event(event):
 			playfield.add_ball(hazard)
 	for exploded in playfield.check_boundary_explosions():
-		battle.apply_player_damage(max(exploded.value, 1))
-		boss_controller.notify_player_damage(max(exploded.value, 1))
+		var damage := _hazard_damage(exploded)
+		battle.apply_player_damage(damage)
+		boss_controller.notify_player_damage(damage)
 	advance_chain_resolution(delta)
 	ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview)
 
@@ -111,6 +112,9 @@ func _apply_chain_result(result: Dictionary) -> void:
 		battle.add_shield(int(result.shield))
 	if int(result.heal) > 0:
 		battle.heal_player(int(result.heal))
+	if int(result.player_damage) > 0:
+		battle.apply_player_damage(int(result.player_damage))
+		boss_controller.notify_player_damage(int(result.player_damage))
 	_remove_balls_by_id(result.cleared_color_ids)
 	_remove_balls_by_id(result.removed_ball_ids)
 
@@ -120,3 +124,8 @@ func _remove_balls_by_id(ids: Array) -> void:
 		if ids.has(ball.id):
 			playfield.balls.remove_at(i)
 			playfield._remove_orb_node(ball.id)
+
+func _hazard_damage(ball: BallState) -> int:
+	if ball.hazard_damage > 0:
+		return ball.hazard_damage
+	return max(ball.value, 1)

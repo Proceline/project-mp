@@ -13,6 +13,7 @@ var color_id: int = -1
 var value: int = 0
 var combat_kind: CombatKind = CombatKind.NONE
 var hazard_phase: HazardPhase = HazardPhase.WARNING
+var hazard_damage: int = 0
 var age_seconds: float = 0.0
 var flashing: bool = false
 var settled: bool = false
