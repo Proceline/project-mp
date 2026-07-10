@@ -5,7 +5,7 @@ const BallState = preload("res://src/rules/ball_state.gd")
 
 var state: BallState
 var velocity: Vector2 = Vector2.ZERO
-var attraction_speed: float = 360.0
+var attraction_speed: float = 120.0
 const LABELS := {
 	BallState.CombatKind.ATTACK: "ATK",
 	BallState.CombatKind.SHIELD: "SHD",
@@ -44,7 +44,19 @@ func _move_toward_settle_target(delta: float) -> void:
 		state.settled = true
 		return
 	var step := minf(attraction_speed * delta, distance)
-	position += to_target.normalized() * step
+	var proposed_position := position + to_target.normalized() * step
+	var parent_playfield := get_parent()
+	if parent_playfield != null and parent_playfield.has_method("resolve_incoming_motion"):
+		var resolved: Dictionary = parent_playfield.resolve_incoming_motion(state, proposed_position)
+		position = resolved.position
+		state.position = position
+		state.settled = bool(resolved.settled)
+		if state.settled:
+			velocity = Vector2.ZERO
+			if parent_playfield.has_method("relax_settled_balls"):
+				parent_playfield.relax_settled_balls()
+		return
+	position = proposed_position
 	state.position = position
 
 func _draw() -> void:

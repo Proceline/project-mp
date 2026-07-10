@@ -72,7 +72,7 @@ func test_playfield_boundary_reports_outside_hazard(runner: TestRunner) -> void:
 
 func test_playfield_rotation_persists_for_settled_orb_nodes(runner: TestRunner) -> void:
 	var playfield: Playfield = Playfield.new()
-	var ball: BallState = BallState.new_ball(1, BallState.Kind.COLOR, Vector2(24, 0))
+	var ball: BallState = BallState.new_ball(1, BallState.Kind.COLOR, Vector2(96, 0))
 	ball.settled = true
 	playfield.balls.append(ball)
 	var orb := OrbNode.new()
@@ -82,12 +82,12 @@ func test_playfield_rotation_persists_for_settled_orb_nodes(runner: TestRunner) 
 	playfield.rotate_settled(PI * 0.5)
 	orb._process(0.0)
 
-	var expected := Vector2(0, 24)
+	var expected := Vector2(0, 96)
 	runner.assert_true(ball.position.distance_to(expected) < 0.001, "rotation keeps settled state position")
 	runner.assert_true(orb.position.distance_to(expected) < 0.001, "rotation updates settled orb node position")
 	playfield.free()
 
-func test_playfield_assigns_distinct_settle_targets_for_new_orbs(runner: TestRunner) -> void:
+func test_playfield_assigns_center_target_for_new_orbs(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
 	var first: BallState = BallState.new_ball(10, BallState.Kind.COLOR, Vector2(-320, -180))
 	var second: BallState = BallState.new_ball(11, BallState.Kind.COLOR, Vector2(-320, -180))
@@ -97,27 +97,63 @@ func test_playfield_assigns_distinct_settle_targets_for_new_orbs(runner: TestRun
 
 	runner.assert_true(first.has_settle_target, "first new orb receives a settle target")
 	runner.assert_true(second.has_settle_target, "second new orb receives a settle target")
-	runner.assert_true(first.settle_target.distance_to(second.settle_target) > first.radius, "new orbs get distinct settle targets instead of replacing each other")
+	runner.assert_eq(first.settle_target, Vector2.ZERO, "new orbs aim at the center")
+	runner.assert_eq(second.settle_target, Vector2.ZERO, "new orbs aim at the center")
 	runner.assert_true(not first.settled, "newly added orb starts moving before it settles")
 	_remove_playfield_from_tree(playfield)
 
-func test_orb_node_moves_toward_settle_target_and_then_rotates(runner: TestRunner) -> void:
+func test_orb_node_moves_toward_center_and_stops_at_core_ring(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
-	var ball: BallState = BallState.new_ball(12, BallState.Kind.COLOR, Vector2(-120, 0))
+	var ball: BallState = BallState.new_ball(12, BallState.Kind.COLOR, Vector2(-180, 0))
 	playfield.add_ball(ball)
 	runner.assert_true(playfield.get_child_count() > 0, "adding a ball creates an orb node")
 	var orb: OrbNode = playfield.get_child(0) as OrbNode
-	var target: Vector2 = ball.settle_target
-	var start_distance := ball.position.distance_to(target)
+	var start_distance := ball.position.length()
 
 	for i in range(90):
 		orb._process(1.0 / 60.0)
 
-	runner.assert_true(ball.position.distance_to(target) < start_distance, "orb moves inward toward assigned settle target")
-	runner.assert_true(ball.settled, "orb settles after reaching target")
+	var core_limit: float = playfield.core_radius + ball.radius
+	runner.assert_true(ball.position.length() < start_distance, "orb moves inward toward center")
+	runner.assert_true(ball.position.length() >= core_limit - 0.1, "orb does not penetrate the HP core ring")
+	runner.assert_true(ball.settled, "orb settles at the first blocker")
 	var settled_position := ball.position
 	playfield.rotate_settled(PI * 0.5)
 	runner.assert_true(ball.position.distance_to(settled_position) > 1.0, "settled orb rotates with playfield")
+	_remove_playfield_from_tree(playfield)
+
+func test_incoming_orb_stops_against_settled_ball_without_overlap(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var blocker: BallState = BallState.new_ball(20, BallState.Kind.COLOR, Vector2(-96, 0))
+	blocker.settled = true
+	playfield.add_ball(blocker)
+
+	var incoming: BallState = BallState.new_ball(21, BallState.Kind.COLOR, Vector2(-180, 0))
+	playfield.add_ball(incoming)
+	var incoming_node: OrbNode = playfield.get_child(1) as OrbNode
+	for i in range(90):
+		incoming_node._process(1.0 / 60.0)
+
+	var minimum_distance: float = blocker.radius + incoming.radius
+	runner.assert_true(incoming.settled, "incoming orb settles when it contacts another ball")
+	runner.assert_true(incoming.position.distance_to(blocker.position) >= minimum_distance - 0.1, "settled balls do not overlap")
+	_remove_playfield_from_tree(playfield)
+
+func test_playfield_relaxes_overlapping_settled_balls(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var first: BallState = BallState.new_ball(30, BallState.Kind.COLOR, Vector2(-82, 0))
+	var second: BallState = BallState.new_ball(31, BallState.Kind.COLOR, Vector2(-90, 0))
+	first.settled = true
+	second.settled = true
+	playfield.add_ball(first)
+	playfield.add_ball(second)
+
+	playfield.relax_settled_balls()
+
+	var minimum_distance := first.radius + second.radius
+	runner.assert_true(first.position.distance_to(second.position) >= minimum_distance - 0.1, "relaxation separates overlapping settled balls")
+	runner.assert_true(first.position.length() >= playfield.core_radius + first.radius - 0.1, "relaxation keeps first ball outside core")
+	runner.assert_true(second.position.length() >= playfield.core_radius + second.radius - 0.1, "relaxation keeps second ball outside core")
 	_remove_playfield_from_tree(playfield)
 
 func test_playfield_boundary_explosion_removes_hazard_node(runner: TestRunner) -> void:

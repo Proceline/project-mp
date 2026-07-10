@@ -25,7 +25,7 @@ var active_chains: Array = []
 var chain_timer: float = 0.0
 var chain_flash_seconds: float = 1.2
 var chain_effects_applied: bool = false
-var player_auto_drop_seconds: float = 2.0
+var player_auto_drop_seconds: float = 3.0
 var player_auto_drop_timer: float = 0.0
 
 func _ready() -> void:
