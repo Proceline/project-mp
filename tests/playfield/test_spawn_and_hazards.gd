@@ -25,7 +25,7 @@ func test_spawn_queue_inserts_hazard_at_configured_preview_index(runner: TestRun
 	runner.assert_eq(queue.preview.size(), 7, "inserting a hazard keeps the existing player preview sequence")
 	queue.free()
 
-func test_fast_drop_waits_when_hazard_is_preview_head(runner: TestRunner) -> void:
+func test_fast_drop_releases_hazard_preview_head(runner: TestRunner) -> void:
 	var queue: SpawnQueue = SpawnQueue.new()
 	queue.seed_preview()
 	var hazard: BallState = BallState.new_ball(901, BallState.Kind.HAZARD, Vector2(120, 0))
@@ -33,8 +33,8 @@ func test_fast_drop_waits_when_hazard_is_preview_head(runner: TestRunner) -> voi
 
 	var dropped: BallState = queue.fast_drop_current()
 
-	runner.assert_true(dropped == null, "player fast drop does not release a hazard preview head")
-	runner.assert_eq(queue.preview[0].id, 901, "hazard remains at the head for the timed drop")
+	runner.assert_eq(dropped.id, 901, "fast drop releases a hazard preview head")
+	runner.assert_true(queue.preview[0].id != 901, "released hazard is removed from the preview head")
 	queue.free()
 
 func test_timed_drop_can_release_hazard_preview_head(runner: TestRunner) -> void:

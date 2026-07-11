@@ -28,11 +28,9 @@ func add_ball(ball: BallState) -> void:
 	balls.append(ball)
 	_ensure_orb_node(ball)
 
-func accelerate_active_player_orbs(target_seconds: float) -> int:
+func accelerate_active_orbs(target_seconds: float) -> int:
 	var accelerated_count := 0
 	for ball in balls:
-		if ball.kind == BallState.Kind.HAZARD:
-			continue
 		if not ball.has_settle_target or ball.settled:
 			continue
 		var node := _get_orb_node(ball.id)

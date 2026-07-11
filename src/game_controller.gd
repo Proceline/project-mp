@@ -80,15 +80,16 @@ func advance_boss_events(delta: float) -> void:
 		_queue_hazards_from_event(event)
 
 func handle_player_fast_drop() -> bool:
-	var accelerated_count := playfield.accelerate_active_player_orbs(orb_tuning.player_fast_drop_entry_seconds)
-	var dropped_next := _drop_player_orb()
+	var accelerated_count := playfield.accelerate_active_orbs(orb_tuning.player_fast_drop_entry_seconds)
+	var dropped_next := _fast_drop_next_orb()
 	return accelerated_count > 0 or dropped_next
 
-func _drop_player_orb() -> bool:
+func _fast_drop_next_orb() -> bool:
 	var ball := spawn_queue.fast_drop_current()
 	if ball == null:
 		return false
-	_prepare_player_entry(ball)
+	if ball.kind != BallState.Kind.HAZARD:
+		_prepare_player_entry(ball)
 	playfield.add_ball(ball)
 	return true
 

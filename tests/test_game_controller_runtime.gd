@@ -103,7 +103,7 @@ func test_player_fast_drop_accelerates_current_orb_and_starts_next(runner: TestR
 	runner.assert_true(second.has_settle_target and not second.settled, "next orb starts falling after fast drop")
 	_destroy_controller(controller)
 
-func test_player_fast_drop_does_not_accelerate_falling_hazard(runner: TestRunner) -> void:
+func test_player_fast_drop_accelerates_falling_hazard(runner: TestRunner) -> void:
 	var controller := _instantiate_controller(runner)
 	if controller == null:
 		return
@@ -120,9 +120,9 @@ func test_player_fast_drop_does_not_accelerate_falling_hazard(runner: TestRunner
 
 	var handled: bool = controller.handle_player_fast_drop()
 
-	runner.assert_true(handled, "fast drop can still start the next player orb")
-	runner.assert_eq(hazard_node.attraction_speed, original_speed, "player fast drop does not accelerate falling hazards")
-	runner.assert_true(not hazard.settled, "player fast drop does not force a falling hazard to land")
+	runner.assert_true(handled, "fast drop handles falling hazards")
+	runner.assert_true(hazard_node.attraction_speed > original_speed, "fast drop accelerates falling hazards")
+	runner.assert_true(not hazard.settled, "fast drop does not instantly settle a falling hazard")
 	_destroy_controller(controller)
 
 func test_falling_hazards_do_not_damage_player_before_boundary_or_clear(runner: TestRunner) -> void:

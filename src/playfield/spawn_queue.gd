@@ -20,16 +20,8 @@ func pop_next_ball() -> BallState:
 		preview.append(_make_player_ball())
 	return ball
 
-func pop_next_player_ball() -> BallState:
-	if preview.is_empty():
-		seed_preview()
-	var ball := preview[0] as BallState
-	if ball.kind == BallState.Kind.HAZARD:
-		return null
-	return pop_next_ball()
-
 func fast_drop_current() -> BallState:
-	return pop_next_player_ball()
+	return pop_next_ball()
 
 func insert_preview_ball(ball: BallState, insert_index: int) -> void:
 	var clamped_index: int = clampi(insert_index, 0, preview.size())

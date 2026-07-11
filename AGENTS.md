@@ -33,8 +33,8 @@
 
 - Player-side orbs and combat orbs can be fast-dropped.
 - Boss hazard events insert hazard orbs into the shared preview queue. They should not add hazards directly to the playfield.
-- Player fast-drop only releases player-side orbs. If a hazard orb is at the preview head, it waits for the timed queue drop.
-- Player fast-drop accelerates currently falling player-side orbs, then immediately starts the next player-side orb. It should not instantly settle or teleport the current orb.
+- Player fast-drop releases the current preview head, including hazard orbs.
+- Player fast-drop accelerates currently falling orbs, including hazard orbs, then immediately starts the next preview orb. It should not instantly settle or teleport the current orb.
 - The preview queue should render as orb icons, not text codes such as `C0` or `DMG5`.
 - Falling orbs move toward the center until they contact the core isolation ring or the orb pile.
 - Orbs touching the core isolation ring are locked.
