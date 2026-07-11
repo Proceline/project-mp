@@ -2,8 +2,8 @@
 
 ## Current Stable Prototype Node
 
-- Stable checkpoint: `2f9387b feat: render preview queue as orb icons`
-- This is the current rollback/reference point for the Godot prototype after the first major orb physics, queued boss hazard, and preview UI pass.
+- Stable checkpoint: `6b4383a fix: allow fast drop for hazard orbs`
+- This is the current rollback/reference point for the Godot prototype after the first major orb physics, queued boss hazard, preview UI, and corrected fast-drop behavior pass.
 
 ## Project Context
 
