@@ -35,15 +35,6 @@ func _process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		state.settled = true
 
-func fast_settle(max_steps: int = 300, delta: float = 1.0 / 60.0) -> bool:
-	if state == null or not state.has_settle_target or state.settled:
-		return false
-	for i in range(max_steps):
-		if state.settled or not state.has_settle_target:
-			return true
-		_move_toward_settle_target(delta)
-	return state.settled
-
 func _move_toward_settle_target(delta: float) -> void:
 	var to_target := state.settle_target - position
 	var distance := to_target.length()

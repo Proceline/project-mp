@@ -28,21 +28,6 @@ func add_ball(ball: BallState) -> void:
 	balls.append(ball)
 	_ensure_orb_node(ball)
 
-func fast_settle_active_orbs() -> int:
-	var settled_count := 0
-	for ball in balls:
-		if ball.kind == BallState.Kind.HAZARD:
-			continue
-		if not ball.has_settle_target or ball.settled:
-			continue
-		var node := _get_orb_node(ball.id)
-		if node == null:
-			continue
-		if node.fast_settle():
-			settled_count += 1
-	_sync_orb_nodes_to_state()
-	return settled_count
-
 func rotate_settled(angle_delta: float) -> void:
 	for ball in balls:
 		if _rotates_with_disk(ball):

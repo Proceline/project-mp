@@ -81,46 +81,6 @@ func test_player_orbs_auto_drop_without_space(runner: TestRunner) -> void:
 	runner.assert_true(dropped.has_settle_target, "auto dropped orb receives a settle target")
 	_destroy_controller(controller)
 
-func test_player_fast_drop_settles_current_orb_and_starts_next(runner: TestRunner) -> void:
-	var controller := _instantiate_controller(runner)
-	if controller == null:
-		return
-	controller.playfield.balls = []
-
-	controller.advance_player_orb_spawn(controller.player_auto_drop_seconds)
-	runner.assert_eq(controller.playfield.balls.size(), 1, "first timed drop starts one falling orb")
-	var first: BallState = controller.playfield.balls[0]
-	runner.assert_true(not first.settled, "first orb is still falling before fast drop")
-
-	var handled: bool = controller.handle_player_fast_drop()
-
-	runner.assert_true(handled, "fast drop action is handled")
-	runner.assert_eq(controller.playfield.balls.size(), 2, "fast drop also starts the next player orb")
-	runner.assert_true(first.settled, "fast drop forces the current falling orb to land")
-	var second: BallState = controller.playfield.balls[1]
-	runner.assert_true(second.has_settle_target and not second.settled, "next orb starts falling after fast drop")
-	_destroy_controller(controller)
-
-func test_player_fast_drop_does_not_settle_falling_hazard(runner: TestRunner) -> void:
-	var controller := _instantiate_controller(runner)
-	if controller == null:
-		return
-	controller.playfield.balls = []
-	var hazard: BallState = controller.hazard_spawner.spawn_from_event({
-		"type": "spawn_hazard",
-		"count": 1,
-		"value": 5,
-		"source": "test",
-	})[0]
-	controller.playfield.add_ball(hazard)
-
-	var handled: bool = controller.handle_player_fast_drop()
-
-	runner.assert_true(handled, "fast drop can still start the next player orb")
-	runner.assert_true(not hazard.settled, "player fast drop does not force a falling hazard to land")
-	runner.assert_eq(controller.playfield.balls.size(), 2, "player fast drop starts a player orb alongside the falling hazard")
-	_destroy_controller(controller)
-
 func test_falling_hazards_do_not_damage_player_before_boundary_or_clear(runner: TestRunner) -> void:
 	var controller := _instantiate_controller(runner)
 	if controller == null:
