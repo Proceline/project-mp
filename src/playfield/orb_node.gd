@@ -35,6 +35,17 @@ func _process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		state.settled = true
 
+func accelerate_entry(target_seconds: float) -> bool:
+	if state == null or state.settled or not state.has_settle_target:
+		return false
+	if target_seconds <= 0.0:
+		return false
+	var travel_distance := position.distance_to(state.settle_target)
+	if travel_distance <= 0.001:
+		return false
+	attraction_speed = maxf(attraction_speed, travel_distance / target_seconds)
+	return true
+
 func _move_toward_settle_target(delta: float) -> void:
 	var to_target := state.settle_target - position
 	var distance := to_target.length()

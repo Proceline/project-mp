@@ -6,6 +6,7 @@
 script = ExtResource("1_orbtuning")
 preview_size = 6
 player_entry_seconds = 3.0
+player_fast_drop_entry_seconds = 0.35
 player_spawn_position = Vector2(-320, -180)
 hazard_entry_seconds = 3.0
 hazard_preview_insert_index = 2

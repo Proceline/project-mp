@@ -28,6 +28,20 @@ func add_ball(ball: BallState) -> void:
 	balls.append(ball)
 	_ensure_orb_node(ball)
 
+func accelerate_active_player_orbs(target_seconds: float) -> int:
+	var accelerated_count := 0
+	for ball in balls:
+		if ball.kind == BallState.Kind.HAZARD:
+			continue
+		if not ball.has_settle_target or ball.settled:
+			continue
+		var node := _get_orb_node(ball.id)
+		if node == null:
+			continue
+		if node.accelerate_entry(target_seconds):
+			accelerated_count += 1
+	return accelerated_count
+
 func rotate_settled(angle_delta: float) -> void:
 	for ball in balls:
 		if _rotates_with_disk(ball):

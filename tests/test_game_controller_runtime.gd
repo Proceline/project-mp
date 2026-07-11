@@ -81,6 +81,50 @@ func test_player_orbs_auto_drop_without_space(runner: TestRunner) -> void:
 	runner.assert_true(dropped.has_settle_target, "auto dropped orb receives a settle target")
 	_destroy_controller(controller)
 
+func test_player_fast_drop_accelerates_current_orb_and_starts_next(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.playfield.balls = []
+
+	controller.advance_player_orb_spawn(controller.player_auto_drop_seconds)
+	runner.assert_eq(controller.playfield.balls.size(), 1, "first timed drop starts one falling orb")
+	var first: BallState = controller.playfield.balls[0]
+	var first_node = controller.playfield._get_orb_node(first.id)
+	var original_speed: float = first_node.attraction_speed
+
+	var handled: bool = controller.handle_player_fast_drop()
+
+	runner.assert_true(handled, "fast drop action is handled")
+	runner.assert_eq(controller.playfield.balls.size(), 2, "fast drop also starts the next player orb immediately")
+	runner.assert_true(not first.settled, "fast drop accelerates the current orb instead of instantly settling it")
+	runner.assert_true(first_node.attraction_speed > original_speed, "current falling player orb receives a faster drop speed")
+	var second: BallState = controller.playfield.balls[1]
+	runner.assert_true(second.has_settle_target and not second.settled, "next orb starts falling after fast drop")
+	_destroy_controller(controller)
+
+func test_player_fast_drop_does_not_accelerate_falling_hazard(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.playfield.balls = []
+	var hazard: BallState = controller.hazard_spawner.spawn_from_event({
+		"type": "spawn_hazard",
+		"count": 1,
+		"value": 5,
+		"source": "test",
+	})[0]
+	controller.playfield.add_ball(hazard)
+	var hazard_node = controller.playfield._get_orb_node(hazard.id)
+	var original_speed: float = hazard_node.attraction_speed
+
+	var handled: bool = controller.handle_player_fast_drop()
+
+	runner.assert_true(handled, "fast drop can still start the next player orb")
+	runner.assert_eq(hazard_node.attraction_speed, original_speed, "player fast drop does not accelerate falling hazards")
+	runner.assert_true(not hazard.settled, "player fast drop does not force a falling hazard to land")
+	_destroy_controller(controller)
+
 func test_falling_hazards_do_not_damage_player_before_boundary_or_clear(runner: TestRunner) -> void:
 	var controller := _instantiate_controller(runner)
 	if controller == null:
