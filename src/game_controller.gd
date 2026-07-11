@@ -53,7 +53,7 @@ func _process(delta: float) -> void:
 	playfield.rotate_settled(rotation_input * playfield.rotation_speed * delta)
 	playfield.advance_hazard_phases(delta)
 	if Input.is_action_just_pressed("fast_drop_player_orb"):
-		if _drop_player_orb():
+		if handle_player_fast_drop():
 			player_auto_drop_timer = 0.0
 	else:
 		advance_player_orb_spawn(delta)
@@ -78,6 +78,11 @@ func advance_player_orb_spawn(delta: float) -> void:
 func advance_boss_events(delta: float) -> void:
 	for event in boss_controller.tick(delta, battle):
 		_queue_hazards_from_event(event)
+
+func handle_player_fast_drop() -> bool:
+	var settled_count := playfield.fast_settle_active_orbs()
+	var dropped_next := _drop_player_orb()
+	return settled_count > 0 or dropped_next
 
 func _drop_player_orb() -> bool:
 	var ball := spawn_queue.fast_drop_current()
