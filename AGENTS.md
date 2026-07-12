@@ -2,8 +2,8 @@
 
 ## Current Stable Prototype Node
 
-- Stable checkpoint: `e98ceb4 feat: use orb runtime v03 sprites`
-- This is the current rollback/reference point for the Godot prototype after the first combat pacing and Astral Resonance visual integration passes: baseline color-chain boss damage, color-only main preview generation, a separate tactical combat orb queue, shared-queue hazard/fast-drop behavior, themed board/background rendering, and v03 runtime orb body/glow sprites aligned to gameplay radius.
+- Stable checkpoint: `c66aa03 art: add orb runtime v04 import metadata`
+- This is the current rollback/reference point for the Godot prototype after the v04 runtime orb visual pass and chain/pacing rule pass: baseline color-chain boss damage, flashing chains that absorb late same-color members with tunable timer extension, configurable color-orb generation, a separate tactical combat orb queue, shared-queue hazard/fast-drop behavior, themed board/background rendering, and v04 runtime orb body/glow sprites aligned to gameplay radius.
 
 ## Project Context
 
@@ -46,7 +46,7 @@
 
 - Five or more connected same-color orbs start flashing.
 - Resolved color chains deal baseline boss damage equal to chain strength, even without combat orbs.
-- While flashing, additional same-color orbs can still join and increase the chain effect.
+- While flashing, additional same-color orbs can still join and increase the chain effect. New members extend the flash window by a tunable amount, capped by a tunable maximum.
 - Combat orbs start at value `0`; nearby flashing color chains increase their value.
 - A combat orb near multiple flashing chains stacks all nearby chain contributions.
 - Hazard orbs have a value and phase:
@@ -54,7 +54,7 @@
   - Danger phase: clearing removes it and deals its stored player damage.
   - If an on-board hazard orb moves outside the danger boundary, it explodes, is removed, and deals its stored damage.
 - Falling hazard orbs should not deal boundary damage before contacting the board.
-- Tunable orb values live in `data/orb_tuning.tres` through `src/config/orb_tuning.gd`; use this for preview insert index, entry angles, entry distance, and entry duration.
+- Tunable orb values live in `data/orb_tuning.tres` through `src/config/orb_tuning.gd`; use this for preview insert index, entry angles, entry distance, entry duration, chain extension timing, and the configurable color generator resource.
 
 ## Verification Commands
 
