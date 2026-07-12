@@ -13,6 +13,7 @@ const Playfield = preload("res://src/playfield/playfield.gd")
 const ChainResolver = preload("res://src/rules/chain_resolver.gd")
 const BattleUI = preload("res://src/ui/battle_ui.gd")
 const OrbTuning = preload("res://src/config/orb_tuning.gd")
+const VisualTheme = preload("res://src/config/visual_theme.gd")
 
 @onready var playfield: Playfield = %Playfield
 @onready var spawn_queue: SpawnQueue = %SpawnQueue
@@ -21,6 +22,7 @@ const OrbTuning = preload("res://src/config/orb_tuning.gd")
 @onready var boss_controller: BossController = %BossController
 @onready var ui: BattleUI = %BattleUI
 @export var orb_tuning: OrbTuning = preload("res://data/orb_tuning.tres")
+@export var visual_theme: VisualTheme = preload("res://data/visual_theme_astral_batch1.tres")
 
 var battle := BattleState.new()
 var volley_mechanic: ActionBarVolleyMechanic
@@ -35,6 +37,7 @@ var damage_events: Array[Dictionary] = []
 
 func _ready() -> void:
 	_apply_orb_tuning()
+	_apply_visual_theme()
 	volley_mechanic = ActionBarVolleyMechanic.new()
 	var phase70 := HpPhaseMechanic.new()
 	phase70.threshold_percent = 0.7
@@ -129,6 +132,12 @@ func _apply_orb_tuning() -> void:
 	tactical_queue.tuning = orb_tuning
 	hazard_spawner.tuning = orb_tuning
 	playfield.hazard_warning_seconds = orb_tuning.hazard_warning_seconds
+
+func _apply_visual_theme() -> void:
+	if visual_theme == null:
+		return
+	playfield.visual_theme = visual_theme
+	ui.visual_theme = visual_theme
 
 func _boss_action_ratio() -> float:
 	if volley_mechanic == null or volley_mechanic.interval_seconds <= 0.0:

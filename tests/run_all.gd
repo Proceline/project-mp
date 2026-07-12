@@ -8,6 +8,7 @@ const TestBossController = preload("res://tests/boss/test_boss_controller.gd")
 const TestSpawnAndHazards = preload("res://tests/playfield/test_spawn_and_hazards.gd")
 const TestGameControllerRuntime = preload("res://tests/test_game_controller_runtime.gd")
 const TestMainSceneLoads = preload("res://tests/test_main_scene_loads.gd")
+const TestVisualTheme = preload("res://tests/test_visual_theme.gd")
 
 func _initialize() -> void:
 	var runner := TestRunner.new()
@@ -18,4 +19,5 @@ func _initialize() -> void:
 	runner.run_suite(TestSpawnAndHazards.new())
 	runner.run_suite(TestGameControllerRuntime.new())
 	runner.run_suite(TestMainSceneLoads.new())
+	runner.run_suite(TestVisualTheme.new())
 	quit(runner.failures)

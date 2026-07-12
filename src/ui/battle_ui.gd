@@ -4,6 +4,10 @@ class_name BattleUI
 const BallState = preload("res://src/rules/ball_state.gd")
 const BattleState = preload("res://src/rules/battle_state.gd")
 const PreviewOrbIcon = preload("res://src/ui/preview_orb_icon.gd")
+const VisualTheme = preload("res://src/config/visual_theme.gd")
+const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astral_batch1.tres")
+
+@export var visual_theme: VisualTheme = DEFAULT_VISUAL_THEME
 
 @onready var player_hp_label: Label = %PlayerHP
 @onready var shield_marks_label: Label = %ShieldMarks
@@ -37,5 +41,6 @@ func _update_icon_row(row: HBoxContainer, orbs: Array[BallState]) -> void:
 		child.queue_free()
 	for ball in orbs:
 		var icon := PreviewOrbIcon.new()
+		icon.visual_theme = visual_theme
 		icon.setup(ball)
 		row.add_child(icon)

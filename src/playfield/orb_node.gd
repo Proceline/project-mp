@@ -2,8 +2,11 @@ extends Node2D
 class_name OrbNode
 
 const BallState = preload("res://src/rules/ball_state.gd")
+const VisualTheme = preload("res://src/config/visual_theme.gd")
+const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astral_batch1.tres")
 
 var state: BallState
+var visual_theme: VisualTheme = DEFAULT_VISUAL_THEME
 var velocity: Vector2 = Vector2.ZERO
 var attraction_speed: float = 120.0
 const LABELS := {
@@ -81,8 +84,14 @@ func _draw() -> void:
 	if state == null:
 		return
 	var color := current_fill_color()
-	draw_circle(Vector2.ZERO, state.radius, color)
-	draw_arc(Vector2.ZERO, state.radius, 0.0, TAU, 48, color.lightened(0.25), 2.0)
+	var texture := current_texture()
+	if texture != null:
+		_draw_centered_texture(texture, state.radius)
+		if state.flashing:
+			draw_arc(Vector2.ZERO, state.radius + 2.0, 0.0, TAU, 48, color.lightened(0.4), 2.0)
+	else:
+		draw_circle(Vector2.ZERO, state.radius, color)
+		draw_arc(Vector2.ZERO, state.radius, 0.0, TAU, 48, color.lightened(0.25), 2.0)
 
 	var font := ThemeDB.fallback_font
 	var font_size := 14
@@ -113,6 +122,19 @@ func current_fill_color() -> Color:
 	if state.kind == BallState.Kind.HAZARD:
 		return Color(1.0, 0.62, 0.2) if state.hazard_phase == BallState.HazardPhase.WARNING else Color(0.9, 0.18, 0.2)
 	return Color.WHITE
+
+func current_texture() -> Texture2D:
+	if visual_theme == null or state == null:
+		return null
+	return visual_theme.get_orb_texture(state)
+
+func _draw_centered_texture(texture: Texture2D, target_radius: float) -> void:
+	var size := texture.get_size()
+	if size.x <= 0.0 or size.y <= 0.0:
+		return
+	var target_size := Vector2(target_radius * 2.0, target_radius * 2.0)
+	var rect := Rect2(-target_size * 0.5, target_size)
+	draw_texture_rect(texture, rect, false)
 
 func _draw_centered_text(font: Font, text: String, baseline: Vector2, font_size: int, color: Color) -> void:
 	if font == null or text.is_empty():

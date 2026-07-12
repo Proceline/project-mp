@@ -2,6 +2,8 @@ extends Control
 class_name PreviewOrbIcon
 
 const BallState = preload("res://src/rules/ball_state.gd")
+const VisualTheme = preload("res://src/config/visual_theme.gd")
+const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astral_batch1.tres")
 
 const SIZE := Vector2(34.0, 34.0)
 const LABELS := {
@@ -11,23 +13,29 @@ const LABELS := {
 }
 
 var state: BallState
+var visual_theme: VisualTheme = DEFAULT_VISUAL_THEME
 
 func _ready() -> void:
-	custom_minimum_size = SIZE
+	custom_minimum_size = _icon_size()
 
 func setup(ball_state: BallState) -> void:
 	state = ball_state
-	custom_minimum_size = SIZE
+	custom_minimum_size = _icon_size()
 	queue_redraw()
 
 func _draw() -> void:
 	if state == null:
 		return
-	var center := SIZE * 0.5
+	var icon_size := _icon_size()
+	var center := icon_size * 0.5
 	var radius := 14.0
 	var color := current_fill_color()
-	draw_circle(center, radius, color)
-	draw_arc(center, radius, 0.0, TAU, 36, color.lightened(0.24), 2.0)
+	var texture := current_texture()
+	if texture != null:
+		draw_texture_rect(texture, Rect2(Vector2.ZERO, icon_size), false)
+	else:
+		draw_circle(center, radius, color)
+		draw_arc(center, radius, 0.0, TAU, 36, color.lightened(0.24), 2.0)
 	var label := display_label()
 	if label.is_empty():
 		return
@@ -57,3 +65,13 @@ func current_fill_color() -> Color:
 	if state.kind == BallState.Kind.HAZARD:
 		return Color(1.0, 0.62, 0.2) if state.hazard_phase == BallState.HazardPhase.WARNING else Color(0.9, 0.18, 0.2)
 	return Color.WHITE
+
+func current_texture() -> Texture2D:
+	if visual_theme == null or state == null:
+		return null
+	return visual_theme.get_orb_texture(state)
+
+func _icon_size() -> Vector2:
+	if visual_theme != null:
+		return visual_theme.preview_icon_size
+	return SIZE
