@@ -1,6 +1,7 @@
 extends RefCounted
 
 const BallState = preload("res://src/rules/ball_state.gd")
+const OrbTuning = preload("res://src/config/orb_tuning.gd")
 const SpawnQueue = preload("res://src/playfield/spawn_queue.gd")
 const TacticalQueue = preload("res://src/playfield/tactical_queue.gd")
 const HazardSpawner = preload("res://src/playfield/hazard_spawner.gd")
@@ -21,6 +22,26 @@ func test_spawn_queue_seeds_only_color_orbs_without_combat_clutter(runner: TestR
 
 	for ball in queue.preview:
 		runner.assert_eq(ball.kind, BallState.Kind.COLOR, "main preview seed contains only color orbs by default")
+	queue.free()
+
+func test_spawn_queue_uses_configurable_color_generator(runner: TestRunner) -> void:
+	var generator_script: Script = load("res://src/config/orb_color_generator.gd")
+	runner.assert_true(generator_script != null, "orb color generator resource script exists")
+	if generator_script == null:
+		return
+	var generator = generator_script.new()
+	generator.mode = generator.Mode.SEQUENCE
+	generator.sequence = PackedInt32Array([2, 2])
+	var tuning := OrbTuning.new()
+	tuning.preview_size = 2
+	tuning.color_generator = generator
+	var queue: SpawnQueue = SpawnQueue.new()
+	queue.tuning = tuning
+
+	queue.seed_preview()
+
+	runner.assert_eq(queue.preview[0].color_id, 2, "first preview color comes from configured generator")
+	runner.assert_eq(queue.preview[1].color_id, 2, "configured generator can produce consecutive same-color orbs")
 	queue.free()
 
 func test_tactical_queue_generates_combat_orb_slots(runner: TestRunner) -> void:

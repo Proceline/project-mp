@@ -36,6 +36,9 @@ func insert_preview_balls(new_balls: Array[BallState], insert_index: int) -> voi
 func _make_player_ball() -> BallState:
 	next_id += 1
 	var color_ball: BallState = BallState.new_ball(next_id, BallState.Kind.COLOR, Vector2.ZERO)
-	color_ball.color_id = next_id % 4
+	if tuning != null and tuning.color_generator != null:
+		color_ball.color_id = tuning.color_generator.next_color_id()
+	else:
+		color_ball.color_id = next_id % 4
 	color_ball.entry_duration_seconds = tuning.player_entry_seconds
 	return color_ball

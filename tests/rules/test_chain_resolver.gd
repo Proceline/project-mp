@@ -44,6 +44,23 @@ func test_board_attached_color_orbs_can_start_flashing_before_locking(runner) ->
 	runner.assert_eq(chains.size(), 1, "board-attached color orbs can form a chain while still sliding")
 	runner.assert_true(balls[0].flashing, "board-attached chain members enter flashing state")
 
+func test_flashing_chain_absorbs_new_connected_same_color_orb(runner) -> void:
+	var resolver := ChainResolver.new()
+	var balls: Array[BallState] = []
+	for i in range(5):
+		balls.append(_color_ball(i, 1, Vector2(i * 40, 0)))
+	var chains := resolver.start_flash_groups(balls)
+	var late_joiner := _color_ball(99, 1, Vector2(200, 0))
+	balls.append(late_joiner)
+
+	var added_count: int = resolver.refresh_flashing_chains(chains, balls)
+
+	runner.assert_eq(added_count, 1, "newly connected same-color orb joins the flashing chain")
+	runner.assert_true(late_joiner.flashing, "late chain member starts flashing")
+	runner.assert_eq(int(chains[0].strength), 6, "chain strength grows when a new member joins")
+	var result := resolver.resolve_finished_chains(chains, balls)
+	runner.assert_true(result.cleared_color_ids.has(99), "resolved chain clears late-joined member")
+
 func test_combat_orb_stacks_from_multiple_chains(runner) -> void:
 	var resolver := ChainResolver.new()
 	var combat := _attack_ball(100, Vector2(80, 0))

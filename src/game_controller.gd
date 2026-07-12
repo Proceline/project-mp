@@ -30,6 +30,8 @@ var chain_resolver := ChainResolver.new()
 var active_chains: Array = []
 var chain_timer: float = 0.0
 var chain_flash_seconds: float = 1.2
+var chain_extend_seconds: float = 0.2
+var chain_max_flash_seconds: float = 2.0
 var chain_effects_applied: bool = false
 var player_auto_drop_seconds: float = 3.0
 var player_auto_drop_timer: float = 0.0
@@ -132,6 +134,8 @@ func _apply_orb_tuning() -> void:
 	tactical_queue.tuning = orb_tuning
 	hazard_spawner.tuning = orb_tuning
 	playfield.hazard_warning_seconds = orb_tuning.hazard_warning_seconds
+	chain_extend_seconds = orb_tuning.chain_extend_seconds
+	chain_max_flash_seconds = orb_tuning.chain_max_flash_seconds
 
 func _apply_visual_theme() -> void:
 	if visual_theme == null:
@@ -153,9 +157,11 @@ func _tick_chains(delta: float) -> void:
 		chain_effects_applied = false
 	if active_chains.is_empty():
 		return
-	if not chain_effects_applied:
-		chain_resolver.apply_chain_influence(active_chains, playfield.balls)
-		chain_effects_applied = true
+	var added_count := chain_resolver.refresh_flashing_chains(active_chains, playfield.balls)
+	if added_count > 0:
+		chain_timer = minf(chain_timer + chain_extend_seconds, chain_max_flash_seconds)
+	chain_resolver.apply_chain_influence_growth(active_chains, playfield.balls)
+	chain_effects_applied = true
 	chain_timer -= delta
 	if chain_timer > 0.0:
 		return

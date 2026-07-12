@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="OrbColorGenerator" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/config/orb_color_generator.gd" id="1_color_generator"]
+
+[resource]
+script = ExtResource("1_color_generator")
+mode = 0
+color_count = 4
+seed = 0

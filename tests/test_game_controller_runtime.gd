@@ -66,6 +66,34 @@ func test_chain_resolution_applies_effects_once_and_clears_orbs(runner: TestRunn
 	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp - 14, "resolved chain does not apply damage twice")
 	_destroy_controller(controller)
 
+func test_late_chain_member_extends_flash_window_and_clears(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+
+	controller.chain_flash_seconds = 0.5
+	controller.chain_extend_seconds = 0.2
+	controller.chain_max_flash_seconds = 1.0
+	controller.playfield.balls = []
+	for i in range(5):
+		controller.playfield.add_ball(_color_ball(i, 3, Vector2(i * 40, 0)))
+
+	controller.advance_chain_resolution(0.0)
+	runner.assert_eq(controller.active_chains.size(), 1, "initial five-color group starts flashing")
+	runner.assert_eq(controller.chain_timer, 0.5, "initial flash timer starts at configured duration")
+
+	var late_joiner := _color_ball(99, 3, Vector2(200, 0))
+	controller.playfield.add_ball(late_joiner)
+	controller.advance_chain_resolution(0.1)
+
+	runner.assert_true(late_joiner.flashing, "late same-color orb joins the active flashing chain")
+	runner.assert_eq(controller.chain_timer, 0.6, "late chain member adds configurable flash time after elapsed time")
+	controller.advance_chain_resolution(0.59)
+	runner.assert_eq(controller.playfield.balls.size(), 6, "extended flash window prevents early clear")
+	controller.advance_chain_resolution(0.02)
+	runner.assert_eq(controller.playfield.balls.size(), 0, "extended chain clears all six color members")
+	_destroy_controller(controller)
+
 func test_player_orbs_auto_drop_without_space(runner: TestRunner) -> void:
 	var controller := _instantiate_controller(runner)
 	if controller == null:
