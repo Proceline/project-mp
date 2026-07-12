@@ -31,19 +31,29 @@ script = ExtResource("5_boss")
 unique_name_in_owner = true
 script = ExtResource("6_ui")
 
+[node name="BattleBackground" type="TextureRect" parent="BattleUI"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+expand_mode = 1
+stretch_mode = 6
+
 [node name="PlayfieldShade" type="ColorRect" parent="BattleUI"]
 offset_left = 70.0
 offset_top = 60.0
 offset_right = 770.0
 offset_bottom = 660.0
-color = Color(0.07, 0.09, 0.14, 0.9)
+color = Color(0.03, 0.04, 0.08, 0.42)
 
 [node name="FieldRing" type="ColorRect" parent="BattleUI"]
 offset_left = 150.0
 offset_top = 90.0
 offset_right = 690.0
 offset_bottom = 630.0
-color = Color(0.12, 0.15, 0.22, 0.95)
+color = Color(0.05, 0.07, 0.12, 0.32)
 
 [node name="Playfield" type="Node2D" parent="BattleUI"]
 unique_name_in_owner = true

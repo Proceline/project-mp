@@ -64,3 +64,19 @@ func test_game_controller_applies_visual_theme_to_playfield_and_ui(runner: TestR
 	runner.assert_eq(scene.get_node("%Playfield").visual_theme, scene.visual_theme, "controller passes visual theme to playfield")
 	runner.assert_eq(scene.get_node("%BattleUI").visual_theme, scene.visual_theme, "controller passes visual theme to battle UI")
 	scene.queue_free()
+
+func test_battle_background_uses_visual_theme_texture(runner: TestRunner) -> void:
+	var packed := load("res://scenes/main.tscn")
+	var scene = packed.instantiate()
+	var tree := Engine.get_main_loop() as SceneTree
+	tree.root.add_child(scene)
+
+	var background := scene.get_node("%BattleBackground") as TextureRect
+	var battle_ui = scene.get_node("%BattleUI")
+	battle_ui.battle_background = background
+	battle_ui.visual_theme = scene.visual_theme
+	battle_ui.apply_visual_theme()
+	runner.assert_true(background != null, "main scene has a battle background texture rect")
+	if background != null:
+		runner.assert_true(background.texture != null, "battle background texture comes from the visual theme")
+	scene.queue_free()

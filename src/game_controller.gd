@@ -138,6 +138,7 @@ func _apply_visual_theme() -> void:
 		return
 	playfield.visual_theme = visual_theme
 	ui.visual_theme = visual_theme
+	ui.apply_visual_theme()
 
 func _boss_action_ratio() -> float:
 	if volley_mechanic == null or volley_mechanic.interval_seconds <= 0.0:

@@ -9,6 +9,7 @@ const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astra
 
 @export var visual_theme: VisualTheme = DEFAULT_VISUAL_THEME
 
+@onready var battle_background: TextureRect = %BattleBackground
 @onready var player_hp_label: Label = %PlayerHP
 @onready var shield_marks_label: Label = %ShieldMarks
 @onready var boss_hp_label: Label = %BossHP
@@ -18,6 +19,14 @@ const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astra
 @onready var tactical_label: Label = %Tactical
 @onready var tactical_row: HBoxContainer = %TacticalRow
 @onready var status_label: Label = %Status
+
+func _ready() -> void:
+	apply_visual_theme()
+
+func apply_visual_theme() -> void:
+	if battle_background == null or visual_theme == null:
+		return
+	battle_background.texture = visual_theme.battle_background()
 
 func update_from_state(battle: BattleState, boss_action_ratio: float, preview: Array[BallState], tactical: Array[BallState] = []) -> void:
 	player_hp_label.text = str(battle.player_hp)
