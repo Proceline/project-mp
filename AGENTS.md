@@ -2,8 +2,8 @@
 
 ## Current Stable Prototype Node
 
-- Stable checkpoint: `765d175 feat: add tactical combat queue`
-- This is the current rollback/reference point for the Godot prototype after the first combat pacing pass: baseline color-chain boss damage, color-only main preview generation, a separate tactical combat orb queue, and corrected shared-queue hazard/fast-drop behavior.
+- Stable checkpoint: `e98ceb4 feat: use orb runtime v03 sprites`
+- This is the current rollback/reference point for the Godot prototype after the first combat pacing and Astral Resonance visual integration passes: baseline color-chain boss damage, color-only main preview generation, a separate tactical combat orb queue, shared-queue hazard/fast-drop behavior, themed board/background rendering, and v03 runtime orb body/glow sprites aligned to gameplay radius.
 
 ## Project Context
 
