@@ -2,8 +2,8 @@
 
 ## Current Stable Prototype Node
 
-- Stable checkpoint: `6b4383a fix: allow fast drop for hazard orbs`
-- This is the current rollback/reference point for the Godot prototype after the first major orb physics, queued boss hazard, preview UI, and corrected fast-drop behavior pass.
+- Stable checkpoint: `765d175 feat: add tactical combat queue`
+- This is the current rollback/reference point for the Godot prototype after the first combat pacing pass: baseline color-chain boss damage, color-only main preview generation, a separate tactical combat orb queue, and corrected shared-queue hazard/fast-drop behavior.
 
 ## Project Context
 
