@@ -84,6 +84,9 @@ func _draw() -> void:
 	if state == null:
 		return
 	var color := current_fill_color()
+	var glow_texture := current_glow_texture()
+	if glow_texture != null:
+		_draw_centered_texture(glow_texture, state.radius * visual_theme.orb_glow_radius_scale, Color(1, 1, 1, visual_theme.orb_glow_alpha))
 	var texture := current_texture()
 	if texture != null:
 		_draw_centered_texture(texture, state.radius)
@@ -128,13 +131,18 @@ func current_texture() -> Texture2D:
 		return null
 	return visual_theme.get_orb_texture(state)
 
-func _draw_centered_texture(texture: Texture2D, target_radius: float) -> void:
+func current_glow_texture() -> Texture2D:
+	if visual_theme == null or state == null:
+		return null
+	return visual_theme.get_orb_glow_texture(state)
+
+func _draw_centered_texture(texture: Texture2D, target_radius: float, modulate: Color = Color.WHITE) -> void:
 	var size := texture.get_size()
 	if size.x <= 0.0 or size.y <= 0.0:
 		return
 	var target_size := Vector2(target_radius * 2.0, target_radius * 2.0)
 	var rect := Rect2(-target_size * 0.5, target_size)
-	draw_texture_rect(texture, rect, false)
+	draw_texture_rect(texture, rect, false, modulate)
 
 func _draw_centered_text(font: Font, text: String, baseline: Vector2, font_size: int, color: Color) -> void:
 	if font == null or text.is_empty():
