@@ -87,6 +87,7 @@ func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictiona
 		"hazard_removed_in_danger": [],
 	}
 	for chain in chains:
+		result.attack += int(chain.get("strength", 0))
 		for member in chain.members:
 			result.cleared_color_ids.append(member.id)
 	for ball in balls:

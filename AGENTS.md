@@ -31,7 +31,8 @@
 
 ## Orb Behavior Notes
 
-- Player-side orbs and combat orbs can be fast-dropped.
+- The main preview queue should naturally generate color orbs. Combat orbs come from the separate tactical queue.
+- Tactical combat orbs can be manually inserted into the main preview queue.
 - Boss hazard events insert hazard orbs into the shared preview queue. They should not add hazards directly to the playfield.
 - Player fast-drop releases the current preview head, including hazard orbs.
 - Player fast-drop accelerates currently falling orbs, including hazard orbs, then immediately starts the next preview orb. It should not instantly settle or teleport the current orb.
@@ -44,6 +45,7 @@
 ## Chain and Hazard Rules
 
 - Five or more connected same-color orbs start flashing.
+- Resolved color chains deal baseline boss damage equal to chain strength, even without combat orbs.
 - While flashing, additional same-color orbs can still join and increase the chain effect.
 - Combat orbs start at value `0`; nearby flashing color chains increase their value.
 - A combat orb near multiple flashing chains stacks all nearby chain contributions.

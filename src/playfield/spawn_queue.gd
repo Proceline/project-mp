@@ -35,13 +35,7 @@ func insert_preview_balls(new_balls: Array[BallState], insert_index: int) -> voi
 
 func _make_player_ball() -> BallState:
 	next_id += 1
-	var roll := next_id % 8
-	if roll < 5:
-		var color_ball: BallState = BallState.new_ball(next_id, BallState.Kind.COLOR, Vector2.ZERO)
-		color_ball.color_id = roll % 4
-		color_ball.entry_duration_seconds = tuning.player_entry_seconds
-		return color_ball
-	var combat: BallState = BallState.new_ball(next_id, BallState.Kind.COMBAT, Vector2.ZERO)
-	combat.combat_kind = [BallState.CombatKind.ATTACK, BallState.CombatKind.SHIELD, BallState.CombatKind.HEAL][roll - 5]
-	combat.entry_duration_seconds = tuning.player_entry_seconds
-	return combat
+	var color_ball: BallState = BallState.new_ball(next_id, BallState.Kind.COLOR, Vector2.ZERO)
+	color_ball.color_id = next_id % 4
+	color_ball.entry_duration_seconds = tuning.player_entry_seconds
+	return color_ball

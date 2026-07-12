@@ -24,7 +24,7 @@ func test_finished_chain_converts_combat_values_to_results(runner) -> void:
 		color.flashing = true
 		chain.members.append(color)
 	var result: Dictionary = resolver.resolve_finished_chains([chain], [attack, shield, heal])
-	runner.assert_eq(result.attack, 9, "attack value is emitted")
+	runner.assert_eq(result.attack, 14, "attack result includes baseline chain damage plus attack orb value")
 	runner.assert_eq(result.shield, 4, "shield value is emitted")
 	runner.assert_eq(result.heal, 6, "heal value is emitted")
 	runner.assert_eq(result.cleared_color_ids.size(), 5, "cleared color ids include every chain member")
@@ -33,6 +33,20 @@ func test_finished_chain_converts_combat_values_to_results(runner) -> void:
 	runner.assert_true(result.removed_ball_ids.has(20), "triggered attack orb removed")
 	runner.assert_true(result.removed_ball_ids.has(21), "triggered shield orb removed")
 	runner.assert_true(result.removed_ball_ids.has(22), "triggered heal orb removed")
+
+func test_finished_color_chain_emits_baseline_attack(runner) -> void:
+	var resolver := ChainResolver.new()
+	var chain := {"color_id": 1, "members": [], "strength": 7}
+	for i in range(7):
+		var color: BallState = BallState.new_ball(i, BallState.Kind.COLOR, Vector2(i * 20, 0))
+		color.color_id = 1
+		color.flashing = true
+		chain.members.append(color)
+
+	var result: Dictionary = resolver.resolve_finished_chains([chain], [])
+
+	runner.assert_eq(result.attack, 7, "resolved color chain deals baseline boss damage equal to chain strength")
+	runner.assert_eq(result.cleared_color_ids.size(), 7, "baseline attack still clears all color chain members")
 
 func test_finished_chain_removes_cleared_warning_hazard_without_damage(runner) -> void:
 	var resolver := ChainResolver.new()

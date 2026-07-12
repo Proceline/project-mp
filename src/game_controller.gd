@@ -7,6 +7,7 @@ const ActionBarVolleyMechanic = preload("res://src/boss/action_bar_volley_mechan
 const HpPhaseMechanic = preload("res://src/boss/hp_phase_mechanic.gd")
 const BurstCounterMechanic = preload("res://src/boss/burst_counter_mechanic.gd")
 const SpawnQueue = preload("res://src/playfield/spawn_queue.gd")
+const TacticalQueue = preload("res://src/playfield/tactical_queue.gd")
 const HazardSpawner = preload("res://src/playfield/hazard_spawner.gd")
 const Playfield = preload("res://src/playfield/playfield.gd")
 const ChainResolver = preload("res://src/rules/chain_resolver.gd")
@@ -15,6 +16,7 @@ const OrbTuning = preload("res://src/config/orb_tuning.gd")
 
 @onready var playfield: Playfield = %Playfield
 @onready var spawn_queue: SpawnQueue = %SpawnQueue
+@onready var tactical_queue: TacticalQueue = %TacticalQueue
 @onready var hazard_spawner: HazardSpawner = %HazardSpawner
 @onready var boss_controller: BossController = %BossController
 @onready var ui: BattleUI = %BattleUI
@@ -43,11 +45,12 @@ func _ready() -> void:
 	var counter := BurstCounterMechanic.new()
 	boss_controller.configure([volley_mechanic, phase70, phase40, phase15, counter])
 	spawn_queue.seed_preview()
-	ui.update_from_state(battle, 0.0, spawn_queue.preview)
+	tactical_queue.seed_slots()
+	ui.update_from_state(battle, 0.0, spawn_queue.preview, tactical_queue.slots)
 
 func _process(delta: float) -> void:
 	if battle.result() != "active":
-		ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview)
+		ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview, tactical_queue.slots)
 		return
 	var rotation_input := Input.get_axis("rotate_left", "rotate_right")
 	playfield.rotate_settled(rotation_input * playfield.rotation_speed * delta)
@@ -55,6 +58,8 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("fast_drop_player_orb"):
 		if handle_player_fast_drop():
 			player_auto_drop_timer = 0.0
+	elif Input.is_action_just_pressed("insert_tactical_orb"):
+		insert_tactical_combat_orb()
 	else:
 		advance_player_orb_spawn(delta)
 	advance_boss_events(delta)
@@ -63,7 +68,7 @@ func _process(delta: float) -> void:
 		_apply_player_damage(damage, "boundary_explosion")
 		boss_controller.notify_player_damage(damage)
 	advance_chain_resolution(delta)
-	ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview)
+	ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview, tactical_queue.slots)
 
 func advance_chain_resolution(delta: float) -> void:
 	_tick_chains(delta)
@@ -83,6 +88,13 @@ func handle_player_fast_drop() -> bool:
 	var accelerated_count := playfield.accelerate_active_orbs(orb_tuning.player_fast_drop_entry_seconds)
 	var dropped_next := _fast_drop_next_orb()
 	return accelerated_count > 0 or dropped_next
+
+func insert_tactical_combat_orb() -> bool:
+	var ball := tactical_queue.pop_next_combat_orb()
+	if ball == null:
+		return false
+	spawn_queue.insert_preview_ball(ball, orb_tuning.tactical_insert_index)
+	return true
 
 func _fast_drop_next_orb() -> bool:
 	var ball := spawn_queue.fast_drop_current()
@@ -114,6 +126,7 @@ func _apply_orb_tuning() -> void:
 	if orb_tuning == null:
 		return
 	spawn_queue.tuning = orb_tuning
+	tactical_queue.tuning = orb_tuning
 	hazard_spawner.tuning = orb_tuning
 	playfield.hazard_warning_seconds = orb_tuning.hazard_warning_seconds
 

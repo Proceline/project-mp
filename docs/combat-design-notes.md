@@ -205,9 +205,24 @@ Important near-term feedback improvements:
 - Boss damage should appear on the boss side, not clutter the board center.
 - Shield and HP should remain anchored to the Heartlight Core.
 
+## Implemented Combat Pacing Phase 1
+
+Implemented after this note was written:
+
+- 5+ color chain clears now produce baseline boss damage.
+- Main preview queue now naturally generates color orbs instead of random combat orbs.
+- Combat orbs now live in a separate tactical queue.
+- The player can manually insert a tactical combat orb into the main preview queue.
+- Existing combat orb charging and multi-chain stacking rules are preserved.
+- Boss Eclipse/hazard orbs remain in the shared main preview queue as the boss-driven disruption system.
+
+Current prototype input:
+
+- `Q`: insert the next tactical combat orb into the main preview queue.
+
 ## Working Summary For Future Implementation Sessions
 
-Recommended next design implementation target:
+Completed combat pacing target:
 
 - Keep color orbs as the dominant board content.
 - Make 5+ color chain clears produce baseline boss damage.
@@ -215,6 +230,9 @@ Recommended next design implementation target:
 - Let the player manually insert tactical combat orbs into the main preview queue.
 - Keep combat orbs compatible with existing chain influence and stacking rules.
 - Keep boss hazards in the shared main preview queue as the primary disruption system.
+
+Recommended next design implementation target:
+
 - Add clear boss intent, board-side warning echoes, and short completion feedback windows.
 
 Primary goal:

@@ -2,6 +2,7 @@ extends RefCounted
 
 const BallState = preload("res://src/rules/ball_state.gd")
 const SpawnQueue = preload("res://src/playfield/spawn_queue.gd")
+const TacticalQueue = preload("res://src/playfield/tactical_queue.gd")
 const HazardSpawner = preload("res://src/playfield/hazard_spawner.gd")
 const Playfield = preload("res://src/playfield/playfield.gd")
 const OrbNode = preload("res://src/playfield/orb_node.gd")
@@ -13,6 +14,37 @@ func test_spawn_queue_contains_only_player_side_orbs(runner: TestRunner) -> void
 	var ball: BallState = queue.fast_drop_current()
 	runner.assert_true(ball.kind != BallState.Kind.HAZARD, "fast drop never returns hazard orbs")
 	queue.free()
+
+func test_spawn_queue_seeds_only_color_orbs_without_combat_clutter(runner: TestRunner) -> void:
+	var queue: SpawnQueue = SpawnQueue.new()
+	queue.seed_preview()
+
+	for ball in queue.preview:
+		runner.assert_eq(ball.kind, BallState.Kind.COLOR, "main preview seed contains only color orbs by default")
+	queue.free()
+
+func test_tactical_queue_generates_combat_orb_slots(runner: TestRunner) -> void:
+	var queue: TacticalQueue = TacticalQueue.new()
+	queue.seed_slots()
+
+	runner.assert_eq(queue.slots.size(), 2, "tactical queue starts with two combat slots")
+	for ball in queue.slots:
+		runner.assert_eq(ball.kind, BallState.Kind.COMBAT, "tactical slots contain combat orbs")
+	queue.free()
+
+func test_tactical_orb_can_be_inserted_into_main_preview(runner: TestRunner) -> void:
+	var main_queue: SpawnQueue = SpawnQueue.new()
+	var tactical_queue: TacticalQueue = TacticalQueue.new()
+	main_queue.seed_preview()
+	tactical_queue.seed_slots()
+
+	var inserted: BallState = tactical_queue.pop_next_combat_orb()
+	main_queue.insert_preview_ball(inserted, 1)
+
+	runner.assert_eq(main_queue.preview[1].kind, BallState.Kind.COMBAT, "tactical combat orb inserts near the main queue head")
+	runner.assert_eq(tactical_queue.slots.size(), 2, "tactical queue refills after insertion")
+	main_queue.free()
+	tactical_queue.free()
 
 func test_spawn_queue_inserts_hazard_at_configured_preview_index(runner: TestRunner) -> void:
 	var queue: SpawnQueue = SpawnQueue.new()

@@ -5,6 +5,8 @@ class_name OrbTuning
 @export var player_entry_seconds: float = 3.0
 @export var player_fast_drop_entry_seconds: float = 0.35
 @export var player_spawn_position: Vector2 = Vector2(-320.0, -180.0)
+@export var tactical_slot_count: int = 2
+@export var tactical_insert_index: int = 1
 @export var hazard_entry_seconds: float = 3.0
 @export var hazard_preview_insert_index: int = 2
 @export var hazard_entry_angle_degrees: float = -35.0

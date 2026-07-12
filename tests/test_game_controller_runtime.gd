@@ -8,6 +8,7 @@ const GameController = preload("res://src/game_controller.gd")
 const HazardSpawner = preload("res://src/playfield/hazard_spawner.gd")
 const Playfield = preload("res://src/playfield/playfield.gd")
 const SpawnQueue = preload("res://src/playfield/spawn_queue.gd")
+const TacticalQueue = preload("res://src/playfield/tactical_queue.gd")
 const TestRunner = preload("res://tests/test_runner.gd")
 
 func test_chain_resolution_applies_effects_once_and_clears_orbs(runner: TestRunner) -> void:
@@ -51,7 +52,7 @@ func test_chain_resolution_applies_effects_once_and_clears_orbs(runner: TestRunn
 	runner.assert_eq(heal.value, 8, "heal orb is not buffed again during the same flash window")
 
 	controller.advance_chain_resolution(0.5)
-	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp - 9, "attack damage lands once when flash resolves")
+	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp - 14, "attack damage includes baseline chain damage and attack orb value")
 	runner.assert_eq(controller.battle.player_shield, 7, "shield bonus is applied once when flash resolves")
 	runner.assert_eq(controller.battle.player_hp, 26, "heal bonus is applied once when flash resolves")
 	runner.assert_eq(controller.playfield.balls.size(), 1, "resolved chain removes color members and triggered combat orbs")
@@ -62,7 +63,7 @@ func test_chain_resolution_applies_effects_once_and_clears_orbs(runner: TestRunn
 	runner.assert_true(bool(counter_state.get("pending_counter", false)), "boss controller is notified about chain attack damage")
 
 	controller.advance_chain_resolution(0.5)
-	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp - 9, "resolved chain does not apply damage twice")
+	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp - 14, "resolved chain does not apply damage twice")
 	_destroy_controller(controller)
 
 func test_player_orbs_auto_drop_without_space(runner: TestRunner) -> void:
@@ -79,6 +80,20 @@ func test_player_orbs_auto_drop_without_space(runner: TestRunner) -> void:
 	var dropped: BallState = controller.playfield.balls[-1]
 	runner.assert_true(dropped.kind != BallState.Kind.HAZARD, "auto drop uses the player-side queue")
 	runner.assert_true(dropped.has_settle_target, "auto dropped orb receives a settle target")
+	_destroy_controller(controller)
+
+func test_tactical_combat_orb_inserts_into_main_preview(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.spawn_queue.seed_preview()
+	var before_size := controller.spawn_queue.preview.size()
+
+	var handled: bool = controller.insert_tactical_combat_orb()
+
+	runner.assert_true(handled, "tactical insertion is handled when a combat slot is ready")
+	runner.assert_eq(controller.spawn_queue.preview.size(), before_size + 1, "tactical combat insertion adds to the main preview")
+	runner.assert_eq(controller.spawn_queue.preview[1].kind, BallState.Kind.COMBAT, "tactical combat orb inserts near the queue head")
 	_destroy_controller(controller)
 
 func test_player_fast_drop_accelerates_current_orb_and_starts_next(runner: TestRunner) -> void:
@@ -238,6 +253,7 @@ func _instantiate_controller(runner: TestRunner) -> GameController:
 	tree.root.add_child(controller)
 	controller.playfield = controller.get_node("%Playfield") as Playfield
 	controller.spawn_queue = controller.get_node("%SpawnQueue") as SpawnQueue
+	controller.tactical_queue = controller.get_node("%TacticalQueue") as TacticalQueue
 	controller.hazard_spawner = controller.get_node("%HazardSpawner") as HazardSpawner
 	controller.boss_controller = controller.get_node("%BossController") as BossController
 	controller.ui = controller.get_node("%BattleUI")
