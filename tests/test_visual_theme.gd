@@ -25,14 +25,14 @@ func test_batch1_visual_theme_maps_orb_textures(runner: TestRunner) -> void:
 	runner.assert_true(theme.get_orb_texture(warning) != null, "theme maps warning eclipse orb texture")
 	runner.assert_true(theme.get_orb_texture(danger) != null, "theme maps danger eclipse orb texture")
 
-func test_batch1_visual_theme_uses_v02_body_and_glow_paths(runner: TestRunner) -> void:
+func test_batch1_visual_theme_uses_v03_body_and_glow_paths(runner: TestRunner) -> void:
 	var theme: VisualTheme = load("res://data/visual_theme_astral_batch1.tres")
-	runner.assert_true(theme != null, "batch 1 visual theme resource loads for v02 checks")
+	runner.assert_true(theme != null, "batch 1 visual theme resource loads for v03 checks")
 	if theme == null:
 		return
-	runner.assert_true(theme.color_orb_red_path.ends_with("_body_v02.png"), "star orb body path uses v02 runtime body art")
-	runner.assert_true(theme.combat_orb_attack_path.ends_with("_body_v02.png"), "combat orb body path uses v02 runtime body art")
-	runner.assert_true(theme.eclipse_orb_danger_path.ends_with("_body_v02.png"), "eclipse orb body path uses v02 runtime body art")
+	runner.assert_true(theme.color_orb_red_path.ends_with("_body_v03.png"), "star orb body path uses v03 runtime body art")
+	runner.assert_true(theme.combat_orb_attack_path.ends_with("_body_v03.png"), "combat orb body path uses v03 runtime body art")
+	runner.assert_true(theme.eclipse_orb_danger_path.ends_with("_body_v03.png"), "eclipse orb body path uses v03 runtime body art")
 	var red := BallState.new_ball(11, BallState.Kind.COLOR, Vector2.ZERO)
 	red.color_id = 0
 	var attack := BallState.new_ball(12, BallState.Kind.COMBAT, Vector2.ZERO)

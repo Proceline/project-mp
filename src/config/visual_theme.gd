@@ -121,10 +121,11 @@ func _texture_from_path(path: String) -> Texture2D:
 		return null
 	if _texture_cache.has(path):
 		return _texture_cache[path] as Texture2D
-	var loaded := ResourceLoader.load(path)
-	if loaded is Texture2D:
-		_texture_cache[path] = loaded
-		return loaded
+	if ResourceLoader.exists(path):
+		var loaded := ResourceLoader.load(path)
+		if loaded is Texture2D:
+			_texture_cache[path] = loaded
+			return loaded
 	var image := Image.new()
 	var error := image.load(path)
 	if error != OK:
