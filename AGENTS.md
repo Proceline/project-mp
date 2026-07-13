@@ -2,8 +2,8 @@
 
 ## Current Stable Prototype Node
 
-- Stable checkpoint: `f2aaad6 fix: treat attached orbs as spawn blockers`
-- This is the current rollback/reference point for the Godot prototype after the v04 runtime orb visual pass, chain/pacing rule pass, hazard lifecycle tuning, orb visual rotation pass, and fast-drop spawn-lane stability pass: baseline color-chain boss damage, flashing chains that absorb late same-color members with tunable timer extension, configurable color-orb generation, tuned warning/danger hazard behavior, contact-only rolling visual offsets, a separate tactical combat orb queue, shared-queue hazard/fast-drop behavior, player fast-drop spawn-lane spacing that treats attached orbs as blockers, themed board/background rendering, and v04 runtime orb body/glow sprites aligned to gameplay radius.
+- Stable checkpoint: `6d7b5b5 chore: clean gdscript reload warnings`
+- This is the current rollback/reference point for the Godot prototype after the v04 runtime orb visual pass, chain/pacing rule pass, hazard lifecycle tuning, orb visual rotation pass, fast-drop spawn-lane stability pass, and GDScript reload-warning cleanup: baseline color-chain boss damage, flashing chains that absorb late same-color members with tunable timer extension, configurable color-orb generation, tuned warning/danger hazard behavior, contact-only rolling visual offsets, a separate tactical combat orb queue, shared-queue hazard/fast-drop behavior, player fast-drop spawn-lane spacing that treats attached orbs as blockers, themed board/background rendering, v04 runtime orb body/glow sprites aligned to gameplay radius, and clean headless reload output.
 
 ## Project Context
 
@@ -28,6 +28,12 @@
 - `BallState.is_on_board()` means `settled or board_attached`.
 - Gameplay rules should usually use `is_on_board()`, not only `settled`.
 - Pure falling orbs have `settled == false` and `board_attached == false`; they should not rotate with the disk and should not trigger chain or hazard boundary rules.
+
+## GDScript Maintenance Notes
+
+- Many scripts use `class_name`; those classes are global in Godot. Do not reintroduce same-name `const Foo = preload(...)` aliases for global classes, because Godot reports them as reload warnings.
+- Avoid names that shadow Godot built-ins such as `seed`, `size`, and `modulate`; use explicit names such as `random_seed`, `text_size`, `texture_size`, or `tint`.
+- Intentionally unused function parameters should be prefixed with `_` to keep reload output clean.
 
 ## Orb Behavior Notes
 
