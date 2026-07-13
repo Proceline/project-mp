@@ -138,10 +138,6 @@ func _assign_settle_target_if_needed(ball: BallState) -> void:
 
 func _spawn_position_has_clearance(candidate: Vector2, radius: float, padding: float) -> bool:
 	for other in balls:
-		if other.settled or other.board_attached:
-			continue
-		if not other.has_settle_target:
-			continue
 		var minimum_distance := radius + other.radius + padding
 		if candidate.distance_to(other.position) < minimum_distance:
 			return false

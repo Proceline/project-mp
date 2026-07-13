@@ -361,6 +361,24 @@ func test_playfield_assigns_center_target_for_new_orbs(runner: TestRunner) -> vo
 	runner.assert_true(not first.settled, "newly added orb starts moving before it settles")
 	_remove_playfield_from_tree(playfield)
 
+func test_spawn_lane_clearance_treats_board_attached_orbs_as_blockers(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var spawn_position := Vector2(-320, -180)
+	var blocker: BallState = BallState.new_ball(13, BallState.Kind.COLOR, spawn_position)
+	blocker.has_settle_target = true
+	blocker.settle_target = Vector2.ZERO
+	blocker.board_attached = true
+	blocker.settled = false
+	playfield.add_ball(blocker)
+
+	var cleared_position := playfield.clear_player_spawn_position(spawn_position, 24.0, 6.0, 8)
+
+	runner.assert_true(
+		cleared_position.distance_to(blocker.position) >= blocker.radius + 24.0 + 6.0,
+		"spawn lane clearance treats board-attached moving orbs as occupied space"
+	)
+	_remove_playfield_from_tree(playfield)
+
 func test_orb_node_moves_toward_center_and_stops_at_core_ring(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
 	var ball: BallState = BallState.new_ball(12, BallState.Kind.COLOR, Vector2(-180, 0))
