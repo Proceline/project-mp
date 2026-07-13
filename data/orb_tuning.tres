@@ -1,12 +1,14 @@
-[gd_resource type="Resource" script_class="OrbTuning" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="OrbTuning" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://src/config/orb_tuning.gd" id="1_orbtuning"]
 [ext_resource type="Resource" path="res://data/orb_color_generator_default.tres" id="2_color_generator"]
+[ext_resource type="Resource" path="res://data/hazard_tuning_default.tres" id="3_hazard_tuning"]
 
 [resource]
 script = ExtResource("1_orbtuning")
 preview_size = 6
 color_generator = ExtResource("2_color_generator")
+hazard_tuning = ExtResource("3_hazard_tuning")
 player_entry_seconds = 3.0
 player_fast_drop_entry_seconds = 0.35
 player_spawn_position = Vector2(-320, -180)

@@ -66,7 +66,7 @@ func test_finished_chain_removes_cleared_warning_hazard_without_damage(runner) -
 func test_finished_chain_removes_cleared_danger_hazard_with_damage(runner) -> void:
 	var resolver := ChainResolver.new()
 	var hazard: BallState = BallState.new_ball(31, BallState.Kind.HAZARD, Vector2(30, 0))
-	hazard.value = 0
+	hazard.value = 3
 	hazard.hazard_damage = 7
 	hazard.hazard_phase = BallState.HazardPhase.DANGER
 	hazard.settled = true
@@ -76,7 +76,7 @@ func test_finished_chain_removes_cleared_danger_hazard_with_damage(runner) -> vo
 
 	runner.assert_true(result.removed_ball_ids.has(31), "cleared danger hazard is removed")
 	runner.assert_eq(result.hazard_removed_in_danger.size(), 1, "danger hazard removal is reported separately")
-	runner.assert_eq(result.player_damage, 7, "danger hazard deals its stored damage when cleared")
+	runner.assert_eq(result.player_damage, 3, "danger hazard deals damage equal to its visible value when cleared")
 
 func _touching_chain() -> Dictionary:
 	var chain := {"color_id": 1, "members": [], "strength": 5}

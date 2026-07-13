@@ -192,6 +192,18 @@ func test_falling_hazards_do_not_damage_player_before_boundary_or_clear(runner: 
 	runner.assert_eq(controller.battle.player_hp, 30, "falling hazards do not damage before boundary explosion or settled clear")
 	_destroy_controller(controller)
 
+func test_boundary_hazard_damage_uses_configured_explosion_damage(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.orb_tuning.hazard_tuning.boundary_explosion_damage = 3
+	var hazard: BallState = BallState.new_ball(601, BallState.Kind.HAZARD, Vector2(300, 0))
+	hazard.value = 5
+	hazard.hazard_damage = 9
+
+	runner.assert_eq(controller._hazard_damage(hazard), 3, "boundary explosion damage ignores visible hazard value")
+	_destroy_controller(controller)
+
 func test_action_bar_hazard_spawn_does_not_immediately_damage_player(runner: TestRunner) -> void:
 	var controller := _instantiate_controller(runner)
 	if controller == null:

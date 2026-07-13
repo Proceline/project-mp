@@ -18,6 +18,7 @@ const LABELS := {
 func setup(ball_state: BallState) -> void:
 	state = ball_state
 	position = state.position
+	_update_visual_rotation()
 	_apply_entry_duration()
 	queue_redraw()
 
@@ -34,6 +35,7 @@ func _process(delta: float) -> void:
 	position += velocity * delta
 	velocity = velocity.move_toward(Vector2.ZERO, 260.0 * delta)
 	state.position = position
+	_update_visual_rotation()
 	if velocity.length() < 8.0:
 		velocity = Vector2.ZERO
 		state.settled = true
@@ -65,12 +67,15 @@ func _move_toward_settle_target(delta: float) -> void:
 		var resolved: Dictionary = parent_playfield.resolve_incoming_motion(state, proposed_position)
 		position = resolved.position
 		state.position = position
+		_apply_contact_roll(float(resolved.get("roll_delta", 0.0)))
+		_update_visual_rotation()
 		state.settled = bool(resolved.settled)
 		if state.settled:
 			velocity = Vector2.ZERO
 		return
 	position = proposed_position
 	state.position = position
+	_update_visual_rotation()
 
 func _apply_entry_duration() -> void:
 	if state == null or state.entry_duration_seconds <= 0.0:
@@ -97,12 +102,11 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, state.radius, 0.0, TAU, 48, color.lightened(0.25), 2.0)
 
 	var font := ThemeDB.fallback_font
-	var font_size := 14
-	var value_text := str(state.value)
+	var value_text := display_label()
+	var font_size := 14 if value_text.length() <= 2 else 12
 	if state.kind == BallState.Kind.COMBAT:
 		font_size = 12
-		value_text = LABELS.get(state.combat_kind, "")
-	elif state.kind == BallState.Kind.HAZARD:
+	if state.kind == BallState.Kind.HAZARD:
 		font_size = 16
 	if value_text != "":
 		_draw_centered_text(font, value_text, Vector2(0.0, 5.0), font_size, Color.BLACK)
@@ -110,6 +114,35 @@ func _draw() -> void:
 	if state.kind == BallState.Kind.COMBAT and state.value > 0:
 		_draw_centered_text(font, str(state.value), Vector2(0.0, state.radius - 3.0), 11, Color.BLACK)
 		_draw_centered_text(font, str(state.value), Vector2(0.0, state.radius - 4.0), 11, Color(1.0, 0.94, 0.65))
+
+func display_label() -> String:
+	if state == null:
+		return ""
+	if state.kind == BallState.Kind.COMBAT:
+		return LABELS.get(state.combat_kind, "")
+	if state.kind == BallState.Kind.HAZARD:
+		if state.hazard_phase == BallState.HazardPhase.WARNING:
+			return ""
+		return str(state.value)
+	return ""
+
+func _update_visual_rotation() -> void:
+	if state == null:
+		return
+	rotation = visual_rotation_for_position(state.position) + state.visual_rotation
+
+func visual_rotation_for_position(world_position: Vector2) -> float:
+	if world_position.length() <= 0.001:
+		return state.visual_rotation if state != null else 0.0
+	var inward := -world_position.normalized()
+	return inward.angle() - Vector2.DOWN.angle()
+
+func _apply_contact_roll(roll_delta: float) -> void:
+	if state == null:
+		return
+	if absf(roll_delta) <= 0.001:
+		return
+	state.visual_rotation += roll_delta
 
 func current_fill_color() -> Color:
 	if state == null:

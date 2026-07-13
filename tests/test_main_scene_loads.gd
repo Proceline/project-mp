@@ -2,6 +2,7 @@ extends RefCounted
 
 const BallState = preload("res://src/rules/ball_state.gd")
 const BattleState = preload("res://src/rules/battle_state.gd")
+const PreviewOrbIcon = preload("res://src/ui/preview_orb_icon.gd")
 const TestRunner = preload("res://tests/test_runner.gd")
 
 func test_main_scene_loads(runner: TestRunner) -> void:
@@ -48,6 +49,7 @@ func test_preview_renders_orb_icons_instead_of_code_text(runner: TestRunner) -> 
 	color_ball.color_id = 0
 	var hazard := BallState.new_ball(2, BallState.Kind.HAZARD, Vector2.ZERO)
 	hazard.value = 5
+	hazard.hazard_phase = BallState.HazardPhase.DANGER
 	var preview: Array[BallState] = [color_ball, hazard]
 
 	var empty_tactical: Array[BallState] = []
@@ -84,3 +86,13 @@ func test_tactical_row_renders_separate_combat_icons(runner: TestRunner) -> void
 	runner.assert_eq(battle_ui.tactical_label.text, "Tactic:", "tactical row has a separate label")
 	runner.assert_eq(battle_ui.tactical_row.get_child_count(), 1, "tactical row renders combat slots separately")
 	scene.queue_free()
+
+func test_preview_warning_hazard_draws_without_value_label(runner: TestRunner) -> void:
+	var hazard := BallState.new_ball(4, BallState.Kind.HAZARD, Vector2.ZERO)
+	hazard.hazard_phase = BallState.HazardPhase.WARNING
+	hazard.value = 5
+	var icon := PreviewOrbIcon.new()
+	icon.setup(hazard)
+
+	runner.assert_eq(icon.display_label(), "", "preview warning hazards do not draw damage numbers")
+	icon.queue_free()

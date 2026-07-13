@@ -2,9 +2,11 @@ extends Resource
 class_name OrbTuning
 
 const OrbColorGenerator = preload("res://src/config/orb_color_generator.gd")
+const HazardTuning = preload("res://src/config/hazard_tuning.gd")
 
 @export var preview_size: int = 6
 @export var color_generator: OrbColorGenerator = preload("res://data/orb_color_generator_default.tres")
+@export var hazard_tuning: HazardTuning = preload("res://data/hazard_tuning_default.tres")
 @export var player_entry_seconds: float = 3.0
 @export var player_fast_drop_entry_seconds: float = 0.35
 @export var player_spawn_position: Vector2 = Vector2(-320.0, -180.0)

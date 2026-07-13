@@ -134,6 +134,7 @@ func _apply_orb_tuning() -> void:
 	tactical_queue.tuning = orb_tuning
 	hazard_spawner.tuning = orb_tuning
 	playfield.hazard_warning_seconds = orb_tuning.hazard_warning_seconds
+	playfield.hazard_tuning = orb_tuning.hazard_tuning
 	chain_extend_seconds = orb_tuning.chain_extend_seconds
 	chain_max_flash_seconds = orb_tuning.chain_max_flash_seconds
 
@@ -198,9 +199,9 @@ func _remove_balls_by_id(ids: Array) -> void:
 		playfield.release_unsupported_orbs()
 
 func _hazard_damage(ball: BallState) -> int:
-	if ball.hazard_damage > 0:
-		return ball.hazard_damage
-	return max(ball.value, 1)
+	if orb_tuning != null and orb_tuning.hazard_tuning != null:
+		return orb_tuning.hazard_tuning.boundary_explosion_damage
+	return 3
 
 func _apply_player_damage(amount: int, source: String) -> void:
 	battle.apply_player_damage(amount)

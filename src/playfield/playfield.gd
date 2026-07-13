@@ -4,11 +4,14 @@ class_name Playfield
 const BallState = preload("res://src/rules/ball_state.gd")
 const OrbNode = preload("res://src/playfield/orb_node.gd")
 const VisualTheme = preload("res://src/config/visual_theme.gd")
+const HazardTuning = preload("res://src/config/hazard_tuning.gd")
 const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astral_batch1.tres")
+const DEFAULT_HAZARD_TUNING: HazardTuning = preload("res://data/hazard_tuning_default.tres")
 
 var balls: Array[BallState] = []
 var orb_nodes_by_id: Dictionary = {}
 @export var visual_theme: VisualTheme = DEFAULT_VISUAL_THEME
+@export var hazard_tuning: HazardTuning = DEFAULT_HAZARD_TUNING
 var danger_radius: float = 260.0
 var core_radius: float = 58.0
 var core_collision_radius: float = 80.0
@@ -51,6 +54,7 @@ func rotate_settled(angle_delta: float) -> void:
 			var node := _get_orb_node(ball.id)
 			if node != null:
 				node.position = rotated_position
+				node.rotation = node.visual_rotation_for_position(rotated_position) + ball.visual_rotation
 	relax_settled_balls()
 	release_unsupported_orbs()
 
@@ -58,15 +62,20 @@ func advance_hazard_phases(delta: float) -> void:
 	if delta <= 0.0:
 		return
 	for ball in balls:
-		if ball.kind != BallState.Kind.HAZARD or ball.hazard_phase == BallState.HazardPhase.DANGER:
+		if ball.kind != BallState.Kind.HAZARD:
+			continue
+		if not ball.is_on_board():
 			continue
 		ball.age_seconds += delta
-		if ball.age_seconds < hazard_warning_seconds:
-			continue
-		ball.hazard_phase = BallState.HazardPhase.DANGER
-		var node := _get_orb_node(ball.id)
-		if node != null:
-			node.queue_redraw()
+		if ball.hazard_phase == BallState.HazardPhase.WARNING:
+			if ball.age_seconds < _hazard_warning_seconds():
+				continue
+			ball.hazard_phase = BallState.HazardPhase.DANGER
+			ball.value = _hazard_initial_value()
+			ball.age_seconds = 0.0
+			_redraw_orb(ball)
+		elif ball.hazard_phase == BallState.HazardPhase.DANGER:
+			_advance_danger_value(ball)
 
 func check_boundary_explosions() -> Array[BallState]:
 	var exploded: Array[BallState] = []
@@ -128,6 +137,7 @@ func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dic
 		return {
 			"position": incoming_direction * core_limit,
 			"settled": true,
+			"roll_delta": 0.0,
 		}
 	var contacts: Array[Dictionary] = []
 	for other in balls:
@@ -150,6 +160,7 @@ func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dic
 	return {
 		"position": proposed_position,
 		"settled": false,
+		"roll_delta": 0.0,
 	}
 
 func _sweep_contacts(ball: BallState, proposed_position: Vector2) -> Array[Dictionary]:
@@ -243,6 +254,7 @@ func _sync_orb_nodes_to_state() -> void:
 		var node := _get_orb_node(ball.id)
 		if node != null:
 			node.position = ball.position
+			node.rotation = node.visual_rotation_for_position(ball.position) + ball.visual_rotation
 
 func _core_limit_for_ball(ball: BallState) -> float:
 	return core_collision_radius + ball.radius
@@ -254,11 +266,13 @@ func _resolve_contact_motion(ball: BallState, contacts: Array[Dictionary]) -> Di
 		return {
 			"position": _average_contact_position(contacts),
 			"settled": true,
+			"roll_delta": 0.0,
 		}
 	if _has_penetrating_contact(contacts):
 		return {
 			"position": _average_contact_position(contacts),
 			"settled": false,
+			"roll_delta": 0.0,
 		}
 	var primary: Dictionary = contacts[0]
 	var blocker_direction: Vector2 = -Vector2(primary.normal)
@@ -267,9 +281,11 @@ func _resolve_contact_motion(ball: BallState, contacts: Array[Dictionary]) -> Di
 	var slide_direction := inward - blocker_direction * support_strength
 	if slide_direction.length() <= 0.001:
 		slide_direction = _fallback_slide_direction(inward, blocker_direction)
+	var slide_position := _limit_motion_step(ball.position, contact_position + slide_direction.normalized() * contact_slide_step)
 	return {
-		"position": _limit_motion_step(ball.position, contact_position + slide_direction.normalized() * contact_slide_step),
+		"position": slide_position,
 		"settled": false,
+		"roll_delta": _signed_roll_delta(ball, contact_position, slide_position),
 	}
 
 func _has_penetrating_contact(contacts: Array[Dictionary]) -> bool:
@@ -348,6 +364,49 @@ func _limit_motion_step(from_position: Vector2, to_position: Vector2) -> Vector2
 	if delta.length() <= max_contact_motion_step:
 		return to_position
 	return from_position + delta.normalized() * max_contact_motion_step
+
+func _signed_roll_delta(ball: BallState, from_position: Vector2, to_position: Vector2) -> float:
+	if ball.radius <= 0.001:
+		return 0.0
+	var movement := to_position - from_position
+	if movement.length() <= 0.001:
+		return 0.0
+	var radial := _safe_direction(from_position)
+	var clockwise_tangent := Vector2(-radial.y, radial.x)
+	var tangent_distance := movement.dot(clockwise_tangent)
+	if absf(tangent_distance) <= 0.001:
+		tangent_distance = movement.length()
+	return tangent_distance / ball.radius
+
+func _hazard_warning_seconds() -> float:
+	if hazard_tuning != null:
+		return hazard_tuning.warning_seconds_after_board_contact
+	return hazard_warning_seconds
+
+func _hazard_initial_value() -> int:
+	if hazard_tuning != null:
+		return hazard_tuning.danger_initial_value
+	return 1
+
+func _advance_danger_value(ball: BallState) -> void:
+	if hazard_tuning == null:
+		return
+	if hazard_tuning.danger_growth_seconds <= 0.0:
+		return
+	var grew := false
+	while ball.age_seconds >= hazard_tuning.danger_growth_seconds and ball.value < hazard_tuning.danger_max_value:
+		ball.age_seconds -= hazard_tuning.danger_growth_seconds
+		ball.value = min(ball.value + 1, hazard_tuning.danger_max_value)
+		grew = true
+	if ball.value >= hazard_tuning.danger_max_value:
+		ball.age_seconds = min(ball.age_seconds, hazard_tuning.danger_growth_seconds)
+	if grew:
+		_redraw_orb(ball)
+
+func _redraw_orb(ball: BallState) -> void:
+	var node := _get_orb_node(ball.id)
+	if node != null:
+		node.queue_redraw()
 
 func _safe_direction(vector: Vector2) -> Vector2:
 	if vector.length() <= 0.001:

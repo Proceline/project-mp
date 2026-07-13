@@ -11,13 +11,12 @@ var tuning: OrbTuning = DEFAULT_TUNING
 func spawn_from_event(event: Dictionary) -> Array[BallState]:
 	var hazards: Array[BallState] = []
 	var count := int(event.get("count", 1))
-	var value := int(event.get("value", tuning.hazard_default_value))
 	var angle_hint := String(event.get("angle_hint", "boss_side"))
 	for i in range(count):
 		next_id += 1
 		var ball: BallState = BallState.new_ball(next_id, BallState.Kind.HAZARD, _spawn_position(event, angle_hint, i, count))
-		ball.value = value
-		ball.hazard_damage = value
+		ball.value = int(event.get("initial_value", 0))
+		ball.hazard_damage = 0
 		ball.age_seconds = 0.0
 		ball.hazard_phase = BallState.HazardPhase.WARNING
 		ball.entry_duration_seconds = float(event.get("entry_seconds", tuning.hazard_entry_seconds))

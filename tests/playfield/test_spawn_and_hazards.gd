@@ -138,8 +138,14 @@ func test_hazard_spawner_places_default_hazards_inside_playfield_boundary(runner
 
 func test_playfield_advances_warning_hazard_to_danger_after_threshold(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
-	playfield.hazard_warning_seconds = 0.5
+	var tuning = _new_hazard_tuning(runner)
+	if tuning == null:
+		_remove_playfield_from_tree(playfield)
+		return
+	tuning.warning_seconds_after_board_contact = 0.5
+	playfield.hazard_tuning = tuning
 	var hazard: BallState = BallState.new_ball(77, BallState.Kind.HAZARD, Vector2(80, 0))
+	hazard.board_attached = true
 	playfield.add_ball(hazard)
 
 	playfield.advance_hazard_phases(0.49)
@@ -147,6 +153,55 @@ func test_playfield_advances_warning_hazard_to_danger_after_threshold(runner: Te
 
 	playfield.advance_hazard_phases(0.01)
 	runner.assert_eq(hazard.hazard_phase, BallState.HazardPhase.DANGER, "hazard becomes danger at warning threshold")
+	_remove_playfield_from_tree(playfield)
+
+func test_hazard_warning_timer_starts_after_board_contact(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var tuning = _new_hazard_tuning(runner)
+	if tuning == null:
+		_remove_playfield_from_tree(playfield)
+		return
+	tuning.warning_seconds_after_board_contact = 10.0
+	playfield.set("hazard_tuning", tuning)
+	var hazard: BallState = BallState.new_ball(78, BallState.Kind.HAZARD, Vector2(120, 0))
+	hazard.settled = false
+	hazard.board_attached = false
+	playfield.add_ball(hazard)
+
+	playfield.advance_hazard_phases(30.0)
+
+	runner.assert_eq(hazard.hazard_phase, BallState.HazardPhase.WARNING, "falling hazard stays in warning phase")
+	runner.assert_eq(hazard.age_seconds, 0.0, "falling hazard does not spend warning time")
+	hazard.board_attached = true
+	playfield.advance_hazard_phases(9.9)
+	runner.assert_eq(hazard.hazard_phase, BallState.HazardPhase.WARNING, "contacted hazard stays warning before configured duration")
+	playfield.advance_hazard_phases(0.1)
+	runner.assert_eq(hazard.hazard_phase, BallState.HazardPhase.DANGER, "contacted hazard enters danger after configured duration")
+	runner.assert_eq(hazard.value, 1, "danger hazard starts at configured initial value")
+	_remove_playfield_from_tree(playfield)
+
+func test_danger_hazard_value_grows_on_configured_interval(runner: TestRunner) -> void:
+	var playfield := _add_playfield_to_tree()
+	var tuning = _new_hazard_tuning(runner)
+	if tuning == null:
+		_remove_playfield_from_tree(playfield)
+		return
+	tuning.danger_initial_value = 1
+	tuning.danger_growth_seconds = 20.0
+	tuning.danger_max_value = 5
+	playfield.set("hazard_tuning", tuning)
+	var hazard: BallState = BallState.new_ball(79, BallState.Kind.HAZARD, Vector2(120, 0))
+	hazard.board_attached = true
+	hazard.hazard_phase = BallState.HazardPhase.DANGER
+	hazard.value = 1
+	playfield.add_ball(hazard)
+
+	playfield.advance_hazard_phases(19.9)
+	runner.assert_eq(hazard.value, 1, "danger value waits for full growth interval")
+	playfield.advance_hazard_phases(0.1)
+	runner.assert_eq(hazard.value, 2, "danger value grows after one interval")
+	playfield.advance_hazard_phases(1000.0)
+	runner.assert_eq(hazard.value, 5, "danger value caps at configured maximum")
 	_remove_playfield_from_tree(playfield)
 
 func test_playfield_boundary_reports_outside_hazard(runner: TestRunner) -> void:
@@ -202,6 +257,41 @@ func test_playfield_rotation_persists_for_settled_orb_nodes(runner: TestRunner) 
 	runner.assert_true(orb.position.distance_to(expected) < 0.001, "rotation updates settled orb node position")
 	playfield.free()
 
+func test_playfield_rotation_recomputes_center_gravity_visuals_without_roll(runner: TestRunner) -> void:
+	var playfield: Playfield = Playfield.new()
+	var ball: BallState = BallState.new_ball(4, BallState.Kind.COLOR, Vector2(120, 0))
+	ball.settled = true
+	playfield.balls.append(ball)
+	var orb := OrbNode.new()
+	orb.setup(ball)
+	playfield.add_child(orb)
+	var start_rotation := orb.rotation
+
+	playfield.rotate_settled(PI * 0.5)
+
+	runner.assert_true(absf(orb.rotation - start_rotation) > 0.001, "orb visual gravity direction updates after board rotation changes its position")
+	runner.assert_true(absf(wrapf(orb.rotation - PI, -PI, PI)) < 0.001, "orb below center points its heavy side toward center without extra rolling")
+	playfield.free()
+
+func test_orb_visual_defaults_to_center_gravity_rotation(runner: TestRunner) -> void:
+	var top_ball: BallState = BallState.new_ball(5, BallState.Kind.COLOR, Vector2(0, -120))
+	var right_ball: BallState = BallState.new_ball(6, BallState.Kind.COLOR, Vector2(120, 0))
+	var lower_right_ball: BallState = BallState.new_ball(7, BallState.Kind.COLOR, Vector2(120, 120))
+	var top_orb := OrbNode.new()
+	var right_orb := OrbNode.new()
+	var lower_right_orb := OrbNode.new()
+
+	top_orb.setup(top_ball)
+	right_orb.setup(right_ball)
+	lower_right_orb.setup(lower_right_ball)
+
+	runner.assert_true(absf(top_orb.rotation) < 0.001, "orb above center keeps default downward-heavy visual rotation")
+	runner.assert_true(absf(wrapf(right_orb.rotation - PI * 0.5, -PI, PI)) < 0.001, "orb right of center rotates its heavy side toward center")
+	runner.assert_true(absf(wrapf(lower_right_orb.rotation - right_orb.rotation, -PI, PI)) > 0.001, "different board positions produce different gravity-facing visual rotations")
+	top_orb.queue_free()
+	right_orb.queue_free()
+	lower_right_orb.queue_free()
+
 func test_playfield_rotation_ignores_falling_orbs_until_contact(runner: TestRunner) -> void:
 	var playfield: Playfield = Playfield.new()
 	var ball: BallState = BallState.new_ball(2, BallState.Kind.COLOR, Vector2(160, 0))
@@ -218,6 +308,23 @@ func test_playfield_rotation_ignores_falling_orbs_until_contact(runner: TestRunn
 
 	runner.assert_true(ball.position.distance_to(Vector2(160, 0)) < 0.001, "falling orb does not rotate before contact")
 	runner.assert_true(orb.position.distance_to(Vector2(160, 0)) < 0.001, "falling orb node does not rotate before contact")
+	playfield.free()
+
+func test_falling_orb_does_not_accumulate_roll_offset_before_contact(runner: TestRunner) -> void:
+	var playfield: Playfield = Playfield.new()
+	var ball: BallState = BallState.new_ball(8, BallState.Kind.COLOR, Vector2(220, 0))
+	ball.has_settle_target = true
+	ball.settle_target = Vector2.ZERO
+	ball.settled = false
+	ball.board_attached = false
+	playfield.balls.append(ball)
+	var orb := OrbNode.new()
+	orb.setup(ball)
+	playfield.add_child(orb)
+
+	orb._process(1.0 / 60.0)
+
+	runner.assert_eq(ball.visual_rotation, 0.0, "falling movement before contact does not accumulate roll offset")
 	playfield.free()
 
 func test_playfield_rotation_carries_contacted_board_orbs(runner: TestRunner) -> void:
@@ -333,6 +440,7 @@ func test_incoming_orb_slides_when_single_contact_does_not_support_center_gravit
 	var incoming_node: OrbNode = playfield.get_child(1) as OrbNode
 	var previous_position := incoming.position
 	var largest_step := 0.0
+	var starting_roll := incoming.visual_rotation
 	for i in range(20):
 		incoming_node._process(1.0 / 60.0)
 		largest_step = maxf(largest_step, incoming.position.distance_to(previous_position))
@@ -341,7 +449,35 @@ func test_incoming_orb_slides_when_single_contact_does_not_support_center_gravit
 	runner.assert_true(not incoming.settled, "off-center single contact keeps sliding instead of locking")
 	runner.assert_true(incoming.position.length() < 180.0, "sliding contact still moves the orb inward")
 	runner.assert_true(largest_step <= 3.0, "contact slide is friction-limited instead of slippery")
+	runner.assert_true(absf(incoming.visual_rotation - starting_roll) > 0.001, "contact sliding accumulates visual roll offset")
 	_remove_playfield_from_tree(playfield)
+
+func test_contact_slide_roll_direction_changes_with_tangent_direction(runner: TestRunner) -> void:
+	var left_playfield := _add_playfield_to_tree()
+	var left_blocker: BallState = BallState.new_ball(60, BallState.Kind.COLOR, Vector2(-118, 24))
+	left_blocker.settled = true
+	left_playfield.add_ball(left_blocker)
+	var left_incoming: BallState = BallState.new_ball(61, BallState.Kind.COLOR, Vector2(-180, 0))
+	left_playfield.add_ball(left_incoming)
+	var left_node: OrbNode = left_playfield.get_child(1) as OrbNode
+	for i in range(20):
+		left_node._process(1.0 / 60.0)
+	var left_roll := left_incoming.visual_rotation
+	_remove_playfield_from_tree(left_playfield)
+
+	var right_playfield := _add_playfield_to_tree()
+	var right_blocker: BallState = BallState.new_ball(62, BallState.Kind.COLOR, Vector2(118, 24))
+	right_blocker.settled = true
+	right_playfield.add_ball(right_blocker)
+	var right_incoming: BallState = BallState.new_ball(63, BallState.Kind.COLOR, Vector2(180, 0))
+	right_playfield.add_ball(right_incoming)
+	var right_node: OrbNode = right_playfield.get_child(1) as OrbNode
+	for i in range(20):
+		right_node._process(1.0 / 60.0)
+	var right_roll := right_incoming.visual_rotation
+	_remove_playfield_from_tree(right_playfield)
+
+	runner.assert_true(left_roll * right_roll < 0.0, "opposite tangent slide directions roll in opposite visual directions")
 
 func test_two_point_contact_supports_settled_orb(runner: TestRunner) -> void:
 	var playfield := _add_playfield_to_tree()
@@ -467,6 +603,28 @@ func test_orb_node_uses_danger_color_for_reachable_hazard_state(runner: TestRunn
 		runner.assert_eq(orb.current_fill_color(), Color(0.9, 0.18, 0.2), "danger hazards draw with the red fill color")
 	orb.queue_free()
 
+func test_warning_hazard_draws_without_value_label(runner: TestRunner) -> void:
+	var hazard: BallState = BallState.new_ball(87, BallState.Kind.HAZARD, Vector2.ZERO)
+	hazard.hazard_phase = BallState.HazardPhase.WARNING
+	hazard.value = 5
+	var orb := OrbNode.new()
+	orb.setup(hazard)
+
+	runner.assert_eq(orb.display_label(), "", "warning hazards do not draw damage numbers")
+	orb.queue_free()
+
+func test_color_orb_draws_without_value_label(runner: TestRunner) -> void:
+	var color_ball: BallState = BallState.new_ball(89, BallState.Kind.COLOR, Vector2.ZERO)
+	color_ball.color_id = 1
+	color_ball.value = 0
+	var orb := OrbNode.new()
+	orb.setup(color_ball)
+
+	runner.assert_true(orb.has_method("display_label"), "orb node exposes display label rules")
+	if orb.has_method("display_label"):
+		runner.assert_eq(orb.display_label(), "", "color orbs do not draw numeric value labels")
+	orb.queue_free()
+
 func _add_playfield_to_tree() -> Playfield:
 	var playfield: Playfield = Playfield.new()
 	var tree := Engine.get_main_loop() as SceneTree
@@ -477,3 +635,10 @@ func _remove_playfield_from_tree(playfield: Playfield) -> void:
 	if playfield.get_parent() != null:
 		playfield.get_parent().remove_child(playfield)
 	playfield.queue_free()
+
+func _new_hazard_tuning(runner: TestRunner):
+	var script: Script = load("res://src/config/hazard_tuning.gd")
+	runner.assert_true(script != null, "hazard tuning resource script exists")
+	if script == null:
+		return null
+	return script.new()

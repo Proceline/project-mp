@@ -52,6 +52,8 @@ func display_label() -> String:
 	if state.kind == BallState.Kind.COMBAT:
 		return LABELS.get(state.combat_kind, "")
 	if state.kind == BallState.Kind.HAZARD:
+		if state.hazard_phase == BallState.HazardPhase.WARNING:
+			return ""
 		return str(state.value)
 	return ""
 

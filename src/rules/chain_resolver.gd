@@ -91,8 +91,6 @@ func apply_chain_influence(chains: Array, balls: Array[BallState]) -> void:
 
 		if target.kind == BallState.Kind.COMBAT:
 			target.value += total
-		elif target.kind == BallState.Kind.HAZARD:
-			target.value = max(target.value - total, 0)
 
 func apply_chain_influence_growth(chains: Array, balls: Array[BallState]) -> void:
 	var deltas: Array[int] = []
@@ -119,8 +117,6 @@ func apply_chain_influence_growth(chains: Array, balls: Array[BallState]) -> voi
 
 		if target.kind == BallState.Kind.COMBAT:
 			target.value += total
-		elif target.kind == BallState.Kind.HAZARD:
-			target.value = max(target.value - total, 0)
 
 	for i in range(chains.size()):
 		chains[i]["applied_strength"] = int(chains[i].get("applied_strength", 0)) + deltas[i]
@@ -155,7 +151,7 @@ func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictiona
 			result.heal += ball.value
 		result.removed_ball_ids.append(ball.id)
 	for ball in balls:
-		if ball.kind != BallState.Kind.HAZARD or ball.value > 0:
+		if ball.kind != BallState.Kind.HAZARD:
 			continue
 		if not ball.is_on_board():
 			continue
@@ -164,7 +160,7 @@ func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictiona
 		result.removed_ball_ids.append(ball.id)
 		if ball.hazard_phase == BallState.HazardPhase.DANGER:
 			result.hazard_removed_in_danger.append(ball.id)
-			result.player_damage += max(ball.hazard_damage, 1)
+			result.player_damage += max(ball.value, 1)
 		else:
 			result.hazard_removed_in_warning.append(ball.id)
 	return result

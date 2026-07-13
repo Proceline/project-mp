@@ -73,20 +73,21 @@ func test_combat_orb_stacks_from_multiple_chains(runner) -> void:
 	resolver.apply_chain_influence([chain_a, chain_b], [combat])
 	runner.assert_eq(combat.value, 11, "combat value stacks from both chains")
 
-func test_hazard_orb_reduces_from_multiple_chains(runner) -> void:
+func test_hazard_orb_value_is_not_reduced_by_chain_influence(runner) -> void:
 	var resolver := ChainResolver.new()
 	var hazard := _hazard_ball(200, 15, Vector2(80, 0))
+	hazard.hazard_phase = BallState.HazardPhase.DANGER
 	var chain_a: Dictionary = {"color_id": 1, "members": [], "strength": 4}
 	var chain_b: Dictionary = {"color_id": 2, "members": [], "strength": 5}
 	for i in range(5):
 		chain_a.members.append(_color_ball(i, 1, Vector2(i * 30, -20)))
 		chain_b.members.append(_color_ball(20 + i, 2, Vector2(i * 30, 20)))
 	resolver.apply_chain_influence([chain_a, chain_b], [hazard])
-	runner.assert_eq(hazard.value, 6, "hazard value is reduced by both chains")
+	runner.assert_eq(hazard.value, 15, "hazard visible damage value is not reduced by chain influence")
 
-func test_board_attached_hazard_reduces_and_clears_before_locking(runner) -> void:
+func test_board_attached_warning_hazard_clears_before_locking(runner) -> void:
 	var resolver := ChainResolver.new()
-	var hazard := _hazard_ball(202, 5, Vector2(80, 0))
+	var hazard := _hazard_ball(202, 0, Vector2(80, 0))
 	hazard.settled = false
 	hazard.board_attached = true
 	hazard.hazard_phase = BallState.HazardPhase.WARNING
@@ -97,10 +98,9 @@ func test_board_attached_hazard_reduces_and_clears_before_locking(runner) -> voi
 	resolver.apply_chain_influence([chain], [hazard])
 	var result := resolver.resolve_finished_chains([chain], [hazard])
 
-	runner.assert_eq(hazard.value, 0, "board-attached hazard can be reduced before it fully locks")
 	runner.assert_true(result.removed_ball_ids.has(202), "board-attached cleared hazard is removed")
 
-func test_unsettled_hazard_is_not_reduced_by_chain(runner) -> void:
+func test_unsettled_hazard_is_not_cleared_by_chain(runner) -> void:
 	var resolver := ChainResolver.new()
 	var hazard := _hazard_ball(201, 5, Vector2(80, 0))
 	hazard.settled = false
