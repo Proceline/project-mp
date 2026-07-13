@@ -2,8 +2,8 @@
 
 ## Current Stable Prototype Node
 
-- Stable checkpoint: `e677369 feat: tune hazards and orb rolling visuals`
-- This is the current rollback/reference point for the Godot prototype after the v04 runtime orb visual pass, chain/pacing rule pass, hazard lifecycle tuning, and orb visual rotation pass: baseline color-chain boss damage, flashing chains that absorb late same-color members with tunable timer extension, configurable color-orb generation, tuned warning/danger hazard behavior, contact-only rolling visual offsets, a separate tactical combat orb queue, shared-queue hazard/fast-drop behavior, themed board/background rendering, and v04 runtime orb body/glow sprites aligned to gameplay radius.
+- Stable checkpoint: `f2aaad6 fix: treat attached orbs as spawn blockers`
+- This is the current rollback/reference point for the Godot prototype after the v04 runtime orb visual pass, chain/pacing rule pass, hazard lifecycle tuning, orb visual rotation pass, and fast-drop spawn-lane stability pass: baseline color-chain boss damage, flashing chains that absorb late same-color members with tunable timer extension, configurable color-orb generation, tuned warning/danger hazard behavior, contact-only rolling visual offsets, a separate tactical combat orb queue, shared-queue hazard/fast-drop behavior, player fast-drop spawn-lane spacing that treats attached orbs as blockers, themed board/background rendering, and v04 runtime orb body/glow sprites aligned to gameplay radius.
 
 ## Project Context
 
@@ -36,6 +36,7 @@
 - Boss hazard events insert hazard orbs into the shared preview queue. They should not add hazards directly to the playfield.
 - Player fast-drop releases the current preview head, including hazard orbs.
 - Player fast-drop accelerates currently falling orbs, including hazard orbs, then immediately starts the next preview orb. It should not instantly settle or teleport the current orb.
+- Player-side fast-drop spawning uses spawn-lane clearance. New player orbs should be placed farther outward on the same entry ray when another orb already occupies the lane, including `board_attached && !settled` orbs.
 - The preview queue should render as orb icons, not text codes such as `C0` or `DMG5`.
 - Falling orbs move toward the center until they contact the core isolation ring or the orb pile.
 - Orb visuals face the center by default based on current board position. Falling movement and board rotation do not add roll offset; contact sliding adds signed roll offset based on tangent direction.
