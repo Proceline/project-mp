@@ -146,6 +146,32 @@ func test_player_fast_drop_accelerates_current_orb_and_starts_next(runner: TestR
 	runner.assert_true(second.has_settle_target and not second.settled, "next orb starts falling after fast drop")
 	_destroy_controller(controller)
 
+func test_repeated_fast_drop_keeps_new_player_orbs_out_of_occupied_spawn_lane(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.playfield.balls = []
+
+	controller.advance_player_orb_spawn(controller.player_auto_drop_seconds)
+	controller.handle_player_fast_drop()
+	controller.handle_player_fast_drop()
+
+	var active_orbs: Array[BallState] = []
+	for ball in controller.playfield.balls:
+		if ball.has_settle_target and not ball.settled and not ball.board_attached:
+			active_orbs.append(ball)
+
+	for i in range(active_orbs.size()):
+		for j in range(i + 1, active_orbs.size()):
+			var first := active_orbs[i]
+			var second := active_orbs[j]
+			var minimum_distance := first.radius + second.radius - 0.1
+			runner.assert_true(
+				first.position.distance_to(second.position) >= minimum_distance,
+				"repeated fast-drop release keeps active falling orbs from overlapping before board contact"
+			)
+	_destroy_controller(controller)
+
 func test_player_fast_drop_accelerates_falling_hazard(runner: TestRunner) -> void:
 	var controller := _instantiate_controller(runner)
 	if controller == null:

@@ -117,7 +117,15 @@ func _drop_next_queued_orb() -> void:
 	playfield.add_ball(ball)
 
 func _prepare_player_entry(ball: BallState) -> void:
-	ball.position = orb_tuning.player_spawn_position
+	var spawn_position := orb_tuning.player_spawn_position
+	if playfield != null:
+		spawn_position = playfield.clear_player_spawn_position(
+			spawn_position,
+			ball.radius,
+			orb_tuning.player_spawn_lane_padding,
+			orb_tuning.player_spawn_lane_max_steps
+		)
+	ball.position = spawn_position
 	ball.entry_duration_seconds = orb_tuning.player_entry_seconds
 
 func _queue_hazards_from_event(event: Dictionary) -> void:

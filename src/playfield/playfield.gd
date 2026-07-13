@@ -34,6 +34,16 @@ func add_ball(ball: BallState) -> void:
 	balls.append(ball)
 	_ensure_orb_node(ball)
 
+func clear_player_spawn_position(spawn_position: Vector2, radius: float, padding: float, max_steps: int = 8) -> Vector2:
+	var outward := _safe_direction(spawn_position)
+	var step_distance := radius * 2.0 + padding
+	var candidate := spawn_position
+	for step in range(maxi(max_steps, 1)):
+		if _spawn_position_has_clearance(candidate, radius, padding):
+			return candidate
+		candidate = spawn_position + outward * step_distance * float(step + 1)
+	return candidate
+
 func accelerate_active_orbs(target_seconds: float) -> int:
 	var accelerated_count := 0
 	for ball in balls:
@@ -125,6 +135,17 @@ func _assign_settle_target_if_needed(ball: BallState) -> void:
 	ball.settle_target = Vector2.ZERO
 	ball.has_settle_target = true
 	ball.settled = false
+
+func _spawn_position_has_clearance(candidate: Vector2, radius: float, padding: float) -> bool:
+	for other in balls:
+		if other.settled or other.board_attached:
+			continue
+		if not other.has_settle_target:
+			continue
+		var minimum_distance := radius + other.radius + padding
+		if candidate.distance_to(other.position) < minimum_distance:
+			return false
+	return true
 
 func resolve_incoming_motion(ball: BallState, proposed_position: Vector2) -> Dictionary:
 	var incoming_direction := _incoming_direction(ball, proposed_position)
