@@ -2,8 +2,8 @@
 
 ## Current Stable Prototype Node
 
-- Stable checkpoint: `c66aa03 art: add orb runtime v04 import metadata`
-- This is the current rollback/reference point for the Godot prototype after the v04 runtime orb visual pass and chain/pacing rule pass: baseline color-chain boss damage, flashing chains that absorb late same-color members with tunable timer extension, configurable color-orb generation, a separate tactical combat orb queue, shared-queue hazard/fast-drop behavior, themed board/background rendering, and v04 runtime orb body/glow sprites aligned to gameplay radius.
+- Stable checkpoint: `e677369 feat: tune hazards and orb rolling visuals`
+- This is the current rollback/reference point for the Godot prototype after the v04 runtime orb visual pass, chain/pacing rule pass, hazard lifecycle tuning, and orb visual rotation pass: baseline color-chain boss damage, flashing chains that absorb late same-color members with tunable timer extension, configurable color-orb generation, tuned warning/danger hazard behavior, contact-only rolling visual offsets, a separate tactical combat orb queue, shared-queue hazard/fast-drop behavior, themed board/background rendering, and v04 runtime orb body/glow sprites aligned to gameplay radius.
 
 ## Project Context
 
@@ -38,6 +38,7 @@
 - Player fast-drop accelerates currently falling orbs, including hazard orbs, then immediately starts the next preview orb. It should not instantly settle or teleport the current orb.
 - The preview queue should render as orb icons, not text codes such as `C0` or `DMG5`.
 - Falling orbs move toward the center until they contact the core isolation ring or the orb pile.
+- Orb visuals face the center by default based on current board position. Falling movement and board rotation do not add roll offset; contact sliding adds signed roll offset based on tangent direction.
 - Orbs touching the core isolation ring are locked.
 - A single orb support should not lock another orb unless the support is the core isolation ring; one-point ball support should slide inward when possible.
 - Releasing/recomputing unsupported locked orbs should generally happen after board-changing events such as chain clears or explosions, not as constant global jitter.
@@ -50,11 +51,11 @@
 - Combat orbs start at value `0`; nearby flashing color chains increase their value.
 - A combat orb near multiple flashing chains stacks all nearby chain contributions.
 - Hazard orbs have a value and phase:
-  - Warning phase: clearing removes it without player damage.
-  - Danger phase: clearing removes it and deals its stored player damage.
-  - If an on-board hazard orb moves outside the danger boundary, it explodes, is removed, and deals its stored damage.
+  - Warning phase starts when the hazard contacts the board. Warning hazards show no number, and clearing one removes it without player damage.
+  - Danger phase starts after the configured warning duration. Danger hazards start at the configured value, show that value, grow on the configured interval up to the configured cap, and clearing one deals damage equal to its visible value.
+  - If an on-board hazard orb moves outside the danger boundary, it explodes, is removed, and deals the configured boundary explosion damage.
 - Falling hazard orbs should not deal boundary damage before contacting the board.
-- Tunable orb values live in `data/orb_tuning.tres` through `src/config/orb_tuning.gd`; use this for preview insert index, entry angles, entry distance, entry duration, chain extension timing, and the configurable color generator resource.
+- Tunable orb values live in `data/orb_tuning.tres` through `src/config/orb_tuning.gd`; use this for preview insert index, entry angles, entry distance, entry duration, chain extension timing, the configurable color generator resource, and the hazard tuning resource (`data/hazard_tuning_default.tres` / `src/config/hazard_tuning.gd`).
 
 ## Verification Commands
 
