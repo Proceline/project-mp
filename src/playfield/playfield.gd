@@ -1,10 +1,6 @@
 extends Node2D
 class_name Playfield
 
-const BallState = preload("res://src/rules/ball_state.gd")
-const OrbNode = preload("res://src/playfield/orb_node.gd")
-const VisualTheme = preload("res://src/config/visual_theme.gd")
-const HazardTuning = preload("res://src/config/hazard_tuning.gd")
 const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astral_batch1.tres")
 const DEFAULT_HAZARD_TUNING: HazardTuning = preload("res://data/hazard_tuning_default.tres")
 
@@ -233,8 +229,8 @@ func _sweep_contacts(ball: BallState, proposed_position: Vector2) -> Array[Dicti
 		return earliest_contacts
 	return contacts
 
-func advance_orb_physics(delta: float) -> void:
-	if delta <= 0.0:
+func advance_orb_physics(_delta: float) -> void:
+	if _delta <= 0.0:
 		return
 	release_unsupported_orbs()
 
@@ -465,8 +461,8 @@ func _draw() -> void:
 		draw_line(inner, outer, Color(0.7, 0.9, 1.0, 0.85), 2.0)
 
 func _draw_centered_texture(texture: Texture2D, target_radius: float) -> void:
-	var size := texture.get_size()
-	if size.x <= 0.0 or size.y <= 0.0:
+	var texture_size := texture.get_size()
+	if texture_size.x <= 0.0 or texture_size.y <= 0.0:
 		return
 	var target_size := Vector2(target_radius * 2.0, target_radius * 2.0)
 	draw_texture_rect(texture, Rect2(-target_size * 0.5, target_size), false)

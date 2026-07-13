@@ -1,16 +1,5 @@
 extends RefCounted
 
-const BallState = preload("res://src/rules/ball_state.gd")
-const ActionBarVolleyMechanic = preload("res://src/boss/action_bar_volley_mechanic.gd")
-const BurstCounterMechanic = preload("res://src/boss/burst_counter_mechanic.gd")
-const BossController = preload("res://src/boss/boss_controller.gd")
-const GameController = preload("res://src/game_controller.gd")
-const HazardSpawner = preload("res://src/playfield/hazard_spawner.gd")
-const Playfield = preload("res://src/playfield/playfield.gd")
-const SpawnQueue = preload("res://src/playfield/spawn_queue.gd")
-const TacticalQueue = preload("res://src/playfield/tactical_queue.gd")
-const TestRunner = preload("res://tests/test_runner.gd")
-
 func test_chain_resolution_applies_effects_once_and_clears_orbs(runner: TestRunner) -> void:
 	var controller := _instantiate_controller(runner)
 	if controller == null:

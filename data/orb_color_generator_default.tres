@@ -6,4 +6,4 @@
 script = ExtResource("1_color_generator")
 mode = 0
 color_count = 4
-seed = 0
+random_seed = 0

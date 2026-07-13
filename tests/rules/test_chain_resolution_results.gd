@@ -1,8 +1,5 @@
 extends RefCounted
 
-const BallState = preload("res://src/rules/ball_state.gd")
-const ChainResolver = preload("res://src/rules/chain_resolver.gd")
-
 func test_finished_chain_converts_combat_values_to_results(runner) -> void:
 	var resolver := ChainResolver.new()
 	var attack: BallState = BallState.new_ball(20, BallState.Kind.COMBAT, Vector2(30, 0))

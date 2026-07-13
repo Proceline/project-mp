@@ -6,7 +6,7 @@ enum Mode { RANDOM, SEQUENCE }
 @export var mode: Mode = Mode.RANDOM
 @export var color_count: int = 4
 @export var sequence: PackedInt32Array = PackedInt32Array()
-@export var seed: int = 0
+@export var random_seed: int = 0
 
 var _rng := RandomNumberGenerator.new()
 var _sequence_index: int = 0
@@ -28,8 +28,8 @@ func reset() -> void:
 func _ensure_rng_seeded() -> void:
 	if _seed_applied:
 		return
-	if seed == 0:
+	if random_seed == 0:
 		_rng.randomize()
 	else:
-		_rng.seed = seed
+		_rng.seed = random_seed
 	_seed_applied = true

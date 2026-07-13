@@ -1,8 +1,6 @@
 extends RefCounted
 class_name ChainResolver
 
-const BallState = preload("res://src/rules/ball_state.gd")
-
 var neighbor_distance: float = 52.0
 var influence_distance: float = 72.0
 var minimum_chain_size: int = 5

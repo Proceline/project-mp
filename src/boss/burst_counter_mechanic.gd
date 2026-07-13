@@ -8,7 +8,7 @@ func on_player_damage(amount: int, controller: Object) -> void:
 	if amount >= burst_threshold:
 		controller.call("get_mechanic_state", self)["pending_counter"] = true
 
-func react_to_tick(events: Array, battle: BattleState, controller: Object) -> Array:
+func react_to_tick(events: Array, _battle: BattleState, controller: Object) -> Array:
 	var state: Dictionary = controller.call("get_mechanic_state", self)
 	if bool(state.get("pending_counter", false)) and _has_action_bar_event(events):
 		state["pending_counter"] = false

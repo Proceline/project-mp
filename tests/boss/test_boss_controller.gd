@@ -1,12 +1,5 @@
 extends RefCounted
 
-const BattleState = preload("res://src/rules/battle_state.gd")
-const BossController = preload("res://src/boss/boss_controller.gd")
-const ActionBarVolleyMechanic = preload("res://src/boss/action_bar_volley_mechanic.gd")
-const HpPhaseMechanic = preload("res://src/boss/hp_phase_mechanic.gd")
-const BurstCounterMechanic = preload("res://src/boss/burst_counter_mechanic.gd")
-const TestRunner = preload("res://tests/test_runner.gd")
-
 func test_action_bar_volley_emits_hazard_event(runner: TestRunner) -> void:
 	var battle := BattleState.new()
 	var boss := BossController.new()

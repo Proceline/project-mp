@@ -1,14 +1,5 @@
 extends RefCounted
 
-const BallState = preload("res://src/rules/ball_state.gd")
-const OrbTuning = preload("res://src/config/orb_tuning.gd")
-const SpawnQueue = preload("res://src/playfield/spawn_queue.gd")
-const TacticalQueue = preload("res://src/playfield/tactical_queue.gd")
-const HazardSpawner = preload("res://src/playfield/hazard_spawner.gd")
-const Playfield = preload("res://src/playfield/playfield.gd")
-const OrbNode = preload("res://src/playfield/orb_node.gd")
-const TestRunner = preload("res://tests/test_runner.gd")
-
 func test_spawn_queue_contains_only_player_side_orbs(runner: TestRunner) -> void:
 	var queue: SpawnQueue = SpawnQueue.new()
 	queue.seed_preview()

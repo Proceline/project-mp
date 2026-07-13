@@ -1,20 +1,6 @@
 extends Node2D
 class_name GameController
 
-const BattleState = preload("res://src/rules/battle_state.gd")
-const BossController = preload("res://src/boss/boss_controller.gd")
-const ActionBarVolleyMechanic = preload("res://src/boss/action_bar_volley_mechanic.gd")
-const HpPhaseMechanic = preload("res://src/boss/hp_phase_mechanic.gd")
-const BurstCounterMechanic = preload("res://src/boss/burst_counter_mechanic.gd")
-const SpawnQueue = preload("res://src/playfield/spawn_queue.gd")
-const TacticalQueue = preload("res://src/playfield/tactical_queue.gd")
-const HazardSpawner = preload("res://src/playfield/hazard_spawner.gd")
-const Playfield = preload("res://src/playfield/playfield.gd")
-const ChainResolver = preload("res://src/rules/chain_resolver.gd")
-const BattleUI = preload("res://src/ui/battle_ui.gd")
-const OrbTuning = preload("res://src/config/orb_tuning.gd")
-const VisualTheme = preload("res://src/config/visual_theme.gd")
-
 @onready var playfield: Playfield = %Playfield
 @onready var spawn_queue: SpawnQueue = %SpawnQueue
 @onready var tactical_queue: TacticalQueue = %TacticalQueue
@@ -206,7 +192,7 @@ func _remove_balls_by_id(ids: Array) -> void:
 	if removed_any:
 		playfield.release_unsupported_orbs()
 
-func _hazard_damage(ball: BallState) -> int:
+func _hazard_damage(_ball: BallState) -> int:
 	if orb_tuning != null and orb_tuning.hazard_tuning != null:
 		return orb_tuning.hazard_tuning.boundary_explosion_damage
 	return 3

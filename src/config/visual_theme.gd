@@ -1,8 +1,6 @@
 extends Resource
 class_name VisualTheme
 
-const BallState = preload("res://src/rules/ball_state.gd")
-
 @export_file("*.png") var battle_background_path: String
 @export_file("*.png") var astrolabe_base_path: String
 @export_file("*.png") var heartlight_core_path: String

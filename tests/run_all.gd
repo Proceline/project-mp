@@ -1,6 +1,5 @@
 extends SceneTree
 
-const TestRunner = preload("res://tests/test_runner.gd")
 const TestBattleState = preload("res://tests/rules/test_battle_state.gd")
 const TestChainResolver = preload("res://tests/rules/test_chain_resolver.gd")
 const TestChainResolutionResults = preload("res://tests/rules/test_chain_resolution_results.gd")

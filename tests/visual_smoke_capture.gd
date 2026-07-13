@@ -1,7 +1,5 @@
 extends SceneTree
 
-const BallState = preload("res://src/rules/ball_state.gd")
-
 func _initialize() -> void:
 	var packed := load("res://scenes/main.tscn")
 	var scene = packed.instantiate()

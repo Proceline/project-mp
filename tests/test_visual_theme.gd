@@ -1,11 +1,5 @@
 extends RefCounted
 
-const BallState = preload("res://src/rules/ball_state.gd")
-const BattleState = preload("res://src/rules/battle_state.gd")
-const PreviewOrbIcon = preload("res://src/ui/preview_orb_icon.gd")
-const VisualTheme = preload("res://src/config/visual_theme.gd")
-const TestRunner = preload("res://tests/test_runner.gd")
-
 func test_batch1_visual_theme_maps_orb_textures(runner: TestRunner) -> void:
 	var theme: VisualTheme = load("res://data/visual_theme_astral_batch1.tres")
 	runner.assert_true(theme != null, "batch 1 visual theme resource loads")

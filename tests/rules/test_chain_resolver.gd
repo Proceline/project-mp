@@ -1,8 +1,5 @@
 extends RefCounted
 
-const BallState = preload("res://src/rules/ball_state.gd")
-const ChainResolver = preload("res://src/rules/chain_resolver.gd")
-
 func _color_ball(id: int, color_id: int, pos: Vector2) -> BallState:
 	var ball: BallState = BallState.new_ball(id, BallState.Kind.COLOR, pos)
 	ball.color_id = color_id

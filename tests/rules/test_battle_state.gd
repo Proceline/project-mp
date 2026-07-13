@@ -1,7 +1,5 @@
 extends RefCounted
 
-const BattleState = preload("res://src/rules/battle_state.gd")
-
 func test_shield_absorbs_before_hp(runner) -> void:
 	var state := BattleState.new()
 	state.player_hp = 20

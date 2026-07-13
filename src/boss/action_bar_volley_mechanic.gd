@@ -5,7 +5,7 @@ class_name ActionBarVolleyMechanic
 @export var count: int = 1
 @export var value: int = 5
 
-func tick(delta: float, battle: BattleState, controller: Object) -> Array:
+func tick(delta: float, _battle: BattleState, controller: Object) -> Array:
 	var state: Dictionary = controller.call("get_mechanic_state", self)
 	var elapsed := float(state.get("elapsed", 0.0)) + delta
 	var events: Array = []

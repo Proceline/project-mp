@@ -1,8 +1,6 @@
 extends Control
 class_name PreviewOrbIcon
 
-const BallState = preload("res://src/rules/ball_state.gd")
-const VisualTheme = preload("res://src/config/visual_theme.gd")
 const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astral_batch1.tres")
 
 const SIZE := Vector2(34.0, 34.0)
@@ -41,8 +39,8 @@ func _draw() -> void:
 		return
 	var font := ThemeDB.fallback_font
 	var font_size := 9 if label.length() > 2 else 12
-	var size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size)
-	var baseline := center + Vector2(-size.x * 0.5, size.y * 0.35)
+	var text_size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size)
+	var baseline := center + Vector2(-text_size.x * 0.5, text_size.y * 0.35)
 	draw_string(font, baseline + Vector2(0.0, 1.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, Color.BLACK)
 	draw_string(font, baseline, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, Color.WHITE)
 

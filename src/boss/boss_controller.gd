@@ -1,9 +1,6 @@
 extends Node
 class_name BossController
 
-const BattleState = preload("res://src/rules/battle_state.gd")
-const BossMechanic = preload("res://src/boss/boss_mechanic.gd")
-
 var mechanics: Array[BossMechanic] = []
 var _mechanic_state: Dictionary = {}
 

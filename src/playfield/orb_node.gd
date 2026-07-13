@@ -1,8 +1,6 @@
 extends Node2D
 class_name OrbNode
 
-const BallState = preload("res://src/rules/ball_state.gd")
-const VisualTheme = preload("res://src/config/visual_theme.gd")
 const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astral_batch1.tres")
 
 var state: BallState
@@ -169,16 +167,16 @@ func current_glow_texture() -> Texture2D:
 		return null
 	return visual_theme.get_orb_glow_texture(state)
 
-func _draw_centered_texture(texture: Texture2D, target_radius: float, modulate: Color = Color.WHITE) -> void:
-	var size := texture.get_size()
-	if size.x <= 0.0 or size.y <= 0.0:
+func _draw_centered_texture(texture: Texture2D, target_radius: float, tint: Color = Color.WHITE) -> void:
+	var texture_size := texture.get_size()
+	if texture_size.x <= 0.0 or texture_size.y <= 0.0:
 		return
 	var target_size := Vector2(target_radius * 2.0, target_radius * 2.0)
 	var rect := Rect2(-target_size * 0.5, target_size)
-	draw_texture_rect(texture, rect, false, modulate)
+	draw_texture_rect(texture, rect, false, tint)
 
 func _draw_centered_text(font: Font, text: String, baseline: Vector2, font_size: int, color: Color) -> void:
 	if font == null or text.is_empty():
 		return
-	var size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size)
-	draw_string(font, baseline - Vector2(size.x * 0.5, 0.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, color)
+	var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size)
+	draw_string(font, baseline - Vector2(text_size.x * 0.5, 0.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, color)

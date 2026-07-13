@@ -1,8 +1,6 @@
 extends Node
 class_name TacticalQueue
 
-const BallState = preload("res://src/rules/ball_state.gd")
-const OrbTuning = preload("res://src/config/orb_tuning.gd")
 const DEFAULT_TUNING: OrbTuning = preload("res://data/orb_tuning.tres")
 
 var slots: Array[BallState] = []

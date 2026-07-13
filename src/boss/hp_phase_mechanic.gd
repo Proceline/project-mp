@@ -5,7 +5,7 @@ class_name HpPhaseMechanic
 @export var count: int = 3
 @export var value: int = 8
 
-func tick(delta: float, battle: BattleState, controller: Object) -> Array:
+func tick(_delta: float, battle: BattleState, controller: Object) -> Array:
 	var state: Dictionary = controller.call("get_mechanic_state", self)
 	if bool(state.get("fired", false)):
 		return []

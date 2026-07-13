@@ -1,10 +1,5 @@
 extends RefCounted
 
-const BallState = preload("res://src/rules/ball_state.gd")
-const BattleState = preload("res://src/rules/battle_state.gd")
-const PreviewOrbIcon = preload("res://src/ui/preview_orb_icon.gd")
-const TestRunner = preload("res://tests/test_runner.gd")
-
 func test_main_scene_loads(runner: TestRunner) -> void:
 	var packed := load("res://scenes/main.tscn")
 	runner.assert_true(packed != null, "main scene resource loads")

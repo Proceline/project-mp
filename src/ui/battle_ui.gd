@@ -1,10 +1,6 @@
 extends CanvasLayer
 class_name BattleUI
 
-const BallState = preload("res://src/rules/ball_state.gd")
-const BattleState = preload("res://src/rules/battle_state.gd")
-const PreviewOrbIcon = preload("res://src/ui/preview_orb_icon.gd")
-const VisualTheme = preload("res://src/config/visual_theme.gd")
 const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astral_batch1.tres")
 
 @export var visual_theme: VisualTheme = DEFAULT_VISUAL_THEME
