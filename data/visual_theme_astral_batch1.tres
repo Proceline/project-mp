@@ -5,7 +5,10 @@
 [resource]
 script = ExtResource("1_visualtheme")
 battle_background_path = "res://assets/art/backgrounds/battle/astral_watercolor_layout_bg_v05.png"
-boss_hp_bar_frame_path = "res://assets/art/ui/boss/boss_hp_bar_frame_v05.png"
+boss_hp_bar_frame_path = "res://assets/art/ui/boss/boss_hp_bar_frame_v08_stacked_action.png"
+boss_action_bar_fill_path = "res://assets/art/ui/boss/action_bar/boss_action_bar_fill_v04_stacked.png"
+boss_action_bar_fill_warning_path = "res://assets/art/ui/boss/action_bar/boss_action_bar_fill_warning_v04_stacked.png"
+boss_action_bar_glow_path = "res://assets/art/ui/boss/action_bar/boss_action_bar_glow_v04_stacked.png"
 vertical_queue_frame_path = "res://assets/art/ui/queue/vertical_orb_queue_frame_v05.png"
 player_portrait_path = "res://assets/art/player/duelist/player_duelist_idle_v05.png"
 boss_portrait_path = "res://assets/art/boss/veiled_seraph/veiled_seraph_idle_v05.png"

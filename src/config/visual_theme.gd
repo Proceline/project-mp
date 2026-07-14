@@ -3,6 +3,9 @@ class_name VisualTheme
 
 @export_file("*.png") var battle_background_path: String
 @export_file("*.png") var boss_hp_bar_frame_path: String
+@export_file("*.png") var boss_action_bar_fill_path: String
+@export_file("*.png") var boss_action_bar_fill_warning_path: String
+@export_file("*.png") var boss_action_bar_glow_path: String
 @export_file("*.png") var vertical_queue_frame_path: String
 @export_file("*.png") var player_portrait_path: String
 @export_file("*.png") var boss_portrait_path: String
@@ -46,6 +49,15 @@ func battle_background() -> Texture2D:
 
 func boss_hp_bar_frame() -> Texture2D:
 	return _texture_from_path(boss_hp_bar_frame_path)
+
+func boss_action_bar_fill() -> Texture2D:
+	return _texture_from_path(boss_action_bar_fill_path)
+
+func boss_action_bar_fill_warning() -> Texture2D:
+	return _texture_from_path(boss_action_bar_fill_warning_path)
+
+func boss_action_bar_glow() -> Texture2D:
+	return _texture_from_path(boss_action_bar_glow_path)
 
 func vertical_queue_frame() -> Texture2D:
 	return _texture_from_path(vertical_queue_frame_path)

@@ -15,10 +15,15 @@ const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astra
 @onready var boss_hp_label: Label = %BossHP
 @onready var boss_action_bar: ProgressBar = %BossActionBar
 @onready var boss_hp_missing: ColorRect = %BossHPMissing
-@onready var boss_action_pips: HBoxContainer = %BossActionPips
+@onready var boss_action_fill: TextureProgressBar = %BossActionFill
+@onready var boss_action_glow: TextureRect = %BossActionGlow
 @onready var preview_row: BoxContainer = %PreviewRow
 @onready var tactical_row: BoxContainer = %TacticalRow
 @onready var status_label: Label = %Status
+
+const BOSS_HP_FILL_X := 197.0
+const BOSS_HP_FILL_WIDTH := 577.0
+const BOSS_ACTION_WARNING_THRESHOLD := 0.85
 
 func _ready() -> void:
 	apply_visual_theme()
@@ -29,6 +34,10 @@ func apply_visual_theme() -> void:
 	battle_background.texture = visual_theme.battle_background()
 	if boss_hp_frame != null:
 		boss_hp_frame.texture = visual_theme.boss_hp_bar_frame()
+	if boss_action_fill != null:
+		boss_action_fill.texture_progress = visual_theme.boss_action_bar_fill()
+	if boss_action_glow != null:
+		boss_action_glow.texture = visual_theme.boss_action_bar_glow()
 	if queue_frame != null:
 		queue_frame.texture = visual_theme.vertical_queue_frame()
 	if player_portrait != null:
@@ -48,7 +57,7 @@ func update_from_state(battle: BattleState, boss_action_ratio: float, preview: A
 	boss_action_bar.visible = false
 	boss_action_bar.value = 0.0
 	_update_boss_hp_mask(battle)
-	_update_boss_action_pips(boss_action_ratio)
+	_update_boss_action_bar(boss_action_ratio)
 	_update_icon_row(preview_row, preview)
 	_update_icon_row(tactical_row, tactical)
 	status_label.text = ""
@@ -69,31 +78,21 @@ func _update_boss_hp_mask(battle: BattleState) -> void:
 		return
 	var max_hp: int = max(battle.boss_max_hp, 1)
 	var hp_ratio := clampf(float(battle.boss_hp) / float(max_hp), 0.0, 1.0)
-	var full_width: float = 520.0
+	var full_width: float = BOSS_HP_FILL_WIDTH
 	var missing_width := full_width * (1.0 - hp_ratio)
 	boss_hp_missing.visible = missing_width > 0.5
 	boss_hp_missing.size.x = missing_width
-	boss_hp_missing.position.x = 170.0 + full_width - missing_width
+	boss_hp_missing.position.x = BOSS_HP_FILL_X + full_width - missing_width
 
-func _update_boss_action_pips(boss_action_ratio: float) -> void:
-	if boss_action_pips == null:
+func _update_boss_action_bar(boss_action_ratio: float) -> void:
+	if boss_action_fill == null:
 		return
-	for child in boss_action_pips.get_children():
-		boss_action_pips.remove_child(child)
-		child.queue_free()
-	var pip_count: int = int(ceil(clampf(boss_action_ratio, 0.0, 1.0) * 7.0))
-	for i in range(pip_count):
-		boss_action_pips.add_child(_new_boss_action_pip())
-
-func _new_boss_action_pip() -> TextureRect:
-	var pip := TextureRect.new()
-	pip.custom_minimum_size = Vector2(19.0, 19.0)
-	pip.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	pip.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	pip.modulate = Color(1, 1, 1, 0.92)
+	var ratio := clampf(boss_action_ratio, 0.0, 1.0)
+	boss_action_fill.visible = ratio > 0.001
+	boss_action_fill.value = ratio * 100.0
 	if visual_theme != null:
-		var hazard := BallState.new_ball(-1, BallState.Kind.HAZARD, Vector2.ZERO)
-		hazard.hazard_phase = BallState.HazardPhase.DANGER
-		hazard.value = 1
-		pip.texture = visual_theme.get_orb_texture(hazard)
-	return pip
+		boss_action_fill.texture_progress = visual_theme.boss_action_bar_fill_warning() if ratio >= BOSS_ACTION_WARNING_THRESHOLD else visual_theme.boss_action_bar_fill()
+	if boss_action_glow != null:
+		boss_action_glow.visible = ratio >= BOSS_ACTION_WARNING_THRESHOLD
+		if visual_theme != null:
+			boss_action_glow.texture = visual_theme.boss_action_bar_glow()
