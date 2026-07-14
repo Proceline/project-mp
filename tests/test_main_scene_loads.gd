@@ -29,8 +29,8 @@ func test_preview_renders_orb_icons_instead_of_code_text(runner: TestRunner) -> 
 	tree.root.add_child(scene)
 	var battle_ui = scene.get_node("%BattleUI")
 	var preview_label: Label = scene.get_node("%Preview")
-	var preview_row: HBoxContainer = scene.get_node("%PreviewRow")
-	var tactical_row: HBoxContainer = scene.get_node("%TacticalRow")
+	var preview_row: BoxContainer = scene.get_node("%PreviewRow")
+	var tactical_row: BoxContainer = scene.get_node("%TacticalRow")
 	battle_ui.player_hp_label = scene.get_node("%PlayerHP")
 	battle_ui.shield_marks_label = scene.get_node("%ShieldMarks")
 	battle_ui.boss_hp_label = scene.get_node("%BossHP")
@@ -80,6 +80,38 @@ func test_tactical_row_renders_separate_combat_icons(runner: TestRunner) -> void
 
 	runner.assert_eq(battle_ui.tactical_label.text, "Tactic:", "tactical row has a separate label")
 	runner.assert_eq(battle_ui.tactical_row.get_child_count(), 1, "tactical row renders combat slots separately")
+	scene.queue_free()
+
+func test_v05_layout_uses_top_boss_hp_and_vertical_queues(runner: TestRunner) -> void:
+	var packed := load("res://scenes/main.tscn")
+	var scene: Node = packed.instantiate()
+	var tree := Engine.get_main_loop() as SceneTree
+	tree.root.add_child(scene)
+
+	var boss_hp_frame := scene.get_node("BattleUI/BossHPFrame") as TextureRect
+	var queue_frame := scene.get_node("BattleUI/QueueFrame") as TextureRect
+	var boss_portrait := scene.get_node("BattleUI/BossPortrait") as TextureRect
+	var player_portrait := scene.get_node("BattleUI/PlayerPortrait") as TextureRect
+	var preview_row := scene.get_node("%PreviewRow")
+	var tactical_row := scene.get_node("%TacticalRow")
+	var boss_hp := scene.get_node("%BossHP") as Label
+	var playfield := scene.get_node("%Playfield") as Node2D
+	var battle_ui = scene.get_node("%BattleUI")
+	battle_ui.battle_background = scene.get_node("%BattleBackground")
+	battle_ui.boss_hp_frame = boss_hp_frame
+	battle_ui.queue_frame = queue_frame
+	battle_ui.boss_portrait = boss_portrait
+	battle_ui.player_portrait = player_portrait
+	battle_ui.apply_visual_theme()
+
+	runner.assert_true(boss_hp_frame != null and boss_hp_frame.texture != null, "v05 layout has a top boss HP art frame")
+	runner.assert_true(queue_frame != null and queue_frame.texture != null, "v05 layout has a vertical queue art frame")
+	runner.assert_true(boss_portrait != null and boss_portrait.texture != null, "v05 layout has a boss portrait")
+	runner.assert_true(player_portrait != null and player_portrait.texture != null, "v05 layout has a player portrait")
+	runner.assert_true(preview_row is VBoxContainer, "main preview queue is vertical")
+	runner.assert_true(tactical_row is VBoxContainer, "tactical queue is vertical")
+	runner.assert_true(boss_hp.position.y < 80.0, "boss HP text is placed near the top bar")
+	runner.assert_true(playfield.position.x > 430.0 and playfield.position.x < 700.0, "playfield sits near the center after v05 layout shift")
 	scene.queue_free()
 
 func test_preview_warning_hazard_draws_without_value_label(runner: TestRunner) -> void:

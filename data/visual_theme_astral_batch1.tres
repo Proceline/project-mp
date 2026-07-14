@@ -4,11 +4,15 @@
 
 [resource]
 script = ExtResource("1_visualtheme")
-battle_background_path = "res://assets/art/backgrounds/battle/astral_battle_background_v01.png"
+battle_background_path = "res://assets/art/backgrounds/battle/astral_watercolor_layout_bg_v05.png"
+boss_hp_bar_frame_path = "res://assets/art/ui/boss/boss_hp_bar_frame_v05.png"
+vertical_queue_frame_path = "res://assets/art/ui/queue/vertical_orb_queue_frame_v05.png"
+player_portrait_path = "res://assets/art/player/duelist/player_duelist_idle_v05.png"
+boss_portrait_path = "res://assets/art/boss/veiled_seraph/veiled_seraph_idle_v05.png"
 astrolabe_base_path = "res://assets/art/board/astrolabe/resonance_astrolabe_base_v01.png"
-heartlight_core_path = "res://assets/art/board/core/heartlight_core_hp_v01.png"
+heartlight_core_path = "res://assets/art/board/core/heartlight_core_painted_v05.png"
 shield_ring_path = "res://assets/art/board/shield/shield_ring_segments_v01.png"
-collapse_boundary_path = "res://assets/art/board/boundary/collapse_boundary_v01.png"
+collapse_boundary_path = "res://assets/art/board/boundary/collapse_boundary_painted_v05.png"
 color_orb_red_path = "res://assets/art/orbs/star/star_orb_red_body_v04.png"
 color_orb_blue_path = "res://assets/art/orbs/star/star_orb_blue_body_v04.png"
 color_orb_gold_path = "res://assets/art/orbs/star/star_orb_gold_body_v04.png"

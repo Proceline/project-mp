@@ -38,6 +38,19 @@ func test_batch1_visual_theme_uses_v04_body_and_glow_paths(runner: TestRunner) -
 	runner.assert_true(theme.get_orb_glow_texture(attack) != null, "theme maps attack combat orb glow texture separately")
 	runner.assert_true(theme.get_orb_glow_texture(danger) != null, "theme maps danger eclipse orb glow texture separately")
 
+func test_layout_v05_visual_theme_maps_screen_assets(runner: TestRunner) -> void:
+	var theme: VisualTheme = load("res://data/visual_theme_astral_batch1.tres")
+	runner.assert_true(theme != null, "visual theme resource loads for v05 layout checks")
+	if theme == null:
+		return
+	runner.assert_true(theme.battle_background_path.ends_with("astral_watercolor_layout_bg_v05.png"), "v05 layout uses watercolor battle background")
+	runner.assert_true(theme.heartlight_core_path.ends_with("heartlight_core_painted_v05.png"), "v05 layout uses painted heartlight core")
+	runner.assert_true(theme.collapse_boundary_path.ends_with("collapse_boundary_painted_v05.png"), "v05 layout uses painted collapse boundary")
+	runner.assert_true(theme.boss_hp_bar_frame() != null, "v05 layout maps boss HP bar frame")
+	runner.assert_true(theme.vertical_queue_frame() != null, "v05 layout maps vertical queue frame")
+	runner.assert_true(theme.player_portrait() != null, "v05 layout maps player portrait")
+	runner.assert_true(theme.boss_portrait() != null, "v05 layout maps boss portrait")
+
 func test_preview_icons_receive_theme_from_battle_ui(runner: TestRunner) -> void:
 	var packed := load("res://scenes/main.tscn")
 	var scene: Node = packed.instantiate()

@@ -6,14 +6,18 @@ const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astra
 @export var visual_theme: VisualTheme = DEFAULT_VISUAL_THEME
 
 @onready var battle_background: TextureRect = %BattleBackground
+@onready var boss_hp_frame: TextureRect = %BossHPFrame
+@onready var queue_frame: TextureRect = %QueueFrame
+@onready var player_portrait: TextureRect = %PlayerPortrait
+@onready var boss_portrait: TextureRect = %BossPortrait
 @onready var player_hp_label: Label = %PlayerHP
 @onready var shield_marks_label: Label = %ShieldMarks
 @onready var boss_hp_label: Label = %BossHP
 @onready var boss_action_bar: ProgressBar = %BossActionBar
 @onready var preview_label: Label = %Preview
-@onready var preview_row: HBoxContainer = %PreviewRow
+@onready var preview_row: BoxContainer = %PreviewRow
 @onready var tactical_label: Label = %Tactical
-@onready var tactical_row: HBoxContainer = %TacticalRow
+@onready var tactical_row: BoxContainer = %TacticalRow
 @onready var status_label: Label = %Status
 
 func _ready() -> void:
@@ -23,6 +27,14 @@ func apply_visual_theme() -> void:
 	if battle_background == null or visual_theme == null:
 		return
 	battle_background.texture = visual_theme.battle_background()
+	if boss_hp_frame != null:
+		boss_hp_frame.texture = visual_theme.boss_hp_bar_frame()
+	if queue_frame != null:
+		queue_frame.texture = visual_theme.vertical_queue_frame()
+	if player_portrait != null:
+		player_portrait.texture = visual_theme.player_portrait()
+	if boss_portrait != null:
+		boss_portrait.texture = visual_theme.boss_portrait()
 
 func update_from_state(battle: BattleState, boss_action_ratio: float, preview: Array[BallState], tactical: Array[BallState] = []) -> void:
 	player_hp_label.text = str(battle.player_hp)
@@ -40,7 +52,7 @@ func update_from_state(battle: BattleState, boss_action_ratio: float, preview: A
 	_update_icon_row(tactical_row, tactical)
 	status_label.text = battle.result()
 
-func _update_icon_row(row: HBoxContainer, orbs: Array[BallState]) -> void:
+func _update_icon_row(row: BoxContainer, orbs: Array[BallState]) -> void:
 	for child in row.get_children():
 		row.remove_child(child)
 		child.queue_free()

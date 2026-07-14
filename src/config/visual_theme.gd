@@ -2,6 +2,10 @@ extends Resource
 class_name VisualTheme
 
 @export_file("*.png") var battle_background_path: String
+@export_file("*.png") var boss_hp_bar_frame_path: String
+@export_file("*.png") var vertical_queue_frame_path: String
+@export_file("*.png") var player_portrait_path: String
+@export_file("*.png") var boss_portrait_path: String
 @export_file("*.png") var astrolabe_base_path: String
 @export_file("*.png") var heartlight_core_path: String
 @export_file("*.png") var shield_ring_path: String
@@ -35,6 +39,18 @@ var _texture_cache: Dictionary = {}
 
 func battle_background() -> Texture2D:
 	return _texture_from_path(battle_background_path)
+
+func boss_hp_bar_frame() -> Texture2D:
+	return _texture_from_path(boss_hp_bar_frame_path)
+
+func vertical_queue_frame() -> Texture2D:
+	return _texture_from_path(vertical_queue_frame_path)
+
+func player_portrait() -> Texture2D:
+	return _texture_from_path(player_portrait_path)
+
+func boss_portrait() -> Texture2D:
+	return _texture_from_path(boss_portrait_path)
 
 func astrolabe_base() -> Texture2D:
 	return _texture_from_path(astrolabe_base_path)
