@@ -433,36 +433,40 @@ func _incoming_direction(ball: BallState, fallback_position: Vector2) -> Vector2
 	return source.normalized()
 
 func _draw() -> void:
+	var astrolabe_alpha := visual_theme.astrolabe_base_alpha if visual_theme != null else 1.0
+	var boundary_alpha := visual_theme.collapse_boundary_alpha if visual_theme != null else 1.0
+	var core_alpha := visual_theme.core_art_alpha if visual_theme != null else 1.0
+	var guide_alpha := visual_theme.board_guide_alpha if visual_theme != null else 1.0
 	var astrolabe_texture := visual_theme.astrolabe_base() if visual_theme != null else null
 	if astrolabe_texture != null:
-		_draw_centered_texture(astrolabe_texture, visual_theme.board_art_radius)
+		_draw_centered_texture(astrolabe_texture, visual_theme.board_art_radius, Color(1, 1, 1, astrolabe_alpha))
 	else:
 		draw_circle(Vector2.ZERO, danger_radius, Color(0.9, 0.1, 0.1, 0.12))
 	var boundary_texture := visual_theme.collapse_boundary() if visual_theme != null else null
 	if boundary_texture != null:
-		_draw_centered_texture(boundary_texture, danger_radius)
+		_draw_centered_texture(boundary_texture, danger_radius, Color(1, 1, 1, boundary_alpha))
 	else:
 		draw_arc(Vector2.ZERO, danger_radius, 0.0, TAU, 128, Color(0.9, 0.2, 0.2), 3.0)
-	draw_arc(Vector2.ZERO, danger_radius * 0.72, 0.0, TAU, 128, Color(0.2, 0.8, 1.0), 2.0)
+	draw_arc(Vector2.ZERO, danger_radius * 0.72, 0.0, TAU, 128, Color(0.2, 0.8, 1.0, 0.45 * guide_alpha), 2.0)
 	var core_texture := visual_theme.heartlight_core() if visual_theme != null else null
 	if core_texture != null:
-		_draw_centered_texture(core_texture, visual_theme.core_art_radius)
+		_draw_centered_texture(core_texture, visual_theme.core_art_radius, Color(1, 1, 1, core_alpha))
 	else:
 		draw_circle(Vector2.ZERO, core_radius, Color(0.02, 0.03, 0.07, 0.78))
 	var shield_texture := visual_theme.shield_ring() if visual_theme != null else null
 	if shield_texture != null:
-		_draw_centered_texture(shield_texture, visual_theme.core_art_radius + 14.0)
-	draw_arc(Vector2.ZERO, core_collision_radius, 0.0, TAU, 96, Color(0.95, 0.95, 1.0, 0.9), 4.0)
-	draw_arc(Vector2.ZERO, core_collision_radius + 10.0, 0.0, TAU, 96, Color(0.5, 0.75, 1.0, 0.7), 2.0)
+		_draw_centered_texture(shield_texture, visual_theme.core_art_radius + 14.0, Color(1, 1, 1, guide_alpha))
+	draw_arc(Vector2.ZERO, core_collision_radius, 0.0, TAU, 96, Color(0.95, 0.95, 1.0, 0.75 * guide_alpha), 4.0)
+	draw_arc(Vector2.ZERO, core_collision_radius + 10.0, 0.0, TAU, 96, Color(0.5, 0.75, 1.0, 0.45 * guide_alpha), 2.0)
 	for i in range(12):
 		var angle := TAU * float(i) / 12.0
 		var inner := Vector2(cos(angle), sin(angle)) * 42.0
 		var outer := Vector2(cos(angle), sin(angle)) * (core_collision_radius - 8.0)
-		draw_line(inner, outer, Color(0.7, 0.9, 1.0, 0.85), 2.0)
+		draw_line(inner, outer, Color(0.7, 0.9, 1.0, 0.55 * guide_alpha), 2.0)
 
-func _draw_centered_texture(texture: Texture2D, target_radius: float) -> void:
+func _draw_centered_texture(texture: Texture2D, target_radius: float, tint: Color = Color.WHITE) -> void:
 	var texture_size := texture.get_size()
 	if texture_size.x <= 0.0 or texture_size.y <= 0.0:
 		return
 	var target_size := Vector2(target_radius * 2.0, target_radius * 2.0)
-	draw_texture_rect(texture, Rect2(-target_size * 0.5, target_size), false)
+	draw_texture_rect(texture, Rect2(-target_size * 0.5, target_size), false, tint)

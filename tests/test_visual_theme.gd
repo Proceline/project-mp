@@ -50,6 +50,10 @@ func test_layout_v05_visual_theme_maps_screen_assets(runner: TestRunner) -> void
 	runner.assert_true(theme.vertical_queue_frame() != null, "v05 layout maps vertical queue frame")
 	runner.assert_true(theme.player_portrait() != null, "v05 layout maps player portrait")
 	runner.assert_true(theme.boss_portrait() != null, "v05 layout maps boss portrait")
+	runner.assert_true(theme.astrolabe_base_alpha < 0.8, "v05 layout subdues old astrolabe line art")
+	runner.assert_true(theme.collapse_boundary_alpha < 0.75, "v05 layout subdues default collapse boundary")
+	runner.assert_true(theme.core_art_alpha < 1.0, "v05 layout can reduce core brightness")
+	runner.assert_true(theme.board_guide_alpha < 0.5, "v05 layout subdues procedural guide lines")
 
 func test_preview_icons_receive_theme_from_battle_ui(runner: TestRunner) -> void:
 	var packed := load("res://scenes/main.tscn")

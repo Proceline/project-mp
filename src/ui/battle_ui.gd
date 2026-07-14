@@ -46,11 +46,12 @@ func update_from_state(battle: BattleState, boss_action_ratio: float, preview: A
 	shield_marks_label.visible = battle.player_shield > 0
 	boss_hp_label.text = "Boss HP %d/%d" % [battle.boss_hp, battle.boss_max_hp]
 	boss_action_bar.value = clampf(boss_action_ratio * 100.0, 0.0, 100.0)
-	preview_label.text = "Next:"
-	tactical_label.text = "Tactic:"
+	preview_label.text = ""
+	tactical_label.text = ""
 	_update_icon_row(preview_row, preview)
 	_update_icon_row(tactical_row, tactical)
-	status_label.text = battle.result()
+	status_label.text = ""
+	status_label.visible = false
 
 func _update_icon_row(row: BoxContainer, orbs: Array[BallState]) -> void:
 	for child in row.get_children():

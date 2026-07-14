@@ -30,6 +30,10 @@ class_name VisualTheme
 @export_file("*.png") var eclipse_orb_danger_glow_path: String
 @export var board_art_radius: float = 260.0
 @export var core_art_radius: float = 80.0
+@export_range(0.0, 1.0, 0.01) var astrolabe_base_alpha: float = 1.0
+@export_range(0.0, 1.0, 0.01) var collapse_boundary_alpha: float = 1.0
+@export_range(0.0, 1.0, 0.01) var core_art_alpha: float = 1.0
+@export_range(0.0, 1.0, 0.01) var board_guide_alpha: float = 1.0
 @export var orb_sprite_radius: float = 24.0
 @export var orb_glow_radius_scale: float = 1.25
 @export var orb_glow_alpha: float = 0.75
