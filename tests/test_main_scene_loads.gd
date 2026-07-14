@@ -94,8 +94,8 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 
 	var boss_hp_frame := scene.get_node("BattleUI/BossHPFrame") as TextureRect
 	var queue_frame := scene.get_node("BattleUI/QueueFrame") as TextureRect
-	var boss_portrait := scene.get_node("BattleUI/BossPortrait") as TextureRect
-	var player_portrait := scene.get_node("BattleUI/PlayerPortrait") as TextureRect
+	var boss_portrait := scene.get_node("BattleUI/BattleBackground/BossPortrait") as TextureRect
+	var player_portrait := scene.get_node("BattleUI/BattleBackground/PlayerPortrait") as TextureRect
 	var boss_panel := scene.get_node("BattleUI/BossPanel") as ColorRect
 	var boss_name := scene.get_node("BattleUI/BossName") as Label
 	var preview_row := scene.get_node("%PreviewRow")
@@ -129,12 +129,16 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	runner.assert_true(boss_hp_frame.position.x >= 280.0, "boss HP art keeps a left safe margin")
 	runner.assert_true(boss_hp_frame.position.x + boss_hp_frame.size.x <= 1140.0, "boss HP art keeps a right safe margin")
 	runner.assert_true(not boss_action_bar.visible, "old transparent boss action bar is hidden")
-	runner.assert_true(boss_portrait.position.x >= 760.0, "boss portrait stays in the right presentation zone")
-	runner.assert_true(boss_portrait.position.x + boss_portrait.size.x <= 1240.0, "boss portrait keeps a right safe margin")
+	runner.assert_true(boss_portrait.get_parent() == battle_ui.battle_background, "boss portrait is composed inside the painted background")
+	runner.assert_eq(boss_portrait.anchor_left, 1.0, "boss portrait is anchored to the right presentation edge")
+	runner.assert_true(boss_portrait.offset_left <= -500.0, "boss portrait keeps enough width for the right presentation zone")
+	runner.assert_true(boss_portrait.offset_right >= 0.0, "boss portrait reaches the right presentation edge")
 	runner.assert_eq(boss_portrait.stretch_mode, TextureRect.STRETCH_KEEP_ASPECT_CENTERED, "boss portrait should not crop the source art")
 	runner.assert_true(boss_name.position.x + boss_name.size.x <= 1220.0, "boss name keeps a right safe margin")
-	runner.assert_true(player_portrait.position.x >= 36.0, "player portrait keeps a left safe margin")
-	runner.assert_true(player_portrait.position.y + player_portrait.size.y <= 710.0, "player portrait keeps a bottom safe margin")
+	runner.assert_true(player_portrait.get_parent() == battle_ui.battle_background, "player portrait is composed inside the painted background")
+	runner.assert_eq(player_portrait.anchor_bottom, 1.0, "player portrait is anchored to the bottom edge")
+	runner.assert_true(player_portrait.offset_left >= 36.0, "player portrait keeps a left safe margin")
+	runner.assert_true(player_portrait.offset_bottom >= 0.0, "player portrait is grounded near the bottom edge")
 	runner.assert_true(queue_frame.position.x >= 32.0, "queue frame keeps a left safe margin")
 	runner.assert_true(queue_frame.modulate.a <= 0.75, "queue frame is subdued behind the orb icons")
 	runner.assert_eq(preview_label.text, "", "preview text label is removed")
