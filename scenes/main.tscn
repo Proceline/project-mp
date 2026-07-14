@@ -45,23 +45,6 @@ texture = ExtResource("8_bg_v05")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="BossPresentationRoot" type="Control" parent="BattleUI"]
-offset_left = 746.0
-offset_top = 77.0
-offset_right = 1280.0
-offset_bottom = 720.0
-
-[node name="BossPortrait" type="TextureRect" parent="BattleUI/BossPresentationRoot" unique_id=685973143]
-unique_name_in_owner = true
-modulate = Color(1, 1, 1, 0.82)
-offset_left = 46.0
-offset_top = 53.0
-offset_right = 486.0
-offset_bottom = 643.0
-texture = ExtResource("9_boss_v05")
-expand_mode = 2
-stretch_mode = 5
-
 [node name="PlayerPortrait" type="TextureRect" parent="BattleUI/BattleBackground" unique_id=467600398]
 unique_name_in_owner = true
 layout_mode = 1
@@ -76,6 +59,42 @@ grow_vertical = 0
 texture = ExtResource("10_player_v05")
 expand_mode = 3
 stretch_mode = 4
+
+[node name="BossPresentationRoot" type="Control" parent="BattleUI/BattleBackground" unique_id=760804749]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -534.0
+offset_top = -643.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BossPortrait" type="TextureRect" parent="BattleUI/BattleBackground/BossPresentationRoot" unique_id=685973143]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.82)
+layout_mode = 0
+offset_left = 46.0
+offset_top = 53.0
+offset_right = 486.0
+offset_bottom = 643.0
+texture = ExtResource("9_boss_v05")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="BossName" type="Label" parent="BattleUI/BattleBackground/BossPresentationRoot" unique_id=2009136511]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 41.0
+offset_right = 472.0
+offset_bottom = 75.0
+theme_override_colors/font_outline_color = Color(0.05, 0.02, 0.05, 0.9)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 24
+text = "Resonance Warden"
+horizontal_alignment = 2
 
 [node name="PlayfieldShade" type="ColorRect" parent="BattleUI" unique_id=1093597175]
 offset_left = 272.0
@@ -96,7 +115,9 @@ unique_name_in_owner = true
 position = Vector2(560, 380)
 script = ExtResource("2_playfield")
 
-[node name="TopBossBarRoot" type="Control" parent="BattleUI"]
+[node name="TopBossBarRoot" type="Control" parent="BattleUI" unique_id=928074039]
+layout_mode = 3
+anchors_preset = 0
 offset_left = 304.0
 offset_top = 8.0
 offset_right = 1128.0
@@ -104,6 +125,7 @@ offset_bottom = 104.0
 
 [node name="BossHPFrame" type="TextureRect" parent="BattleUI/TopBossBarRoot" unique_id=3349487]
 unique_name_in_owner = true
+layout_mode = 0
 offset_right = 824.0
 offset_bottom = 96.0
 texture = ExtResource("11_hpbar_v05")
@@ -113,6 +135,7 @@ stretch_mode = 6
 [node name="BossHPMissing" type="ColorRect" parent="BattleUI/TopBossBarRoot" unique_id=2105136738]
 unique_name_in_owner = true
 visible = false
+layout_mode = 0
 offset_left = 690.0
 offset_top = 50.0
 offset_right = 690.0
@@ -121,13 +144,45 @@ color = Color(0.11, 0.055, 0.075, 0.82)
 
 [node name="BossActionPips" type="HBoxContainer" parent="BattleUI/TopBossBarRoot" unique_id=1632107284]
 unique_name_in_owner = true
-offset_left = 662.0
-offset_top = 69.0
-offset_right = 816.0
-offset_bottom = 91.0
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -217.0
+offset_top = -32.0
+offset_right = -63.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
 theme_override_constants/separation = 1
 
-[node name="LeftQueueRoot" type="Control" parent="BattleUI"]
+[node name="BossHP" type="Label" parent="BattleUI/TopBossBarRoot" unique_id=1706777413]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 98.0
+offset_top = 16.0
+offset_right = 336.0
+offset_bottom = 44.0
+theme_override_colors/font_outline_color = Color(0.05, 0.02, 0.04, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 20
+text = "Boss HP 200/200"
+
+[node name="BossActionBar" type="ProgressBar" parent="BattleUI/TopBossBarRoot" unique_id=25943011]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 170.0
+offset_top = 49.0
+offset_right = 696.0
+offset_bottom = 69.0
+show_percentage = false
+
+[node name="LeftQueueRoot" type="Control" parent="BattleUI" unique_id=1471030565]
+layout_mode = 3
+anchors_preset = 0
 offset_left = 48.0
 offset_top = 116.0
 offset_right = 172.0
@@ -136,11 +191,41 @@ offset_bottom = 536.0
 [node name="QueueFrame" type="TextureRect" parent="BattleUI/LeftQueueRoot" unique_id=469115959]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.68)
+layout_mode = 0
 offset_right = 124.0
 offset_bottom = 420.0
 texture = ExtResource("12_queue_v05")
 expand_mode = 1
 stretch_mode = 6
+
+[node name="PreviewRow" type="VBoxContainer" parent="BattleUI/LeftQueueRoot" unique_id=1392087405]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -19.0
+offset_top = 31.0
+offset_right = 21.0
+offset_bottom = 258.0
+grow_horizontal = 2
+theme_override_constants/separation = 6
+
+[node name="TacticalRow" type="VBoxContainer" parent="BattleUI/LeftQueueRoot" unique_id=1030311129]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -134.0
+offset_right = 20.0
+offset_bottom = -43.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 6
 
 [node name="BossPanel" type="ColorRect" parent="BattleUI" unique_id=196736427]
 visible = false
@@ -149,17 +234,6 @@ offset_top = 36.0
 offset_right = 1280.0
 offset_bottom = 720.0
 color = Color(0.06, 0.02, 0.05, 0.12)
-
-[node name="BossName" type="Label" parent="BattleUI/BossPresentationRoot" unique_id=2009136511]
-offset_left = 90.0
-offset_top = 41.0
-offset_right = 472.0
-offset_bottom = 75.0
-theme_override_colors/font_outline_color = Color(0.05, 0.02, 0.05, 0.9)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 24
-text = "Resonance Warden"
-horizontal_alignment = 2
 
 [node name="BossBody" type="ColorRect" parent="BattleUI" unique_id=1652467035]
 visible = false
@@ -190,42 +264,6 @@ offset_top = 406.0
 offset_right = 634.0
 offset_bottom = 430.0
 horizontal_alignment = 1
-
-[node name="BossHP" type="Label" parent="BattleUI/TopBossBarRoot" unique_id=1706777413]
-unique_name_in_owner = true
-offset_left = 98.0
-offset_top = 16.0
-offset_right = 336.0
-offset_bottom = 44.0
-theme_override_colors/font_outline_color = Color(0.05, 0.02, 0.04, 0.95)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 20
-text = "Boss HP 200/200"
-
-[node name="BossActionBar" type="ProgressBar" parent="BattleUI/TopBossBarRoot" unique_id=25943011]
-unique_name_in_owner = true
-visible = false
-offset_left = 170.0
-offset_top = 49.0
-offset_right = 696.0
-offset_bottom = 69.0
-show_percentage = false
-
-[node name="PreviewRow" type="VBoxContainer" parent="BattleUI/LeftQueueRoot" unique_id=1392087405]
-unique_name_in_owner = true
-offset_left = 42.0
-offset_top = 38.0
-offset_right = 82.0
-offset_bottom = 294.0
-theme_override_constants/separation = 6
-
-[node name="TacticalRow" type="VBoxContainer" parent="BattleUI/LeftQueueRoot" unique_id=1030311129]
-unique_name_in_owner = true
-offset_left = 42.0
-offset_top = 326.0
-offset_right = 82.0
-offset_bottom = 408.0
-theme_override_constants/separation = 6
 
 [node name="Status" type="Label" parent="BattleUI" unique_id=1763603431]
 unique_name_in_owner = true
