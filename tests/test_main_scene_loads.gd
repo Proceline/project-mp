@@ -28,7 +28,6 @@ func test_preview_renders_orb_icons_instead_of_code_text(runner: TestRunner) -> 
 	var tree := Engine.get_main_loop() as SceneTree
 	tree.root.add_child(scene)
 	var battle_ui = scene.get_node("%BattleUI")
-	var preview_label: Label = scene.get_node("%Preview")
 	var preview_row: BoxContainer = scene.get_node("%PreviewRow")
 	var tactical_row: BoxContainer = scene.get_node("%TacticalRow")
 	battle_ui.player_hp_label = scene.get_node("%PlayerHP")
@@ -37,9 +36,7 @@ func test_preview_renders_orb_icons_instead_of_code_text(runner: TestRunner) -> 
 	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
 	battle_ui.boss_hp_missing = scene.get_node("%BossHPMissing")
 	battle_ui.boss_action_pips = scene.get_node("%BossActionPips")
-	battle_ui.preview_label = preview_label
 	battle_ui.preview_row = preview_row
-	battle_ui.tactical_label = scene.get_node("%Tactical")
 	battle_ui.tactical_row = tactical_row
 	battle_ui.status_label = scene.get_node("%Status")
 	var color_ball := BallState.new_ball(1, BallState.Kind.COLOR, Vector2.ZERO)
@@ -52,7 +49,6 @@ func test_preview_renders_orb_icons_instead_of_code_text(runner: TestRunner) -> 
 	var empty_tactical: Array[BallState] = []
 	battle_ui.update_from_state(BattleState.new(), 0.0, preview, empty_tactical)
 
-	runner.assert_eq(preview_label.text, "", "preview label is hidden in the v05 art frame")
 	runner.assert_eq(preview_row.get_child_count(), 2, "preview row renders one icon per preview orb")
 	if preview_row.get_child_count() >= 2:
 		runner.assert_true(preview_row.get_child(0).has_method("current_fill_color"), "preview entries are orb icon controls")
@@ -70,9 +66,7 @@ func test_tactical_row_renders_separate_combat_icons(runner: TestRunner) -> void
 	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
 	battle_ui.boss_hp_missing = scene.get_node("%BossHPMissing")
 	battle_ui.boss_action_pips = scene.get_node("%BossActionPips")
-	battle_ui.preview_label = scene.get_node("%Preview")
 	battle_ui.preview_row = scene.get_node("%PreviewRow")
-	battle_ui.tactical_label = scene.get_node("%Tactical")
 	battle_ui.tactical_row = scene.get_node("%TacticalRow")
 	battle_ui.status_label = scene.get_node("%Status")
 	var combat := BallState.new_ball(3, BallState.Kind.COMBAT, Vector2.ZERO)
@@ -82,7 +76,6 @@ func test_tactical_row_renders_separate_combat_icons(runner: TestRunner) -> void
 
 	battle_ui.update_from_state(BattleState.new(), 0.0, empty_preview, tactical)
 
-	runner.assert_eq(battle_ui.tactical_label.text, "", "tactical label is hidden in the v05 art frame")
 	runner.assert_eq(battle_ui.tactical_row.get_child_count(), 1, "tactical row renders combat slots separately")
 	scene.queue_free()
 
@@ -92,16 +85,17 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	var tree := Engine.get_main_loop() as SceneTree
 	tree.root.add_child(scene)
 
-	var boss_hp_frame := scene.get_node("BattleUI/BossHPFrame") as TextureRect
-	var queue_frame := scene.get_node("BattleUI/QueueFrame") as TextureRect
-	var boss_portrait := scene.get_node("BattleUI/BattleBackground/BossPortrait") as TextureRect
+	var left_queue_root := scene.get_node("BattleUI/LeftQueueRoot") as Control
+	var top_boss_bar_root := scene.get_node("BattleUI/TopBossBarRoot") as Control
+	var boss_presentation_root := scene.get_node("BattleUI/BossPresentationRoot") as Control
+	var boss_hp_frame := scene.get_node("BattleUI/TopBossBarRoot/BossHPFrame") as TextureRect
+	var queue_frame := scene.get_node("BattleUI/LeftQueueRoot/QueueFrame") as TextureRect
+	var boss_portrait := scene.get_node("BattleUI/BossPresentationRoot/BossPortrait") as TextureRect
 	var player_portrait := scene.get_node("BattleUI/BattleBackground/PlayerPortrait") as TextureRect
 	var boss_panel := scene.get_node("BattleUI/BossPanel") as ColorRect
-	var boss_name := scene.get_node("BattleUI/BossName") as Label
+	var boss_name := scene.get_node("BattleUI/BossPresentationRoot/BossName") as Label
 	var preview_row := scene.get_node("%PreviewRow")
 	var tactical_row := scene.get_node("%TacticalRow")
-	var preview_label := scene.get_node("%Preview") as Label
-	var tactical_label := scene.get_node("%Tactical") as Label
 	var status_label := scene.get_node("%Status") as Label
 	var boss_hp := scene.get_node("%BossHP") as Label
 	var boss_hp_missing := scene.get_node("%BossHPMissing") as ColorRect
@@ -116,6 +110,9 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	battle_ui.player_portrait = player_portrait
 	battle_ui.apply_visual_theme()
 
+	runner.assert_true(left_queue_root != null, "left queue UI has an editor-adjustable root")
+	runner.assert_true(top_boss_bar_root != null, "top boss bar UI has an editor-adjustable root")
+	runner.assert_true(boss_presentation_root != null, "boss presentation UI has an editor-adjustable root")
 	runner.assert_true(boss_hp_frame != null and boss_hp_frame.texture != null, "v05 layout has a top boss HP art frame")
 	runner.assert_true(boss_hp_missing != null, "boss HP has a damage mask over the painted bar")
 	runner.assert_true(boss_action_pips != null, "boss action progress uses the frame's pip sockets")
@@ -124,25 +121,29 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	runner.assert_true(player_portrait != null and player_portrait.texture != null, "v05 layout has a player portrait")
 	runner.assert_true(preview_row is VBoxContainer, "main preview queue is vertical")
 	runner.assert_true(tactical_row is VBoxContainer, "tactical queue is vertical")
+	runner.assert_true(boss_hp.get_parent() == top_boss_bar_root, "boss HP text is grouped with the top boss bar")
 	runner.assert_true(boss_hp.position.y < 60.0, "boss HP text is placed near the top bar")
 	runner.assert_true(playfield.position.x > 430.0 and playfield.position.x < 700.0, "playfield sits near the center after v05 layout shift")
-	runner.assert_true(boss_hp_frame.position.x >= 280.0, "boss HP art keeps a left safe margin")
-	runner.assert_true(boss_hp_frame.position.x + boss_hp_frame.size.x <= 1140.0, "boss HP art keeps a right safe margin")
+	runner.assert_true(top_boss_bar_root.position.x >= 280.0, "boss HP root keeps a left safe margin")
+	runner.assert_true(top_boss_bar_root.position.x + top_boss_bar_root.size.x <= 1140.0, "boss HP root keeps a right safe margin")
 	runner.assert_true(not boss_action_bar.visible, "old transparent boss action bar is hidden")
-	runner.assert_true(boss_portrait.get_parent() == battle_ui.battle_background, "boss portrait is composed inside the painted background")
-	runner.assert_eq(boss_portrait.anchor_left, 1.0, "boss portrait is anchored to the right presentation edge")
-	runner.assert_true(boss_portrait.offset_left <= -500.0, "boss portrait keeps enough width for the right presentation zone")
-	runner.assert_true(boss_portrait.offset_right >= 0.0, "boss portrait reaches the right presentation edge")
+	runner.assert_true(boss_portrait.get_parent() == boss_presentation_root, "boss portrait is grouped with the boss presentation root")
+	runner.assert_true(boss_presentation_root.position.x >= 720.0, "boss presentation root stays in the right presentation zone")
+	runner.assert_true(boss_presentation_root.position.x + boss_presentation_root.size.x <= 1280.0, "boss presentation root stays inside the viewport")
 	runner.assert_eq(boss_portrait.stretch_mode, TextureRect.STRETCH_KEEP_ASPECT_CENTERED, "boss portrait should not crop the source art")
-	runner.assert_true(boss_name.position.x + boss_name.size.x <= 1220.0, "boss name keeps a right safe margin")
+	runner.assert_true(boss_name.get_parent() == boss_presentation_root, "boss name is grouped with boss portrait")
+	runner.assert_true(boss_name.position.x + boss_name.size.x <= boss_presentation_root.size.x, "boss name stays inside boss presentation root")
 	runner.assert_true(player_portrait.get_parent() == battle_ui.battle_background, "player portrait is composed inside the painted background")
 	runner.assert_eq(player_portrait.anchor_bottom, 1.0, "player portrait is anchored to the bottom edge")
 	runner.assert_true(player_portrait.offset_left >= 36.0, "player portrait keeps a left safe margin")
 	runner.assert_true(player_portrait.offset_bottom >= 0.0, "player portrait is grounded near the bottom edge")
-	runner.assert_true(queue_frame.position.x >= 32.0, "queue frame keeps a left safe margin")
+	runner.assert_true(queue_frame.get_parent() == left_queue_root, "queue frame is grouped with queue rows")
+	runner.assert_true(preview_row.get_parent() == left_queue_root, "preview icon row is grouped with the queue frame")
+	runner.assert_true(tactical_row.get_parent() == left_queue_root, "tactical icon row is grouped with the queue frame")
+	runner.assert_true(not scene.has_node("BattleUI/Preview"), "legacy preview label node is removed")
+	runner.assert_true(not scene.has_node("BattleUI/Tactical"), "legacy tactical label node is removed")
+	runner.assert_true(left_queue_root.position.x >= 32.0, "queue root keeps a left safe margin")
 	runner.assert_true(queue_frame.modulate.a <= 0.75, "queue frame is subdued behind the orb icons")
-	runner.assert_eq(preview_label.text, "", "preview text label is removed")
-	runner.assert_eq(tactical_label.text, "", "tactical text label is removed")
 	runner.assert_true(not status_label.visible, "debug status label is hidden")
 	runner.assert_true(not boss_panel.visible, "old boss panel tint is hidden")
 	scene.queue_free()
@@ -159,9 +160,7 @@ func test_boss_hp_and_action_pips_update_from_state(runner: TestRunner) -> void:
 	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
 	battle_ui.boss_hp_missing = scene.get_node("%BossHPMissing")
 	battle_ui.boss_action_pips = scene.get_node("%BossActionPips")
-	battle_ui.preview_label = scene.get_node("%Preview")
 	battle_ui.preview_row = scene.get_node("%PreviewRow")
-	battle_ui.tactical_label = scene.get_node("%Tactical")
 	battle_ui.tactical_row = scene.get_node("%TacticalRow")
 	battle_ui.status_label = scene.get_node("%Status")
 	var battle := BattleState.new()

@@ -16,9 +16,7 @@ const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astra
 @onready var boss_action_bar: ProgressBar = %BossActionBar
 @onready var boss_hp_missing: ColorRect = %BossHPMissing
 @onready var boss_action_pips: HBoxContainer = %BossActionPips
-@onready var preview_label: Label = %Preview
 @onready var preview_row: BoxContainer = %PreviewRow
-@onready var tactical_label: Label = %Tactical
 @onready var tactical_row: BoxContainer = %TacticalRow
 @onready var status_label: Label = %Status
 
@@ -51,8 +49,6 @@ func update_from_state(battle: BattleState, boss_action_ratio: float, preview: A
 	boss_action_bar.value = 0.0
 	_update_boss_hp_mask(battle)
 	_update_boss_action_pips(boss_action_ratio)
-	preview_label.text = ""
-	tactical_label.text = ""
 	_update_icon_row(preview_row, preview)
 	_update_icon_row(tactical_row, tactical)
 	status_label.text = ""
@@ -77,7 +73,7 @@ func _update_boss_hp_mask(battle: BattleState) -> void:
 	var missing_width := full_width * (1.0 - hp_ratio)
 	boss_hp_missing.visible = missing_width > 0.5
 	boss_hp_missing.size.x = missing_width
-	boss_hp_missing.position.x = 474.0 + full_width - missing_width
+	boss_hp_missing.position.x = 170.0 + full_width - missing_width
 
 func _update_boss_action_pips(boss_action_ratio: float) -> void:
 	if boss_action_pips == null:
