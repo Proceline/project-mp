@@ -35,6 +35,7 @@ func test_preview_renders_orb_icons_instead_of_code_text(runner: TestRunner) -> 
 	battle_ui.boss_hp_label = scene.get_node("%BossHP")
 	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
 	battle_ui.boss_hp_missing = scene.get_node("%BossHPMissing")
+	battle_ui.boss_action_clip = scene.get_node("%BossActionClip")
 	battle_ui.boss_action_fill = scene.get_node("%BossActionFill")
 	battle_ui.boss_action_glow = scene.get_node("%BossActionGlow")
 	battle_ui.preview_row = preview_row
@@ -66,6 +67,7 @@ func test_tactical_row_renders_separate_combat_icons(runner: TestRunner) -> void
 	battle_ui.boss_hp_label = scene.get_node("%BossHP")
 	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
 	battle_ui.boss_hp_missing = scene.get_node("%BossHPMissing")
+	battle_ui.boss_action_clip = scene.get_node("%BossActionClip")
 	battle_ui.boss_action_fill = scene.get_node("%BossActionFill")
 	battle_ui.boss_action_glow = scene.get_node("%BossActionGlow")
 	battle_ui.preview_row = scene.get_node("%PreviewRow")
@@ -102,7 +104,8 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	var boss_hp := scene.get_node("%BossHP") as Label
 	var boss_hp_missing := scene.get_node("%BossHPMissing") as ColorRect
 	var boss_action_bar := scene.get_node("%BossActionBar") as ProgressBar
-	var boss_action_fill := scene.get_node("%BossActionFill") as TextureProgressBar
+	var boss_action_clip := scene.get_node("%BossActionClip") as Control
+	var boss_action_fill := scene.get_node("%BossActionFill") as TextureRect
 	var boss_action_glow := scene.get_node("%BossActionGlow") as TextureRect
 	var playfield := scene.get_node("%Playfield") as Node2D
 	var battle_ui = scene.get_node("%BattleUI")
@@ -120,7 +123,8 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	runner.assert_true(boss_presentation_root != null, "boss presentation UI has an editor-adjustable root")
 	runner.assert_true(boss_hp_frame != null and boss_hp_frame.texture != null, "v05 layout has a top boss HP art frame")
 	runner.assert_true(boss_hp_missing != null, "boss HP has a damage mask over the painted bar")
-	runner.assert_true(boss_action_fill != null and boss_action_fill.texture_progress != null, "boss action progress uses stacked bar fill")
+	runner.assert_true(boss_action_clip != null, "boss action progress has a clipped lane")
+	runner.assert_true(boss_action_fill != null and boss_action_fill.texture != null, "boss action progress uses stacked bar fill")
 	runner.assert_true(boss_action_glow != null and boss_action_glow.texture != null, "boss action progress has stacked warning glow")
 	runner.assert_true(queue_frame != null and queue_frame.texture != null, "v05 layout has a vertical queue art frame")
 	runner.assert_true(boss_portrait != null and boss_portrait.texture != null, "v05 layout has a boss portrait")
@@ -165,6 +169,7 @@ func test_boss_hp_and_stacked_action_bar_update_from_state(runner: TestRunner) -
 	battle_ui.boss_hp_label = scene.get_node("%BossHP")
 	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
 	battle_ui.boss_hp_missing = scene.get_node("%BossHPMissing")
+	battle_ui.boss_action_clip = scene.get_node("%BossActionClip")
 	battle_ui.boss_action_fill = scene.get_node("%BossActionFill")
 	battle_ui.boss_action_glow = scene.get_node("%BossActionGlow")
 	battle_ui.preview_row = scene.get_node("%PreviewRow")
@@ -181,14 +186,16 @@ func test_boss_hp_and_stacked_action_bar_update_from_state(runner: TestRunner) -
 	runner.assert_eq(battle_ui.boss_hp_label.text, "Boss HP 127/200", "boss HP label shows current HP")
 	runner.assert_true(battle_ui.boss_hp_missing.visible, "missing HP mask is visible after boss damage")
 	runner.assert_true(battle_ui.boss_hp_missing.size.x > 0.0, "missing HP mask grows when boss loses HP")
+	runner.assert_true(battle_ui.boss_action_clip.visible, "boss action clip is visible while progress exists")
 	runner.assert_true(battle_ui.boss_action_fill.visible, "boss action fill is visible while progress exists")
-	runner.assert_eq(int(battle_ui.boss_action_fill.value), 50, "half-full boss action ratio fills half the stacked bar")
-	runner.assert_eq(battle_ui.boss_action_fill.texture_progress, battle_ui.visual_theme.boss_action_bar_fill(), "normal action progress uses stacked normal fill")
+	runner.assert_true(battle_ui.boss_action_clip.size.x > 250.0 and battle_ui.boss_action_clip.size.x < 320.0, "half-full boss action ratio clips about half the stacked bar")
+	runner.assert_true(battle_ui.boss_action_fill.size.x <= 580.0, "boss action fill art stays inside the stacked bar lane")
+	runner.assert_eq(battle_ui.boss_action_fill.texture, battle_ui.visual_theme.boss_action_bar_fill(), "normal action progress uses stacked normal fill")
 	runner.assert_true(not battle_ui.boss_action_glow.visible, "normal action progress does not show warning glow")
 
 	battle_ui.update_from_state(battle, 0.9, empty_preview, empty_tactical)
 
-	runner.assert_eq(battle_ui.boss_action_fill.texture_progress, battle_ui.visual_theme.boss_action_bar_fill_warning(), "near-full action progress switches to warning fill")
+	runner.assert_eq(battle_ui.boss_action_fill.texture, battle_ui.visual_theme.boss_action_bar_fill_warning(), "near-full action progress switches to warning fill")
 	runner.assert_true(battle_ui.boss_action_glow.visible, "near-full action progress shows glow")
 	scene.queue_free()
 

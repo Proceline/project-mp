@@ -74,6 +74,7 @@ func test_preview_icons_receive_theme_from_battle_ui(runner: TestRunner) -> void
 	battle_ui.shield_marks_label = scene.get_node("%ShieldMarks")
 	battle_ui.boss_hp_label = scene.get_node("%BossHP")
 	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
+	battle_ui.boss_action_clip = scene.get_node("%BossActionClip")
 	battle_ui.boss_action_fill = scene.get_node("%BossActionFill")
 	battle_ui.boss_action_glow = scene.get_node("%BossActionGlow")
 	battle_ui.preview_row = scene.get_node("%PreviewRow")

@@ -15,7 +15,8 @@ const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astra
 @onready var boss_hp_label: Label = %BossHP
 @onready var boss_action_bar: ProgressBar = %BossActionBar
 @onready var boss_hp_missing: ColorRect = %BossHPMissing
-@onready var boss_action_fill: TextureProgressBar = %BossActionFill
+@onready var boss_action_clip: Control = %BossActionClip
+@onready var boss_action_fill: TextureRect = %BossActionFill
 @onready var boss_action_glow: TextureRect = %BossActionGlow
 @onready var preview_row: BoxContainer = %PreviewRow
 @onready var tactical_row: BoxContainer = %TacticalRow
@@ -35,7 +36,7 @@ func apply_visual_theme() -> void:
 	if boss_hp_frame != null:
 		boss_hp_frame.texture = visual_theme.boss_hp_bar_frame()
 	if boss_action_fill != null:
-		boss_action_fill.texture_progress = visual_theme.boss_action_bar_fill()
+		boss_action_fill.texture = visual_theme.boss_action_bar_fill()
 	if boss_action_glow != null:
 		boss_action_glow.texture = visual_theme.boss_action_bar_glow()
 	if queue_frame != null:
@@ -85,13 +86,16 @@ func _update_boss_hp_mask(battle: BattleState) -> void:
 	boss_hp_missing.position.x = BOSS_HP_FILL_X + full_width - missing_width
 
 func _update_boss_action_bar(boss_action_ratio: float) -> void:
-	if boss_action_fill == null:
+	if boss_action_clip == null or boss_action_fill == null:
 		return
 	var ratio := clampf(boss_action_ratio, 0.0, 1.0)
-	boss_action_fill.visible = ratio > 0.001
-	boss_action_fill.value = ratio * 100.0
+	boss_action_clip.visible = ratio > 0.001
+	boss_action_clip.size.x = 577.0 * ratio
+	boss_action_fill.visible = true
+	boss_action_fill.size.x = 577.0
+	boss_action_fill.size.y = 12.0
 	if visual_theme != null:
-		boss_action_fill.texture_progress = visual_theme.boss_action_bar_fill_warning() if ratio >= BOSS_ACTION_WARNING_THRESHOLD else visual_theme.boss_action_bar_fill()
+		boss_action_fill.texture = visual_theme.boss_action_bar_fill_warning() if ratio >= BOSS_ACTION_WARNING_THRESHOLD else visual_theme.boss_action_bar_fill()
 	if boss_action_glow != null:
 		boss_action_glow.visible = ratio >= BOSS_ACTION_WARNING_THRESHOLD
 		if visual_theme != null:

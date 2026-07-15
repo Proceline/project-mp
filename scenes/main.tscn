@@ -153,7 +153,7 @@ offset_bottom = 83.0
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BossActionFill" type="TextureProgressBar" parent="BattleUI/TopBossBarRoot"]
+[node name="BossActionClip" type="Control" parent="BattleUI/TopBossBarRoot"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
@@ -161,8 +161,15 @@ offset_left = 197.0
 offset_top = 68.0
 offset_right = 774.0
 offset_bottom = 80.0
-max_value = 100.0
-value = 0.0
+clip_contents = true
+
+[node name="BossActionFill" type="TextureRect" parent="BattleUI/TopBossBarRoot/BossActionClip"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 577.0
+offset_bottom = 12.0
+expand_mode = 1
+stretch_mode = 5
 
 [node name="BossHP" type="Label" parent="BattleUI/TopBossBarRoot" unique_id=1706777413]
 unique_name_in_owner = true
