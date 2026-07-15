@@ -2,8 +2,8 @@
 
 ## Current Stable Prototype Node
 
-- Stable checkpoint: `6d7b5b5 chore: clean gdscript reload warnings`
-- This is the current rollback/reference point for the Godot prototype after the v04 runtime orb visual pass, chain/pacing rule pass, hazard lifecycle tuning, orb visual rotation pass, fast-drop spawn-lane stability pass, and GDScript reload-warning cleanup: baseline color-chain boss damage, flashing chains that absorb late same-color members with tunable timer extension, configurable color-orb generation, tuned warning/danger hazard behavior, contact-only rolling visual offsets, a separate tactical combat orb queue, shared-queue hazard/fast-drop behavior, player fast-drop spawn-lane spacing that treats attached orbs as blockers, themed board/background rendering, v04 runtime orb body/glow sprites aligned to gameplay radius, and clean headless reload output.
+- Stable checkpoint: `6da4497 fix: clip stacked boss action fill`
+- This is the current rollback/reference point for the Godot prototype after the v04 runtime orb visual pass, chain/pacing rule pass, hazard lifecycle tuning, orb visual rotation pass, fast-drop spawn-lane stability pass, GDScript reload-warning cleanup, v05 layout art pass, grouped battle UI roots, and stacked Boss HP / Boss Action UI pass: baseline color-chain boss damage, flashing chains that absorb late same-color members with tunable timer extension, configurable color-orb generation, tuned warning/danger hazard behavior, contact-only rolling visual offsets, a separate tactical combat orb queue, shared-queue hazard/fast-drop behavior, player fast-drop spawn-lane spacing that treats attached orbs as blockers, themed board/background rendering, v04 runtime orb body/glow sprites aligned to gameplay radius, clean headless reload output, editor-adjustable UI roots, and clipped stacked Boss Action fill/warning/glow behavior.
 
 ## Project Context
 
