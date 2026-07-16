@@ -46,7 +46,7 @@ func test_layout_v05_visual_theme_maps_screen_assets(runner: TestRunner) -> void
 	runner.assert_true(theme.battle_background_path.ends_with("astral_watercolor_layout_bg_v05.png"), "v05 layout uses watercolor battle background")
 	runner.assert_true(theme.heartlight_core_path.ends_with("heartlight_core_painted_v05.png"), "v05 layout uses painted heartlight core")
 	runner.assert_true(theme.collapse_boundary_path.ends_with("collapse_boundary_painted_v05.png"), "v05 layout uses painted collapse boundary")
-	runner.assert_true(theme.boss_hp_bar_frame_path.ends_with("boss_hp_bar_frame_v08_stacked_action.png"), "boss UI uses final stacked HP/action frame")
+	runner.assert_true(theme.boss_hp_bar_frame_path.ends_with("boss_hp_bar_frame_v09_stacked_shell.png"), "boss UI uses v09 empty stacked HP/action shell")
 	runner.assert_true(theme.boss_action_bar_fill_path.ends_with("boss_action_bar_fill_v04_stacked.png"), "boss action uses final stacked normal fill")
 	runner.assert_true(theme.boss_action_bar_fill_warning_path.ends_with("boss_action_bar_fill_warning_v04_stacked.png"), "boss action uses final stacked warning fill")
 	runner.assert_true(theme.boss_action_bar_glow_path.ends_with("boss_action_bar_glow_v04_stacked.png"), "boss action uses final stacked glow")

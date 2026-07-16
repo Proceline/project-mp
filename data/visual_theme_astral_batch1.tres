@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_visualtheme")
 battle_background_path = "res://assets/art/backgrounds/battle/astral_watercolor_layout_bg_v05.png"
-boss_hp_bar_frame_path = "res://assets/art/ui/boss/boss_hp_bar_frame_v08_stacked_action.png"
+boss_hp_bar_frame_path = "res://assets/art/ui/boss/boss_hp_bar_frame_v09_stacked_shell.png"
 boss_action_bar_fill_path = "res://assets/art/ui/boss/action_bar/boss_action_bar_fill_v04_stacked.png"
 boss_action_bar_fill_warning_path = "res://assets/art/ui/boss/action_bar/boss_action_bar_fill_warning_v04_stacked.png"
 boss_action_bar_glow_path = "res://assets/art/ui/boss/action_bar/boss_action_bar_glow_v04_stacked.png"

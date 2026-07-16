@@ -10,8 +10,10 @@
 [ext_resource type="Texture2D" uid="uid://c2kfvcau8eftg" path="res://assets/art/backgrounds/battle/astral_watercolor_layout_bg_v05.png" id="8_bg_v05"]
 [ext_resource type="Texture2D" uid="uid://rbvnsbha7dp7" path="res://assets/art/boss/veiled_seraph/veiled_seraph_idle_v05.png" id="9_boss_v05"]
 [ext_resource type="Texture2D" uid="uid://b850khjcesatf" path="res://assets/art/player/duelist/player_duelist_idle_v05.png" id="10_player_v05"]
-[ext_resource type="Texture2D" uid="uid://bmokvg5hckuwl" path="res://assets/art/ui/boss/boss_hp_bar_frame_v08_stacked_action.png" id="11_hpbar_v05"]
+[ext_resource type="Texture2D" uid="uid://byjj7p3x3jed2" path="res://assets/art/ui/boss/boss_hp_bar_frame_v09_stacked_shell.png" id="11_hpbar_v05"]
 [ext_resource type="Texture2D" uid="uid://bedfoy756183a" path="res://assets/art/ui/queue/vertical_orb_queue_frame_v05.png" id="12_queue_v05"]
+[ext_resource type="Texture2D" uid="uid://cf3s6h5f3kr40" path="res://assets/art/ui/boss/action_bar/boss_action_bar_fill_v04_stacked.png" id="13_action_fill"]
+[ext_resource type="Texture2D" uid="uid://dwkvy3vwc14we" path="res://assets/art/ui/boss/action_bar/boss_action_bar_glow_v04_stacked.png" id="14_action_glow"]
 
 [node name="GameController" type="Node2D" unique_id=379213318]
 script = ExtResource("1_game")
@@ -132,6 +134,22 @@ texture = ExtResource("11_hpbar_v05")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="BossHPClip" type="Control" parent="BattleUI/TopBossBarRoot"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 197.0
+offset_top = 37.0
+offset_right = 774.0
+offset_bottom = 63.0
+clip_contents = true
+
+[node name="BossHPFill" type="ColorRect" parent="BattleUI/TopBossBarRoot/BossHPClip"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 577.0
+offset_bottom = 26.0
+color = Color(0.5, 0.055, 0.075, 0.92)
+
 [node name="BossHPMissing" type="ColorRect" parent="BattleUI/TopBossBarRoot" unique_id=2105136738]
 unique_name_in_owner = true
 visible = false
@@ -150,6 +168,7 @@ offset_left = 184.0
 offset_top = 61.0
 offset_right = 776.0
 offset_bottom = 83.0
+texture = ExtResource("14_action_glow")
 expand_mode = 1
 stretch_mode = 5
 
@@ -168,6 +187,7 @@ unique_name_in_owner = true
 layout_mode = 0
 offset_right = 577.0
 offset_bottom = 12.0
+texture = ExtResource("13_action_fill")
 expand_mode = 1
 stretch_mode = 5
 

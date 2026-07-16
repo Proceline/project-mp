@@ -102,6 +102,8 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	var tactical_row := scene.get_node("%TacticalRow")
 	var status_label := scene.get_node("%Status") as Label
 	var boss_hp := scene.get_node("%BossHP") as Label
+	var boss_hp_clip := scene.get_node("%BossHPClip") as Control
+	var boss_hp_fill := scene.get_node("%BossHPFill") as ColorRect
 	var boss_hp_missing := scene.get_node("%BossHPMissing") as ColorRect
 	var boss_action_bar := scene.get_node("%BossActionBar") as ProgressBar
 	var boss_action_clip := scene.get_node("%BossActionClip") as Control
@@ -122,10 +124,14 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	runner.assert_true(top_boss_bar_root != null, "top boss bar UI has an editor-adjustable root")
 	runner.assert_true(boss_presentation_root != null, "boss presentation UI has an editor-adjustable root")
 	runner.assert_true(boss_hp_frame != null and boss_hp_frame.texture != null, "v05 layout has a top boss HP art frame")
-	runner.assert_true(boss_hp_missing != null, "boss HP has a damage mask over the painted bar")
+	runner.assert_true(boss_hp_frame.texture.resource_path.ends_with("boss_hp_bar_frame_v09_stacked_shell.png"), "top boss bar uses the v09 empty shell before runtime")
+	runner.assert_true(boss_hp_clip != null and boss_hp_clip.visible, "boss HP fill lane is visible in the static scene")
+	runner.assert_true(boss_hp_fill != null and boss_hp_fill.visible, "boss HP fill is already placed before gameplay starts")
+	runner.assert_true(boss_hp_clip.size.x > 570.0 and boss_hp_clip.size.x < 585.0, "static boss HP starts full-width in the v09 shell")
+	runner.assert_true(boss_hp_missing != null and not boss_hp_missing.visible, "legacy boss HP damage mask is hidden with the v09 shell")
 	runner.assert_true(boss_action_clip != null, "boss action progress has a clipped lane")
-	runner.assert_true(boss_action_fill != null and boss_action_fill.texture != null, "boss action progress uses stacked bar fill")
-	runner.assert_true(boss_action_glow != null and boss_action_glow.texture != null, "boss action progress has stacked warning glow")
+	runner.assert_true(boss_action_fill != null and boss_action_fill.texture != null, "boss action progress uses stacked bar fill before runtime")
+	runner.assert_true(boss_action_glow != null and boss_action_glow.texture != null, "boss action progress has stacked warning glow before runtime")
 	runner.assert_true(queue_frame != null and queue_frame.texture != null, "v05 layout has a vertical queue art frame")
 	runner.assert_true(boss_portrait != null and boss_portrait.texture != null, "v05 layout has a boss portrait")
 	runner.assert_true(player_portrait != null and player_portrait.texture != null, "v05 layout has a player portrait")
@@ -168,6 +174,8 @@ func test_boss_hp_and_stacked_action_bar_update_from_state(runner: TestRunner) -
 	battle_ui.shield_marks_label = scene.get_node("%ShieldMarks")
 	battle_ui.boss_hp_label = scene.get_node("%BossHP")
 	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
+	battle_ui.boss_hp_clip = scene.get_node("%BossHPClip")
+	battle_ui.boss_hp_fill = scene.get_node("%BossHPFill")
 	battle_ui.boss_hp_missing = scene.get_node("%BossHPMissing")
 	battle_ui.boss_action_clip = scene.get_node("%BossActionClip")
 	battle_ui.boss_action_fill = scene.get_node("%BossActionFill")
@@ -184,8 +192,9 @@ func test_boss_hp_and_stacked_action_bar_update_from_state(runner: TestRunner) -
 	battle_ui.update_from_state(battle, 0.5, empty_preview, empty_tactical)
 
 	runner.assert_eq(battle_ui.boss_hp_label.text, "Boss HP 127/200", "boss HP label shows current HP")
-	runner.assert_true(battle_ui.boss_hp_missing.visible, "missing HP mask is visible after boss damage")
-	runner.assert_true(battle_ui.boss_hp_missing.size.x > 0.0, "missing HP mask grows when boss loses HP")
+	runner.assert_true(battle_ui.boss_hp_clip.visible, "boss HP fill lane remains visible after boss damage")
+	runner.assert_true(battle_ui.boss_hp_clip.size.x > 360.0 and battle_ui.boss_hp_clip.size.x < 370.0, "boss HP fill clips to the current HP ratio")
+	runner.assert_true(not battle_ui.boss_hp_missing.visible, "legacy missing HP mask stays hidden with the v09 shell")
 	runner.assert_true(battle_ui.boss_action_clip.visible, "boss action clip is visible while progress exists")
 	runner.assert_true(battle_ui.boss_action_fill.visible, "boss action fill is visible while progress exists")
 	runner.assert_true(battle_ui.boss_action_clip.size.x > 250.0 and battle_ui.boss_action_clip.size.x < 320.0, "half-full boss action ratio clips about half the stacked bar")
