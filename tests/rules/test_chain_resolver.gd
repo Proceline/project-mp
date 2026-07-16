@@ -58,9 +58,10 @@ func test_flashing_chain_absorbs_new_connected_same_color_orb(runner) -> void:
 	var result := resolver.resolve_finished_chains(chains, balls)
 	runner.assert_true(result.cleared_color_ids.has(99), "resolved chain clears late-joined member")
 
-func test_combat_orb_stacks_from_multiple_chains(runner) -> void:
+func test_combat_orb_is_not_charged_by_color_chains(runner) -> void:
 	var resolver := ChainResolver.new()
 	var combat := _attack_ball(100, Vector2(80, 0))
+	combat.value = 0
 	var chain_a: Dictionary = {"color_id": 1, "members": [], "strength": 5}
 	var chain_b: Dictionary = {"color_id": 2, "members": [], "strength": 6}
 	for i in range(5):
@@ -68,7 +69,7 @@ func test_combat_orb_stacks_from_multiple_chains(runner) -> void:
 	for i in range(5):
 		chain_b.members.append(_color_ball(20 + i, 2, Vector2(i * 30, 20)))
 	resolver.apply_chain_influence([chain_a, chain_b], [combat])
-	runner.assert_eq(combat.value, 11, "combat value stacks from both chains")
+	runner.assert_eq(combat.value, 0, "combat orbs are no longer charged by color chains")
 
 func test_hazard_orb_value_is_not_reduced_by_chain_influence(runner) -> void:
 	var resolver := ChainResolver.new()

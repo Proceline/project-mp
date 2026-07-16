@@ -5,6 +5,18 @@ var neighbor_distance: float = 52.0
 var influence_distance: float = 72.0
 var minimum_chain_size: int = 5
 
+const COLOR_RED := 0
+const COLOR_BLUE := 1
+const COLOR_YELLOW := 2
+const COLOR_GREEN := 3
+
+const RED_DAMAGE_PER_ORB := 2
+const DEFAULT_DAMAGE_PER_ORB := 1
+const YELLOW_DAMAGE_PER_ORB := 0
+const YELLOW_VULNERABILITY_PER_ORB := 1
+const BLUE_HAZARD_MITIGATION_PER_ORB := 1
+const GREEN_HEAL_DIVISOR := 2
+
 func find_color_groups(balls: Array[BallState]) -> Array:
 	var color_balls: Array[BallState] = []
 	for ball in balls:
@@ -72,49 +84,15 @@ func refresh_flashing_chains(chains: Array, balls: Array[BallState]) -> int:
 		chain["strength"] = members.size()
 	return added_count
 
-func apply_chain_influence(chains: Array, balls: Array[BallState]) -> void:
-	for target in balls:
-		if target.kind == BallState.Kind.COLOR:
-			continue
-		if not target.is_on_board():
-			continue
+func apply_chain_influence(_chains: Array, _balls: Array[BallState]) -> void:
+	pass
 
-		var total := 0
-		for chain in chains:
-			if _chain_touches_ball(chain, target):
-				total += int(chain.strength)
-
-		if total == 0:
-			continue
-
-		if target.kind == BallState.Kind.COMBAT:
-			target.value += total
-
-func apply_chain_influence_growth(chains: Array, balls: Array[BallState]) -> void:
+func apply_chain_influence_growth(chains: Array, _balls: Array[BallState]) -> void:
 	var deltas: Array[int] = []
 	for chain in chains:
 		var strength := int(chain.get("strength", 0))
 		var applied_strength := int(chain.get("applied_strength", 0))
 		deltas.append(max(strength - applied_strength, 0))
-
-	for target in balls:
-		if target.kind == BallState.Kind.COLOR:
-			continue
-		if not target.is_on_board():
-			continue
-
-		var total := 0
-		for i in range(chains.size()):
-			if deltas[i] <= 0:
-				continue
-			if _chain_touches_ball(chains[i], target):
-				total += deltas[i]
-
-		if total == 0:
-			continue
-
-		if target.kind == BallState.Kind.COMBAT:
-			target.value += total
 
 	for i in range(chains.size()):
 		chains[i]["applied_strength"] = int(chains[i].get("applied_strength", 0)) + deltas[i]
@@ -124,6 +102,8 @@ func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictiona
 		"attack": 0,
 		"shield": 0,
 		"heal": 0,
+		"hazard_mitigation": 0,
+		"yellow_vulnerability": 0,
 		"player_damage": 0,
 		"cleared_color_ids": [],
 		"removed_ball_ids": [],
@@ -131,23 +111,18 @@ func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictiona
 		"hazard_removed_in_danger": [],
 	}
 	for chain in chains:
-		result.attack += int(chain.get("strength", 0))
+		var strength := int(chain.get("strength", 0))
+		var color_id := int(chain.get("color_id", -1))
+		var chain_attack := _attack_for_color(color_id, strength)
+		result.attack += chain_attack
+		if color_id == COLOR_GREEN:
+			result.heal += chain_attack / GREEN_HEAL_DIVISOR
+		elif color_id == COLOR_BLUE:
+			result.hazard_mitigation += strength * BLUE_HAZARD_MITIGATION_PER_ORB
+		elif color_id == COLOR_YELLOW:
+			result.yellow_vulnerability += strength * YELLOW_VULNERABILITY_PER_ORB
 		for member in chain.members:
 			result.cleared_color_ids.append(member.id)
-	for ball in balls:
-		if ball.kind != BallState.Kind.COMBAT or ball.value <= 0:
-			continue
-		if not ball.is_on_board():
-			continue
-		if not _is_touched_by_any_chain(chains, ball):
-			continue
-		if ball.combat_kind == BallState.CombatKind.ATTACK:
-			result.attack += ball.value
-		elif ball.combat_kind == BallState.CombatKind.SHIELD:
-			result.shield += ball.value
-		elif ball.combat_kind == BallState.CombatKind.HEAL:
-			result.heal += ball.value
-		result.removed_ball_ids.append(ball.id)
 	for ball in balls:
 		if ball.kind != BallState.Kind.HAZARD:
 			continue
@@ -162,6 +137,13 @@ func resolve_finished_chains(chains: Array, balls: Array[BallState]) -> Dictiona
 		else:
 			result.hazard_removed_in_warning.append(ball.id)
 	return result
+
+func _attack_for_color(color_id: int, strength: int) -> int:
+	if color_id == COLOR_RED:
+		return strength * RED_DAMAGE_PER_ORB
+	if color_id == COLOR_YELLOW:
+		return strength * YELLOW_DAMAGE_PER_ORB
+	return strength * DEFAULT_DAMAGE_PER_ORB
 
 func _is_touched_by_any_chain(chains: Array, target: BallState) -> bool:
 	for chain in chains:

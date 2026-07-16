@@ -19,6 +19,8 @@ var chain_flash_seconds: float = 1.2
 var chain_extend_seconds: float = 0.2
 var chain_max_flash_seconds: float = 2.0
 var chain_effects_applied: bool = false
+var pending_yellow_vulnerability: int = 0
+var pending_hazard_mitigation: int = 0
 var player_auto_drop_seconds: float = 3.0
 var player_auto_drop_timer: float = 0.0
 var damage_events: Array[Dictionary] = []
@@ -36,7 +38,6 @@ func _ready() -> void:
 	var counter := BurstCounterMechanic.new()
 	boss_controller.configure([volley_mechanic, phase70, phase40, phase15, counter])
 	spawn_queue.seed_preview()
-	tactical_queue.seed_slots()
 	ui.update_from_state(battle, 0.0, spawn_queue.preview, tactical_queue.slots)
 
 func _process(delta: float) -> void:
@@ -81,11 +82,7 @@ func handle_player_fast_drop() -> bool:
 	return accelerated_count > 0 or dropped_next
 
 func insert_tactical_combat_orb() -> bool:
-	var ball := tactical_queue.pop_next_combat_orb()
-	if ball == null:
-		return false
-	spawn_queue.insert_preview_ball(ball, orb_tuning.tactical_insert_index)
-	return true
+	return false
 
 func _fast_drop_next_orb() -> bool:
 	var ball := spawn_queue.fast_drop_current()
@@ -169,17 +166,28 @@ func _tick_chains(delta: float) -> void:
 func _apply_chain_result(result: Dictionary) -> void:
 	var attack := int(result.attack)
 	if attack > 0:
+		attack += pending_yellow_vulnerability
+		pending_yellow_vulnerability = 0
 		battle.apply_attack_to_boss(attack)
 		boss_controller.notify_player_damage(attack)
+	pending_yellow_vulnerability += int(result.get("yellow_vulnerability", 0))
 	if int(result.shield) > 0:
 		battle.add_shield(int(result.shield))
 	if int(result.heal) > 0:
 		battle.heal_player(int(result.heal))
-	if int(result.player_damage) > 0:
-		_apply_player_damage(int(result.player_damage), "danger_hazard_clear")
-		boss_controller.notify_player_damage(int(result.player_damage))
+	pending_hazard_mitigation += int(result.get("hazard_mitigation", 0))
+	var mitigated_player_damage: int = _consume_hazard_mitigation(int(result.player_damage))
+	if mitigated_player_damage > 0:
+		_apply_player_damage(mitigated_player_damage, "danger_hazard_clear")
+		boss_controller.notify_player_damage(mitigated_player_damage)
 	_remove_balls_by_id(result.cleared_color_ids)
 	_remove_balls_by_id(result.removed_ball_ids)
+
+func _consume_hazard_mitigation(amount: int) -> int:
+	var remaining_damage: int = max(amount, 0)
+	var absorbed: int = min(pending_hazard_mitigation, remaining_damage)
+	pending_hazard_mitigation -= absorbed
+	return remaining_damage - absorbed
 
 func _remove_balls_by_id(ids: Array) -> void:
 	var removed_any := false

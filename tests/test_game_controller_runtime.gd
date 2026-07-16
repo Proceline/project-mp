@@ -1,58 +1,85 @@
 extends RefCounted
 
-func test_chain_resolution_applies_effects_once_and_clears_orbs(runner: TestRunner) -> void:
+func test_chain_resolution_applies_color_effects_once_and_clears_orbs(runner: TestRunner) -> void:
 	var controller := _instantiate_controller(runner)
 	if controller == null:
 		return
 
 	controller.chain_flash_seconds = 0.5
 	controller.battle.player_hp = 18
-	controller.battle.player_shield = 0
 
 	var counter := BurstCounterMechanic.new()
 	counter.burst_threshold = 1
 	controller.boss_controller.configure([counter])
 
-	var attack := _combat_ball(100, BallState.CombatKind.ATTACK, 4, Vector2(40, 10))
-	var shield := _combat_ball(101, BallState.CombatKind.SHIELD, 2, Vector2(80, 10))
-	var heal := _combat_ball(102, BallState.CombatKind.HEAL, 3, Vector2(120, 10))
-	var untouched := _combat_ball(103, BallState.CombatKind.ATTACK, 9, Vector2(500, 500))
 	var chain_members: Array[BallState] = []
 	for i in range(5):
-		chain_members.append(_color_ball(i, 7, Vector2(i * 30, 0)))
+		chain_members.append(_color_ball(i, 0, Vector2(i * 30, 0)))
 
 	controller.playfield.balls = []
 	for ball in chain_members:
 		controller.playfield.add_ball(ball)
-	for ball in [attack, shield, heal, untouched]:
-		controller.playfield.add_ball(ball)
 
 	controller.advance_chain_resolution(0.0)
-	runner.assert_eq(attack.value, 9, "attack orb gains chain strength once when flash starts")
-	runner.assert_eq(shield.value, 7, "shield orb gains chain strength once when flash starts")
-	runner.assert_eq(heal.value, 8, "heal orb gains chain strength once when flash starts")
 	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp, "boss hp does not change before flash resolves")
-	runner.assert_eq(controller.battle.player_shield, 0, "shield is not granted before flash resolves")
 	runner.assert_eq(controller.battle.player_hp, 18, "heal is not granted before flash resolves")
 
 	controller.advance_chain_resolution(0.1)
-	runner.assert_eq(attack.value, 9, "attack orb is not buffed again during the same flash window")
-	runner.assert_eq(shield.value, 7, "shield orb is not buffed again during the same flash window")
-	runner.assert_eq(heal.value, 8, "heal orb is not buffed again during the same flash window")
+	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp, "color chain does not apply during flash window")
 
 	controller.advance_chain_resolution(0.5)
-	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp - 14, "attack damage includes baseline chain damage and attack orb value")
-	runner.assert_eq(controller.battle.player_shield, 7, "shield bonus is applied once when flash resolves")
-	runner.assert_eq(controller.battle.player_hp, 26, "heal bonus is applied once when flash resolves")
-	runner.assert_eq(controller.playfield.balls.size(), 1, "resolved chain removes color members and triggered combat orbs")
-	if controller.playfield.balls.size() == 1:
-		runner.assert_eq(controller.playfield.balls[0].id, 103, "untouched combat orb remains on the playfield")
+	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp - 10, "red chain deals 2 damage per orb")
+	runner.assert_eq(controller.battle.player_hp, 18, "red chain does not heal")
+	runner.assert_eq(controller.playfield.balls.size(), 0, "resolved chain removes color members")
 
 	var counter_state := controller.boss_controller.get_mechanic_state(counter)
 	runner.assert_true(bool(counter_state.get("pending_counter", false)), "boss controller is notified about chain attack damage")
 
 	controller.advance_chain_resolution(0.5)
-	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp - 14, "resolved chain does not apply damage twice")
+	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp - 10, "resolved chain does not apply damage twice")
+	_destroy_controller(controller)
+
+func test_yellow_chain_vulnerability_applies_to_next_damaging_chain(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.chain_flash_seconds = 0.1
+	controller.playfield.balls = []
+	for i in range(5):
+		controller.playfield.add_ball(_color_ball(i, 2, Vector2(i * 30, 0)))
+
+	controller.advance_chain_resolution(0.0)
+	controller.advance_chain_resolution(0.11)
+	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp, "yellow chain deals no direct damage")
+	runner.assert_eq(controller.pending_yellow_vulnerability, 5, "yellow chain stores next-hit vulnerability")
+
+	for i in range(5):
+		controller.playfield.add_ball(_color_ball(20 + i, 0, Vector2(i * 30, 0)))
+	controller.advance_chain_resolution(0.0)
+	controller.advance_chain_resolution(0.11)
+
+	runner.assert_eq(controller.battle.boss_hp, controller.battle.boss_max_hp - 15, "next red chain consumes yellow vulnerability")
+	runner.assert_eq(controller.pending_yellow_vulnerability, 0, "yellow vulnerability is consumed by the next damaging chain")
+	_destroy_controller(controller)
+
+func test_blue_chain_mitigates_danger_hazard_clear_damage(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.chain_flash_seconds = 0.1
+	controller.battle.player_hp = 30
+	controller.playfield.balls = []
+	for i in range(5):
+		controller.playfield.add_ball(_color_ball(i, 1, Vector2(i * 30, 0)))
+	var hazard := _hazard_ball(99, 4, Vector2(80, 0))
+	hazard.hazard_phase = BallState.HazardPhase.DANGER
+	controller.playfield.add_ball(hazard)
+
+	controller.advance_chain_resolution(0.0)
+	controller.advance_chain_resolution(0.11)
+
+	runner.assert_eq(controller.battle.player_hp, 30, "blue mitigation absorbs the cleared danger hazard damage")
+	runner.assert_eq(controller.pending_hazard_mitigation, 1, "unused blue mitigation is kept for later hazard clears")
 	_destroy_controller(controller)
 
 func test_late_chain_member_extends_flash_window_and_clears(runner: TestRunner) -> void:
@@ -99,7 +126,7 @@ func test_player_orbs_auto_drop_without_space(runner: TestRunner) -> void:
 	runner.assert_true(dropped.has_settle_target, "auto dropped orb receives a settle target")
 	_destroy_controller(controller)
 
-func test_tactical_combat_orb_inserts_into_main_preview(runner: TestRunner) -> void:
+func test_tactical_combat_orb_insert_is_disabled_for_color_effect_loop(runner: TestRunner) -> void:
 	var controller := _instantiate_controller(runner)
 	if controller == null:
 		return
@@ -108,9 +135,16 @@ func test_tactical_combat_orb_inserts_into_main_preview(runner: TestRunner) -> v
 
 	var handled: bool = controller.insert_tactical_combat_orb()
 
-	runner.assert_true(handled, "tactical insertion is handled when a combat slot is ready")
-	runner.assert_eq(controller.spawn_queue.preview.size(), before_size + 1, "tactical combat insertion adds to the main preview")
-	runner.assert_eq(controller.spawn_queue.preview[1].kind, BallState.Kind.COMBAT, "tactical combat orb inserts near the queue head")
+	runner.assert_true(not handled, "tactical insertion is disabled when color chains own combat effects")
+	runner.assert_eq(controller.spawn_queue.preview.size(), before_size, "disabled tactical insertion does not change the main preview")
+	_destroy_controller(controller)
+
+func test_tactical_slots_start_empty_for_color_effect_loop(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+
+	runner.assert_eq(controller.tactical_queue.slots.size(), 0, "tactical combat slots are empty when color chains own combat effects")
 	_destroy_controller(controller)
 
 func test_player_fast_drop_accelerates_current_orb_and_starts_next(runner: TestRunner) -> void:
@@ -328,5 +362,12 @@ func _combat_ball(id: int, combat_kind: BallState.CombatKind, value: int, pos: V
 	var ball: BallState = BallState.new_ball(id, BallState.Kind.COMBAT, pos)
 	ball.combat_kind = combat_kind
 	ball.value = value
+	ball.settled = true
+	return ball
+
+func _hazard_ball(id: int, value: int, pos: Vector2) -> BallState:
+	var ball: BallState = BallState.new_ball(id, BallState.Kind.HAZARD, pos)
+	ball.value = value
+	ball.hazard_damage = value
 	ball.settled = true
 	return ball

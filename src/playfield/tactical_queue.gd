@@ -8,16 +8,10 @@ var next_id: int = 7000
 var tuning: OrbTuning = DEFAULT_TUNING
 
 func seed_slots() -> void:
-	while slots.size() < tuning.tactical_slot_count:
-		slots.append(_make_combat_ball())
+	slots.clear()
 
 func pop_next_combat_orb() -> BallState:
-	seed_slots()
-	if slots.is_empty():
-		return null
-	var ball := slots.pop_front() as BallState
-	slots.append(_make_combat_ball())
-	return ball
+	return null
 
 func _make_combat_ball() -> BallState:
 	next_id += 1

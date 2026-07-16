@@ -1,6 +1,6 @@
 # Combat Design Notes
 
-Last updated: 2026-07-11
+Last updated: 2026-07-16
 
 This document is the ongoing design summary for combat pacing, boss presentation, orb role clarity, and visual direction. Future design sessions should update this file with settled conclusions so implementation-focused sessions can use it as a practical reference.
 
@@ -44,7 +44,26 @@ Example modular boss mechanics:
 
 Boss mechanics should stay composable. A future boss should be able to combine queue insertion, entry angle changes, warning duration changes, boundary pressure, and phase behavior without rewriting the core playfield rules.
 
-## Combat Orb Pacing Problem
+## Color Chain Combat Effects
+
+Current direction:
+
+- Tactical combat orbs are removed from normal play because they added too much handling overhead.
+- Color chains now carry combat effects directly.
+- Boss Eclipse/hazard orbs remain the main disruption layer.
+
+Current color roles:
+
+- Red chains deal `2` boss damage per orb.
+- Blue chains deal `1` boss damage per orb and grant hazard mitigation. Mitigation reduces damage taken when clearing danger Eclipse Orbs and leftover mitigation can carry forward.
+- Yellow chains deal `0` direct damage and grant next-hit vulnerability. The next positive boss damage consumes stored yellow vulnerability.
+- Green chains deal `1` boss damage per orb and heal the player for half of that chain damage.
+
+Design principle:
+
+**Color choice should decide combat intent. Red bursts, yellow prepares, blue stabilizes hazard pressure, and green recovers.**
+
+## Previous Combat Orb Pacing Problem
 
 Current player feel:
 
@@ -57,7 +76,7 @@ Design principle:
 
 **Color orbs create plans, Eclipse Orbs disrupt plans, and combat orbs amplify plans only when the player chooses to deploy them.**
 
-## Recommended Combat Structure
+## Previous Combat Structure
 
 Use a hybrid structure:
 
@@ -118,7 +137,7 @@ Design intent:
 - A well-placed combat orb turns a good chain into a major tactical payoff.
 - The player should feel clever for choosing when to insert and where to land a combat orb.
 
-## Alternative Considered: Remove Combat Orbs
+## Alternative Chosen: Remove Combat Orbs
 
 An alternative design is to remove combat orbs entirely and let color chains trigger the active stance directly.
 
@@ -141,8 +160,8 @@ Cons:
 
 Conclusion:
 
-- Do not choose this as the primary direction yet.
-- Keep it as a fallback if tactical combat orbs remain too complex or too distracting.
+- This is now the primary direction.
+- Tactical combat orbs are kept only as compatibility code for now, but they are not seeded, inserted, or rendered in normal play.
 
 ## Boss Visibility And Attention
 
@@ -197,11 +216,11 @@ The feedback window should not freeze the whole game for long. It should briefly
 Important near-term feedback improvements:
 
 - Preview queue should remain icon-based.
-- Tactical combat queue should be visually separate from the main preview queue.
+- Tactical combat queue should be removed or repurposed visually now that combat orbs are no longer normal-play objects.
 - Eclipse Orb warning and danger states need strong shape, color, and animation differences.
 - Fast drop should feel like acceleration or forced entry, not teleportation.
 - Flashing color chains should visually connect as constellations or resonance lines.
-- Combat orb charging should show stacked contribution clearly, such as rings, pulses, or value ticks.
+- Color-chain effects should show clear feedback for damage, healing, hazard mitigation, and yellow vulnerability.
 - Boss damage should appear on the boss side, not clutter the board center.
 - Shield and HP should remain anchored to the Heartlight Core.
 
@@ -220,15 +239,25 @@ Current prototype input:
 
 - `Q`: insert the next tactical combat orb into the main preview queue.
 
+## Implemented Combat Pacing Phase 2
+
+Implemented after the tactical queue proved too fussy in play:
+
+- Red, blue, yellow, and green color chains now directly create combat results.
+- Tactical combat insertion is disabled.
+- Tactical combat slots are empty in normal play.
+- Combat orb chain charging is no longer part of the active rule loop.
+- The main preview remains focused on color orbs plus boss-inserted Eclipse Orbs.
+- `Q` is currently a no-op and can be removed or reassigned in a later input cleanup.
+
 ## Working Summary For Future Implementation Sessions
 
 Completed combat pacing target:
 
 - Keep color orbs as the dominant board content.
-- Make 5+ color chain clears produce baseline boss damage.
-- Move combat orbs into a slow, separate tactical queue.
-- Let the player manually insert tactical combat orbs into the main preview queue.
-- Keep combat orbs compatible with existing chain influence and stacking rules.
+- Make 5+ color chain clears produce color-specific boss combat effects.
+- Remove tactical combat orbs from normal play.
+- Keep red/yellow/blue/green chain roles readable and tunable.
 - Keep boss hazards in the shared main preview queue as the primary disruption system.
 
 Recommended next design implementation target:

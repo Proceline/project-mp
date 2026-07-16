@@ -35,27 +35,21 @@ func test_spawn_queue_uses_configurable_color_generator(runner: TestRunner) -> v
 	runner.assert_eq(queue.preview[1].color_id, 2, "configured generator can produce consecutive same-color orbs")
 	queue.free()
 
-func test_tactical_queue_generates_combat_orb_slots(runner: TestRunner) -> void:
+func test_tactical_queue_stays_empty_after_color_effect_redesign(runner: TestRunner) -> void:
 	var queue: TacticalQueue = TacticalQueue.new()
 	queue.seed_slots()
 
-	runner.assert_eq(queue.slots.size(), 2, "tactical queue starts with two combat slots")
-	for ball in queue.slots:
-		runner.assert_eq(ball.kind, BallState.Kind.COMBAT, "tactical slots contain combat orbs")
+	runner.assert_eq(queue.slots.size(), 0, "tactical queue no longer seeds combat orb slots")
 	queue.free()
 
-func test_tactical_orb_can_be_inserted_into_main_preview(runner: TestRunner) -> void:
-	var main_queue: SpawnQueue = SpawnQueue.new()
+func test_tactical_queue_returns_no_combat_orb_after_color_effect_redesign(runner: TestRunner) -> void:
 	var tactical_queue: TacticalQueue = TacticalQueue.new()
-	main_queue.seed_preview()
 	tactical_queue.seed_slots()
 
 	var inserted: BallState = tactical_queue.pop_next_combat_orb()
-	main_queue.insert_preview_ball(inserted, 1)
 
-	runner.assert_eq(main_queue.preview[1].kind, BallState.Kind.COMBAT, "tactical combat orb inserts near the main queue head")
-	runner.assert_eq(tactical_queue.slots.size(), 2, "tactical queue refills after insertion")
-	main_queue.free()
+	runner.assert_true(inserted == null, "tactical queue no longer returns combat orbs")
+	runner.assert_eq(tactical_queue.slots.size(), 0, "tactical queue remains empty after pop")
 	tactical_queue.free()
 
 func test_spawn_queue_inserts_hazard_at_configured_preview_index(runner: TestRunner) -> void:

@@ -53,10 +53,13 @@
 ## Chain and Hazard Rules
 
 - Five or more connected same-color orbs start flashing.
-- Resolved color chains deal baseline boss damage equal to chain strength, even without combat orbs.
+- Resolved color chains directly produce color-specific combat effects; combat orbs are no longer part of normal play.
+- Red chains deal 2 boss damage per orb.
+- Blue chains deal 1 boss damage per orb and grant hazard mitigation, which reduces damage from clearing danger hazard orbs. Unused mitigation can carry forward.
+- Yellow chains deal 0 direct damage and grant next-hit vulnerability. The next positive boss damage consumes stored yellow vulnerability.
+- Green chains deal 1 boss damage per orb and heal the player for half of that chain damage.
 - While flashing, additional same-color orbs can still join and increase the chain effect. New members extend the flash window by a tunable amount, capped by a tunable maximum.
-- Combat orbs start at value `0`; nearby flashing color chains increase their value.
-- A combat orb near multiple flashing chains stacks all nearby chain contributions.
+- Tactical combat orbs remain in compatibility code, but normal play does not seed, insert, charge, or render them.
 - Hazard orbs have a value and phase:
   - Warning phase starts when the hazard contacts the board. Warning hazards show no number, and clearing one removes it without player damage.
   - Danger phase starts after the configured warning duration. Danger hazards start at the configured value, show that value, grow on the configured interval up to the configured cap, and clearing one deals damage equal to its visible value.
