@@ -16,7 +16,7 @@ assets/art/ui/queue/vertical_preview_queue_frame_v06.png
 - Format: `RGBA`
 - Transparent background
 - One continuous parchment / watercolor / astral frame
-- Six clear orb placement areas
+- No baked orb placement rings or socket outlines
 - No `Next`, `Tactic`, `ATK`, `HEAL`, `DMG`, numbers, or other baked text
 - No baked gameplay orbs
 - No separate tactical section
@@ -44,7 +44,7 @@ assets/art/ui/queue/vertical_preview_queue_frame_v06.png
 
 Do not overwrite the v05 file unless you specifically want to remove the older art variant. Keeping both files makes rollback easier.
 
-## Socket Coordinates
+## Runtime Orb Coordinates
 
 Coordinates are in native texture space for `360x760`.
 
@@ -59,10 +59,9 @@ slot 5: x=180, y=527
 slot 6: x=180, y=628
 ```
 
-Suggested visual socket radius:
+Suggested runtime icon size:
 
 ```text
-socket visual radius: ~38 px
 runtime orb icon radius: ~24 px if using current preview icon scale
 ```
 
@@ -78,12 +77,13 @@ displayed_frame_size / Vector2(360, 760)
 - Runtime orbs should be placed at the six centers above.
 - The frame should not render any tactical slots.
 - The tactical label/row should remain hidden or be removed from the normal layout.
-- The frame art has restrained socket marks, but the orb sprites should remain the primary visual signal.
+- The frame art intentionally has no baked socket marks; the runtime orb sprites define the actual queue positions.
 
 ## Visual Constraints
 
 - Keep the Astral Resonance watercolor / parchment / star-chart style.
 - Do not reintroduce a separate lower tactical panel.
+- Do not bake orb position rings, socket outlines, or placement circles into the frame.
 - Do not bake orb graphics into the frame.
 - Do not add text labels to the art.
 - Do not use Nintendo-like party UI, toy-like plastic, or gameplay-orb pips as UI decoration.
