@@ -6,7 +6,6 @@
 [ext_resource type="Script" uid="uid://bip2ppp4756sp" path="res://src/playfield/hazard_spawner.gd" id="4_hazard"]
 [ext_resource type="Script" uid="uid://rkduewtdd24d" path="res://src/boss/boss_controller.gd" id="5_boss"]
 [ext_resource type="Script" uid="uid://bs17oqev7dvpr" path="res://src/ui/battle_ui.gd" id="6_ui"]
-[ext_resource type="Script" uid="uid://c7xgm28ukjh5" path="res://src/playfield/tactical_queue.gd" id="7_tactical"]
 [ext_resource type="Texture2D" uid="uid://c2kfvcau8eftg" path="res://assets/art/backgrounds/battle/astral_watercolor_layout_bg_v05.png" id="8_bg_v05"]
 [ext_resource type="Texture2D" uid="uid://rbvnsbha7dp7" path="res://assets/art/boss/veiled_seraph/veiled_seraph_idle_v05.png" id="9_boss_v05"]
 [ext_resource type="Texture2D" uid="uid://b850khjcesatf" path="res://assets/art/player/duelist/player_duelist_idle_v05.png" id="10_player_v05"]
@@ -21,10 +20,6 @@ script = ExtResource("1_game")
 [node name="SpawnQueue" type="Node" parent="." unique_id=268057010]
 unique_name_in_owner = true
 script = ExtResource("3_queue")
-
-[node name="TacticalQueue" type="Node" parent="." unique_id=807657698]
-unique_name_in_owner = true
-script = ExtResource("7_tactical")
 
 [node name="HazardSpawner" type="Node" parent="." unique_id=2049343656]
 unique_name_in_owner = true
@@ -242,22 +237,6 @@ offset_top = 31.0
 offset_right = 21.0
 offset_bottom = 258.0
 grow_horizontal = 2
-theme_override_constants/separation = 6
-
-[node name="TacticalRow" type="VBoxContainer" parent="BattleUI/LeftQueueRoot" unique_id=1030311129]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -20.0
-offset_top = -134.0
-offset_right = 20.0
-offset_bottom = -43.0
-grow_horizontal = 2
-grow_vertical = 0
 theme_override_constants/separation = 6
 
 [node name="BossPanel" type="ColorRect" parent="BattleUI" unique_id=196736427]

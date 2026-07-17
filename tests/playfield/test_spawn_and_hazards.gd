@@ -35,23 +35,6 @@ func test_spawn_queue_uses_configurable_color_generator(runner: TestRunner) -> v
 	runner.assert_eq(queue.preview[1].color_id, 2, "configured generator can produce consecutive same-color orbs")
 	queue.free()
 
-func test_tactical_queue_stays_empty_after_color_effect_redesign(runner: TestRunner) -> void:
-	var queue: TacticalQueue = TacticalQueue.new()
-	queue.seed_slots()
-
-	runner.assert_eq(queue.slots.size(), 0, "tactical queue no longer seeds combat orb slots")
-	queue.free()
-
-func test_tactical_queue_returns_no_combat_orb_after_color_effect_redesign(runner: TestRunner) -> void:
-	var tactical_queue: TacticalQueue = TacticalQueue.new()
-	tactical_queue.seed_slots()
-
-	var inserted: BallState = tactical_queue.pop_next_combat_orb()
-
-	runner.assert_true(inserted == null, "tactical queue no longer returns combat orbs")
-	runner.assert_eq(tactical_queue.slots.size(), 0, "tactical queue remains empty after pop")
-	tactical_queue.free()
-
 func test_spawn_queue_inserts_hazard_at_configured_preview_index(runner: TestRunner) -> void:
 	var queue: SpawnQueue = SpawnQueue.new()
 	queue.seed_preview()

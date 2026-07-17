@@ -29,7 +29,6 @@ func test_preview_renders_orb_icons_instead_of_code_text(runner: TestRunner) -> 
 	tree.root.add_child(scene)
 	var battle_ui = scene.get_node("%BattleUI")
 	var preview_row: BoxContainer = scene.get_node("%PreviewRow")
-	var tactical_row: BoxContainer = scene.get_node("%TacticalRow")
 	battle_ui.player_hp_label = scene.get_node("%PlayerHP")
 	battle_ui.shield_marks_label = scene.get_node("%ShieldMarks")
 	battle_ui.boss_hp_label = scene.get_node("%BossHP")
@@ -39,7 +38,6 @@ func test_preview_renders_orb_icons_instead_of_code_text(runner: TestRunner) -> 
 	battle_ui.boss_action_fill = scene.get_node("%BossActionFill")
 	battle_ui.boss_action_glow = scene.get_node("%BossActionGlow")
 	battle_ui.preview_row = preview_row
-	battle_ui.tactical_row = tactical_row
 	battle_ui.status_label = scene.get_node("%Status")
 	var color_ball := BallState.new_ball(1, BallState.Kind.COLOR, Vector2.ZERO)
 	color_ball.color_id = 0
@@ -48,39 +46,19 @@ func test_preview_renders_orb_icons_instead_of_code_text(runner: TestRunner) -> 
 	hazard.hazard_phase = BallState.HazardPhase.DANGER
 	var preview: Array[BallState] = [color_ball, hazard]
 
-	var empty_tactical: Array[BallState] = []
-	battle_ui.update_from_state(BattleState.new(), 0.0, preview, empty_tactical)
+	battle_ui.update_from_state(BattleState.new(), 0.0, preview)
 
 	runner.assert_eq(preview_row.get_child_count(), 2, "preview row renders one icon per preview orb")
 	if preview_row.get_child_count() >= 2:
 		runner.assert_true(preview_row.get_child(0).has_method("current_fill_color"), "preview entries are orb icon controls")
 	scene.queue_free()
 
-func test_tactical_row_renders_separate_combat_icons(runner: TestRunner) -> void:
+func test_tactical_queue_ui_is_removed_from_main_scene(runner: TestRunner) -> void:
 	var packed := load("res://scenes/main.tscn")
 	var scene: Node = packed.instantiate()
-	var tree := Engine.get_main_loop() as SceneTree
-	tree.root.add_child(scene)
-	var battle_ui = scene.get_node("%BattleUI")
-	battle_ui.player_hp_label = scene.get_node("%PlayerHP")
-	battle_ui.shield_marks_label = scene.get_node("%ShieldMarks")
-	battle_ui.boss_hp_label = scene.get_node("%BossHP")
-	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
-	battle_ui.boss_hp_missing = scene.get_node("%BossHPMissing")
-	battle_ui.boss_action_clip = scene.get_node("%BossActionClip")
-	battle_ui.boss_action_fill = scene.get_node("%BossActionFill")
-	battle_ui.boss_action_glow = scene.get_node("%BossActionGlow")
-	battle_ui.preview_row = scene.get_node("%PreviewRow")
-	battle_ui.tactical_row = scene.get_node("%TacticalRow")
-	battle_ui.status_label = scene.get_node("%Status")
-	var combat := BallState.new_ball(3, BallState.Kind.COMBAT, Vector2.ZERO)
-	combat.combat_kind = BallState.CombatKind.ATTACK
-	var empty_preview: Array[BallState] = []
-	var tactical: Array[BallState] = [combat]
 
-	battle_ui.update_from_state(BattleState.new(), 0.0, empty_preview, tactical)
-
-	runner.assert_eq(battle_ui.tactical_row.get_child_count(), 1, "tactical row renders combat slots separately")
+	runner.assert_true(not scene.has_node("TacticalQueue"), "tactical queue node is removed from normal play")
+	runner.assert_true(not scene.has_node("BattleUI/LeftQueueRoot/TacticalRow"), "left queue UI no longer has a tactical row")
 	scene.queue_free()
 
 func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner) -> void:
@@ -99,7 +77,6 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	var boss_panel := scene.get_node("BattleUI/BossPanel") as ColorRect
 	var boss_name := scene.get_node("BattleUI/BattleBackground/BossPresentationRoot/BossName") as Label
 	var preview_row := scene.get_node("%PreviewRow")
-	var tactical_row := scene.get_node("%TacticalRow")
 	var status_label := scene.get_node("%Status") as Label
 	var boss_hp := scene.get_node("%BossHP") as Label
 	var boss_hp_clip := scene.get_node("%BossHPClip") as Control
@@ -136,7 +113,6 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	runner.assert_true(boss_portrait != null and boss_portrait.texture != null, "v05 layout has a boss portrait")
 	runner.assert_true(player_portrait != null and player_portrait.texture != null, "v05 layout has a player portrait")
 	runner.assert_true(preview_row is VBoxContainer, "main preview queue is vertical")
-	runner.assert_true(tactical_row is VBoxContainer, "tactical queue is vertical")
 	runner.assert_true(boss_hp.get_parent() == top_boss_bar_root, "boss HP text is grouped with the top boss bar")
 	runner.assert_true(boss_hp.position.y < 60.0, "boss HP text is placed near the top bar")
 	runner.assert_true(playfield.position.x > 430.0 and playfield.position.x < 700.0, "playfield sits near the center after v05 layout shift")
@@ -155,9 +131,9 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	runner.assert_true(player_portrait.offset_bottom >= 0.0, "player portrait is grounded near the bottom edge")
 	runner.assert_true(queue_frame.get_parent() == left_queue_root, "queue frame is grouped with queue rows")
 	runner.assert_true(preview_row.get_parent() == left_queue_root, "preview icon row is grouped with the queue frame")
-	runner.assert_true(tactical_row.get_parent() == left_queue_root, "tactical icon row is grouped with the queue frame")
 	runner.assert_true(not scene.has_node("BattleUI/Preview"), "legacy preview label node is removed")
 	runner.assert_true(not scene.has_node("BattleUI/Tactical"), "legacy tactical label node is removed")
+	runner.assert_true(not scene.has_node("BattleUI/LeftQueueRoot/TacticalRow"), "legacy tactical row node is removed")
 	runner.assert_true(left_queue_root.position.x >= 32.0, "queue root keeps a left safe margin")
 	runner.assert_true(queue_frame.modulate.a <= 0.75, "queue frame is subdued behind the orb icons")
 	runner.assert_true(not status_label.visible, "debug status label is hidden")
@@ -181,15 +157,13 @@ func test_boss_hp_and_stacked_action_bar_update_from_state(runner: TestRunner) -
 	battle_ui.boss_action_fill = scene.get_node("%BossActionFill")
 	battle_ui.boss_action_glow = scene.get_node("%BossActionGlow")
 	battle_ui.preview_row = scene.get_node("%PreviewRow")
-	battle_ui.tactical_row = scene.get_node("%TacticalRow")
 	battle_ui.status_label = scene.get_node("%Status")
 	var battle := BattleState.new()
 	battle.boss_hp = 127
 	battle.boss_max_hp = 200
 	var empty_preview: Array[BallState] = []
-	var empty_tactical: Array[BallState] = []
 
-	battle_ui.update_from_state(battle, 0.5, empty_preview, empty_tactical)
+	battle_ui.update_from_state(battle, 0.5, empty_preview)
 
 	runner.assert_eq(battle_ui.boss_hp_label.text, "Boss HP 127/200", "boss HP label shows current HP")
 	runner.assert_true(battle_ui.boss_hp_clip.visible, "boss HP fill lane remains visible after boss damage")
@@ -202,7 +176,7 @@ func test_boss_hp_and_stacked_action_bar_update_from_state(runner: TestRunner) -
 	runner.assert_eq(battle_ui.boss_action_fill.texture, battle_ui.visual_theme.boss_action_bar_fill(), "normal action progress uses stacked normal fill")
 	runner.assert_true(not battle_ui.boss_action_glow.visible, "normal action progress does not show warning glow")
 
-	battle_ui.update_from_state(battle, 0.9, empty_preview, empty_tactical)
+	battle_ui.update_from_state(battle, 0.9, empty_preview)
 
 	runner.assert_eq(battle_ui.boss_action_fill.texture, battle_ui.visual_theme.boss_action_bar_fill_warning(), "near-full action progress switches to warning fill")
 	runner.assert_true(battle_ui.boss_action_glow.visible, "near-full action progress shows glow")

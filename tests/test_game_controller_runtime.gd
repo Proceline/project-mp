@@ -126,27 +126,6 @@ func test_player_orbs_auto_drop_without_space(runner: TestRunner) -> void:
 	runner.assert_true(dropped.has_settle_target, "auto dropped orb receives a settle target")
 	_destroy_controller(controller)
 
-func test_tactical_combat_orb_insert_is_disabled_for_color_effect_loop(runner: TestRunner) -> void:
-	var controller := _instantiate_controller(runner)
-	if controller == null:
-		return
-	controller.spawn_queue.seed_preview()
-	var before_size := controller.spawn_queue.preview.size()
-
-	var handled: bool = controller.insert_tactical_combat_orb()
-
-	runner.assert_true(not handled, "tactical insertion is disabled when color chains own combat effects")
-	runner.assert_eq(controller.spawn_queue.preview.size(), before_size, "disabled tactical insertion does not change the main preview")
-	_destroy_controller(controller)
-
-func test_tactical_slots_start_empty_for_color_effect_loop(runner: TestRunner) -> void:
-	var controller := _instantiate_controller(runner)
-	if controller == null:
-		return
-
-	runner.assert_eq(controller.tactical_queue.slots.size(), 0, "tactical combat slots are empty when color chains own combat effects")
-	_destroy_controller(controller)
-
 func test_player_fast_drop_accelerates_current_orb_and_starts_next(runner: TestRunner) -> void:
 	var controller := _instantiate_controller(runner)
 	if controller == null:
@@ -342,7 +321,6 @@ func _instantiate_controller(runner: TestRunner) -> GameController:
 	tree.root.add_child(controller)
 	controller.playfield = controller.get_node("%Playfield") as Playfield
 	controller.spawn_queue = controller.get_node("%SpawnQueue") as SpawnQueue
-	controller.tactical_queue = controller.get_node("%TacticalQueue") as TacticalQueue
 	controller.hazard_spawner = controller.get_node("%HazardSpawner") as HazardSpawner
 	controller.boss_controller = controller.get_node("%BossController") as BossController
 	controller.ui = controller.get_node("%BattleUI")

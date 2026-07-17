@@ -21,7 +21,6 @@ const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astra
 @onready var boss_action_fill: TextureRect = %BossActionFill
 @onready var boss_action_glow: TextureRect = %BossActionGlow
 @onready var preview_row: BoxContainer = %PreviewRow
-@onready var tactical_row: BoxContainer = %TacticalRow
 @onready var status_label: Label = %Status
 
 const BOSS_HP_FILL_X := 197.0
@@ -51,7 +50,7 @@ func apply_visual_theme() -> void:
 	if boss_portrait != null:
 		boss_portrait.texture = visual_theme.boss_portrait()
 
-func update_from_state(battle: BattleState, boss_action_ratio: float, preview: Array[BallState], tactical: Array[BallState] = []) -> void:
+func update_from_state(battle: BattleState, boss_action_ratio: float, preview: Array[BallState]) -> void:
 	player_hp_label.text = str(battle.player_hp)
 	var marks: int = mini(battle.player_shield, 20)
 	if marks > 0:
@@ -65,11 +64,12 @@ func update_from_state(battle: BattleState, boss_action_ratio: float, preview: A
 	_update_boss_hp_fill(battle)
 	_update_boss_action_bar(boss_action_ratio)
 	_update_icon_row(preview_row, preview)
-	_update_icon_row(tactical_row, tactical)
 	status_label.text = ""
 	status_label.visible = false
 
 func _update_icon_row(row: BoxContainer, orbs: Array[BallState]) -> void:
+	if row == null:
+		return
 	for child in row.get_children():
 		row.remove_child(child)
 		child.queue_free()

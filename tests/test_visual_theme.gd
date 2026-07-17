@@ -78,14 +78,12 @@ func test_preview_icons_receive_theme_from_battle_ui(runner: TestRunner) -> void
 	battle_ui.boss_action_fill = scene.get_node("%BossActionFill")
 	battle_ui.boss_action_glow = scene.get_node("%BossActionGlow")
 	battle_ui.preview_row = scene.get_node("%PreviewRow")
-	battle_ui.tactical_row = scene.get_node("%TacticalRow")
 	battle_ui.status_label = scene.get_node("%Status")
 	var color_ball := BallState.new_ball(5, BallState.Kind.COLOR, Vector2.ZERO)
 	color_ball.color_id = 1
 	var preview: Array[BallState] = [color_ball]
-	var tactical: Array[BallState] = []
 
-	battle_ui.update_from_state(BattleState.new(), 0.0, preview, tactical)
+	battle_ui.update_from_state(BattleState.new(), 0.0, preview)
 
 	var icon := battle_ui.preview_row.get_child(0) as PreviewOrbIcon
 	runner.assert_true(icon != null, "preview row creates themed orb icon")

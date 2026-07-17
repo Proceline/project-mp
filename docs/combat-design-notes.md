@@ -235,7 +235,7 @@ Implemented after this note was written:
 - Existing combat orb charging and multi-chain stacking rules are preserved.
 - Boss Eclipse/hazard orbs remain in the shared main preview queue as the boss-driven disruption system.
 
-Current prototype input:
+Previous prototype input:
 
 - `Q`: insert the next tactical combat orb into the main preview queue.
 
@@ -248,7 +248,7 @@ Implemented after the tactical queue proved too fussy in play:
 - Tactical combat slots are empty in normal play.
 - Combat orb chain charging is no longer part of the active rule loop.
 - The main preview remains focused on color orbs plus boss-inserted Eclipse Orbs.
-- `Q` is currently a no-op and can be removed or reassigned in a later input cleanup.
+- The `Q` tactical input mapping has been removed and can be reassigned later.
 
 ## Working Summary For Future Implementation Sessions
 

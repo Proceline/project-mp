@@ -3,7 +3,6 @@ class_name GameController
 
 @onready var playfield: Playfield = %Playfield
 @onready var spawn_queue: SpawnQueue = %SpawnQueue
-@onready var tactical_queue: TacticalQueue = %TacticalQueue
 @onready var hazard_spawner: HazardSpawner = %HazardSpawner
 @onready var boss_controller: BossController = %BossController
 @onready var ui: BattleUI = %BattleUI
@@ -38,11 +37,11 @@ func _ready() -> void:
 	var counter := BurstCounterMechanic.new()
 	boss_controller.configure([volley_mechanic, phase70, phase40, phase15, counter])
 	spawn_queue.seed_preview()
-	ui.update_from_state(battle, 0.0, spawn_queue.preview, tactical_queue.slots)
+	ui.update_from_state(battle, 0.0, spawn_queue.preview)
 
 func _process(delta: float) -> void:
 	if battle.result() != "active":
-		ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview, tactical_queue.slots)
+		ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview)
 		return
 	var rotation_input := Input.get_axis("rotate_left", "rotate_right")
 	playfield.rotate_settled(rotation_input * playfield.rotation_speed * delta)
@@ -50,8 +49,6 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("fast_drop_player_orb"):
 		if handle_player_fast_drop():
 			player_auto_drop_timer = 0.0
-	elif Input.is_action_just_pressed("insert_tactical_orb"):
-		insert_tactical_combat_orb()
 	else:
 		advance_player_orb_spawn(delta)
 	advance_boss_events(delta)
@@ -60,7 +57,7 @@ func _process(delta: float) -> void:
 		_apply_player_damage(damage, "boundary_explosion")
 		boss_controller.notify_player_damage(damage)
 	advance_chain_resolution(delta)
-	ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview, tactical_queue.slots)
+	ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview)
 
 func advance_chain_resolution(delta: float) -> void:
 	_tick_chains(delta)
@@ -80,9 +77,6 @@ func handle_player_fast_drop() -> bool:
 	var accelerated_count := playfield.accelerate_active_orbs(orb_tuning.player_fast_drop_entry_seconds)
 	var dropped_next := _fast_drop_next_orb()
 	return accelerated_count > 0 or dropped_next
-
-func insert_tactical_combat_orb() -> bool:
-	return false
 
 func _fast_drop_next_orb() -> bool:
 	var ball := spawn_queue.fast_drop_current()
@@ -122,7 +116,6 @@ func _apply_orb_tuning() -> void:
 	if orb_tuning == null:
 		return
 	spawn_queue.tuning = orb_tuning
-	tactical_queue.tuning = orb_tuning
 	hazard_spawner.tuning = orb_tuning
 	playfield.hazard_warning_seconds = orb_tuning.hazard_warning_seconds
 	playfield.hazard_tuning = orb_tuning.hazard_tuning
