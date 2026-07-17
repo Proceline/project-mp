@@ -37,8 +37,7 @@
 
 ## Orb Behavior Notes
 
-- The main preview queue should naturally generate color orbs. Tactical combat orbs have been removed from normal play.
-- Tactical combat orbs can be manually inserted into the main preview queue.
+- The main preview queue should naturally generate color orbs, with boss hazards inserted into the same queue by boss mechanics. Tactical/combat orb queues are removed from normal play.
 - Boss hazard events insert hazard orbs into the shared preview queue. They should not add hazards directly to the playfield.
 - Player fast-drop releases the current preview head, including hazard orbs.
 - Player fast-drop accelerates currently falling orbs, including hazard orbs, then immediately starts the next preview orb. It should not instantly settle or teleport the current orb.
@@ -59,7 +58,7 @@
 - Yellow chains deal 0 direct damage and grant next-hit vulnerability. The next positive boss damage consumes stored yellow vulnerability.
 - Green chains deal 1 boss damage per orb and heal the player for half of that chain damage.
 - While flashing, additional same-color orbs can still join and increase the chain effect. New members extend the flash window by a tunable amount, capped by a tunable maximum.
-- Tactical combat orbs remain in compatibility code, but normal play does not seed, insert, charge, or render them.
+- Tactical/combat orb compatibility code has been removed from the active runtime. Do not reintroduce `BallState.Kind.COMBAT`, tactical slots, or ATK/SHD/HEAL preview labels unless the design explicitly returns to that feature.
 - Hazard orbs have a value and phase:
   - Warning phase starts when the hazard contacts the board. Warning hazards show no number, and clearing one removes it without player damage.
   - Danger phase starts after the configured warning duration. Danger hazards start at the configured value, show that value, grow on the configured interval up to the configured cap, and clearing one deals damage equal to its visible value.

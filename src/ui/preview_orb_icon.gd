@@ -4,11 +4,6 @@ class_name PreviewOrbIcon
 const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astral_batch1.tres")
 
 const SIZE := Vector2(34.0, 34.0)
-const LABELS := {
-	BallState.CombatKind.ATTACK: "ATK",
-	BallState.CombatKind.SHIELD: "SHD",
-	BallState.CombatKind.HEAL: "HEAL",
-}
 
 var state: BallState
 var visual_theme: VisualTheme = DEFAULT_VISUAL_THEME
@@ -47,8 +42,6 @@ func _draw() -> void:
 func display_label() -> String:
 	if state == null:
 		return ""
-	if state.kind == BallState.Kind.COMBAT:
-		return LABELS.get(state.combat_kind, "")
 	if state.kind == BallState.Kind.HAZARD:
 		if state.hazard_phase == BallState.HazardPhase.WARNING:
 			return ""
@@ -60,8 +53,6 @@ func current_fill_color() -> Color:
 		return Color.WHITE
 	if state.kind == BallState.Kind.COLOR:
 		return [Color.RED, Color.DODGER_BLUE, Color.GOLD, Color.LIME_GREEN][max(state.color_id, 0) % 4]
-	if state.kind == BallState.Kind.COMBAT:
-		return Color.MEDIUM_PURPLE
 	if state.kind == BallState.Kind.HAZARD:
 		return Color(1.0, 0.62, 0.2) if state.hazard_phase == BallState.HazardPhase.WARNING else Color(0.9, 0.18, 0.2)
 	return Color.WHITE

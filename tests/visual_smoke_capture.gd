@@ -47,10 +47,10 @@ func _add_sample_orbs(playfield) -> void:
 		ball.color_id = i % 4
 		ball.settled = true
 		playfield.add_ball(ball)
-	var attack := BallState.new_ball(9010, BallState.Kind.COMBAT, Vector2(-108, 40))
-	attack.combat_kind = BallState.CombatKind.ATTACK
-	attack.settled = true
-	playfield.add_ball(attack)
+	var extra_color := BallState.new_ball(9010, BallState.Kind.COLOR, Vector2(-108, 40))
+	extra_color.color_id = 2
+	extra_color.settled = true
+	playfield.add_ball(extra_color)
 	var hazard := BallState.new_ball(9011, BallState.Kind.HAZARD, Vector2(132, 70))
 	hazard.value = 5
 	hazard.hazard_phase = BallState.HazardPhase.DANGER

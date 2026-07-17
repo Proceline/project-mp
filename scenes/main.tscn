@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://rbvnsbha7dp7" path="res://assets/art/boss/veiled_seraph/veiled_seraph_idle_v05.png" id="9_boss_v05"]
 [ext_resource type="Texture2D" uid="uid://b850khjcesatf" path="res://assets/art/player/duelist/player_duelist_idle_v05.png" id="10_player_v05"]
 [ext_resource type="Texture2D" uid="uid://byjj7p3x3jed2" path="res://assets/art/ui/boss/boss_hp_bar_frame_v09_stacked_shell.png" id="11_hpbar_v05"]
-[ext_resource type="Texture2D" uid="uid://bedfoy756183a" path="res://assets/art/ui/queue/vertical_orb_queue_frame_v05.png" id="12_queue_v05"]
+[ext_resource type="Texture2D" uid="uid://cacmp2a8dadgl" path="res://assets/art/ui/queue/vertical_preview_queue_frame_v06.png" id="12_queue_v06"]
 [ext_resource type="Texture2D" uid="uid://cf3s6h5f3kr40" path="res://assets/art/ui/boss/action_bar/boss_action_bar_fill_v04_stacked.png" id="13_action_fill"]
 [ext_resource type="Texture2D" uid="uid://dwkvy3vwc14we" path="res://assets/art/ui/boss/action_bar/boss_action_bar_glow_v04_stacked.png" id="14_action_glow"]
 
@@ -213,16 +213,17 @@ layout_mode = 3
 anchors_preset = 0
 offset_left = 48.0
 offset_top = 116.0
-offset_right = 172.0
-offset_bottom = 536.0
+offset_right = 198.0
+offset_bottom = 433.0
 
 [node name="QueueFrame" type="TextureRect" parent="BattleUI/LeftQueueRoot" unique_id=469115959]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.68)
 layout_mode = 0
 offset_right = 124.0
-offset_bottom = 420.0
-texture = ExtResource("12_queue_v05")
+offset_right = 150.0
+offset_bottom = 317.0
+texture = ExtResource("12_queue_v06")
 expand_mode = 1
 stretch_mode = 6
 
@@ -232,12 +233,12 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -19.0
+offset_left = -18.0
 offset_top = 31.0
-offset_right = 21.0
-offset_bottom = 258.0
+offset_right = 16.0
+offset_bottom = 281.0
 grow_horizontal = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 2
 
 [node name="BossPanel" type="ColorRect" parent="BattleUI" unique_id=196736427]
 visible = false

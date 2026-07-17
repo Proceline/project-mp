@@ -6,17 +6,14 @@ func _color_ball(id: int, color_id: int, pos: Vector2) -> BallState:
 	ball.settled = true
 	return ball
 
-func _attack_ball(id: int, pos: Vector2) -> BallState:
-	var ball: BallState = BallState.new_ball(id, BallState.Kind.COMBAT, pos)
-	ball.combat_kind = BallState.CombatKind.ATTACK
-	ball.settled = true
-	return ball
-
 func _hazard_ball(id: int, value: int, pos: Vector2) -> BallState:
 	var ball: BallState = BallState.new_ball(id, BallState.Kind.HAZARD, pos)
 	ball.value = value
 	ball.settled = true
 	return ball
+
+func test_ball_state_has_no_combat_orb_kind(runner) -> void:
+	runner.assert_true(not BallState.Kind.keys().has("COMBAT"), "abandoned combat orb kind is removed from active rules")
 
 func test_five_same_color_orbs_start_flashing(runner) -> void:
 	var resolver := ChainResolver.new()
@@ -57,19 +54,6 @@ func test_flashing_chain_absorbs_new_connected_same_color_orb(runner) -> void:
 	runner.assert_eq(int(chains[0].strength), 6, "chain strength grows when a new member joins")
 	var result := resolver.resolve_finished_chains(chains, balls)
 	runner.assert_true(result.cleared_color_ids.has(99), "resolved chain clears late-joined member")
-
-func test_combat_orb_is_not_charged_by_color_chains(runner) -> void:
-	var resolver := ChainResolver.new()
-	var combat := _attack_ball(100, Vector2(80, 0))
-	combat.value = 0
-	var chain_a: Dictionary = {"color_id": 1, "members": [], "strength": 5}
-	var chain_b: Dictionary = {"color_id": 2, "members": [], "strength": 6}
-	for i in range(5):
-		chain_a.members.append(_color_ball(i, 1, Vector2(i * 30, -20)))
-	for i in range(5):
-		chain_b.members.append(_color_ball(20 + i, 2, Vector2(i * 30, 20)))
-	resolver.apply_chain_influence([chain_a, chain_b], [combat])
-	runner.assert_eq(combat.value, 0, "combat orbs are no longer charged by color chains")
 
 func test_hazard_orb_value_is_not_reduced_by_chain_influence(runner) -> void:
 	var resolver := ChainResolver.new()

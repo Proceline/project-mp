@@ -1,6 +1,6 @@
 # Combat Design Notes
 
-Last updated: 2026-07-16
+Last updated: 2026-07-17
 
 This document is the ongoing design summary for combat pacing, boss presentation, orb role clarity, and visual direction. Future design sessions should update this file with settled conclusions so implementation-focused sessions can use it as a practical reference.
 
@@ -77,6 +77,8 @@ Design principle:
 **Color orbs create plans, Eclipse Orbs disrupt plans, and combat orbs amplify plans only when the player chooses to deploy them.**
 
 ## Previous Combat Structure
+
+Archived idea, not the active runtime direction:
 
 Use a hybrid structure:
 
@@ -161,7 +163,7 @@ Cons:
 Conclusion:
 
 - This is now the primary direction.
-- Tactical combat orbs are kept only as compatibility code for now, but they are not seeded, inserted, or rendered in normal play.
+- Tactical/combat orb compatibility code has been removed from the active runtime. Do not reintroduce tactical slots, ATK/SHD/HEAL preview labels, or `BallState.Kind.COMBAT` unless the design explicitly returns to that feature.
 
 ## Boss Visibility And Attention
 
@@ -207,7 +209,7 @@ Examples:
 Suggested duration:
 
 - Small chain hit: about 0.2-0.3 seconds of readable impact feedback.
-- Large tactical combat orb payoff: about 0.4-0.6 seconds of stronger boss reaction.
+- Large color-chain payoff: about 0.4-0.6 seconds of stronger boss reaction.
 
 The feedback window should not freeze the whole game for long. It should briefly lower visual noise and make the boss feel physically involved.
 
@@ -216,7 +218,7 @@ The feedback window should not freeze the whole game for long. It should briefly
 Important near-term feedback improvements:
 
 - Preview queue should remain icon-based.
-- Tactical combat queue should be removed or repurposed visually now that combat orbs are no longer normal-play objects.
+- Tactical combat queue should stay removed from normal play.
 - Eclipse Orb warning and danger states need strong shape, color, and animation differences.
 - Fast drop should feel like acceleration or forced entry, not teleportation.
 - Flashing color chains should visually connect as constellations or resonance lines.
@@ -224,9 +226,9 @@ Important near-term feedback improvements:
 - Boss damage should appear on the boss side, not clutter the board center.
 - Shield and HP should remain anchored to the Heartlight Core.
 
-## Implemented Combat Pacing Phase 1
+## Archived Combat Pacing Phase 1
 
-Implemented after this note was written:
+Historical implementation pass, now superseded:
 
 - 5+ color chain clears now produce baseline boss damage.
 - Main preview queue now naturally generates color orbs instead of random combat orbs.
@@ -247,6 +249,7 @@ Implemented after the tactical queue proved too fussy in play:
 - Tactical combat insertion is disabled.
 - Tactical combat slots are empty in normal play.
 - Combat orb chain charging is no longer part of the active rule loop.
+- Tactical/combat orb runtime compatibility code has been removed.
 - The main preview remains focused on color orbs plus boss-inserted Eclipse Orbs.
 - The `Q` tactical input mapping has been removed and can be reassigned later.
 

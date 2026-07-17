@@ -7,11 +7,6 @@ var state: BallState
 var visual_theme: VisualTheme = DEFAULT_VISUAL_THEME
 var velocity: Vector2 = Vector2.ZERO
 var attraction_speed: float = 120.0
-const LABELS := {
-	BallState.CombatKind.ATTACK: "ATK",
-	BallState.CombatKind.SHIELD: "SHD",
-	BallState.CombatKind.HEAL: "HEAL",
-}
 
 func setup(ball_state: BallState) -> void:
 	state = ball_state
@@ -102,22 +97,15 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	var value_text := display_label()
 	var font_size := 14 if value_text.length() <= 2 else 12
-	if state.kind == BallState.Kind.COMBAT:
-		font_size = 12
 	if state.kind == BallState.Kind.HAZARD:
 		font_size = 16
 	if value_text != "":
 		_draw_centered_text(font, value_text, Vector2(0.0, 5.0), font_size, Color.BLACK)
 		_draw_centered_text(font, value_text, Vector2(0.0, 4.0), font_size, Color.WHITE)
-	if state.kind == BallState.Kind.COMBAT and state.value > 0:
-		_draw_centered_text(font, str(state.value), Vector2(0.0, state.radius - 3.0), 11, Color.BLACK)
-		_draw_centered_text(font, str(state.value), Vector2(0.0, state.radius - 4.0), 11, Color(1.0, 0.94, 0.65))
 
 func display_label() -> String:
 	if state == null:
 		return ""
-	if state.kind == BallState.Kind.COMBAT:
-		return LABELS.get(state.combat_kind, "")
 	if state.kind == BallState.Kind.HAZARD:
 		if state.hazard_phase == BallState.HazardPhase.WARNING:
 			return ""
@@ -151,8 +139,6 @@ func current_fill_color() -> Color:
 			var pulse := 0.75 + 0.25 * sin(Time.get_ticks_msec() / 90.0)
 			return color.lerp(Color.WHITE, pulse * 0.35)
 		return color
-	if state.kind == BallState.Kind.COMBAT:
-		return Color.MEDIUM_PURPLE
 	if state.kind == BallState.Kind.HAZARD:
 		return Color(1.0, 0.62, 0.2) if state.hazard_phase == BallState.HazardPhase.WARNING else Color(0.9, 0.18, 0.2)
 	return Color.WHITE

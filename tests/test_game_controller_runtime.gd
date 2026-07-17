@@ -336,13 +336,6 @@ func _color_ball(id: int, color_id: int, pos: Vector2) -> BallState:
 	ball.settled = true
 	return ball
 
-func _combat_ball(id: int, combat_kind: BallState.CombatKind, value: int, pos: Vector2) -> BallState:
-	var ball: BallState = BallState.new_ball(id, BallState.Kind.COMBAT, pos)
-	ball.combat_kind = combat_kind
-	ball.value = value
-	ball.settled = true
-	return ball
-
 func _hazard_ball(id: int, value: int, pos: Vector2) -> BallState:
 	var ball: BallState = BallState.new_ball(id, BallState.Kind.HAZARD, pos)
 	ball.value = value

@@ -7,15 +7,12 @@ func test_batch1_visual_theme_maps_orb_textures(runner: TestRunner) -> void:
 		return
 	var red := BallState.new_ball(1, BallState.Kind.COLOR, Vector2.ZERO)
 	red.color_id = 0
-	var attack := BallState.new_ball(2, BallState.Kind.COMBAT, Vector2.ZERO)
-	attack.combat_kind = BallState.CombatKind.ATTACK
 	var warning := BallState.new_ball(3, BallState.Kind.HAZARD, Vector2.ZERO)
 	warning.hazard_phase = BallState.HazardPhase.WARNING
 	var danger := BallState.new_ball(4, BallState.Kind.HAZARD, Vector2.ZERO)
 	danger.hazard_phase = BallState.HazardPhase.DANGER
 
 	runner.assert_true(theme.get_orb_texture(red) != null, "theme maps red color orb texture")
-	runner.assert_true(theme.get_orb_texture(attack) != null, "theme maps attack combat orb texture")
 	runner.assert_true(theme.get_orb_texture(warning) != null, "theme maps warning eclipse orb texture")
 	runner.assert_true(theme.get_orb_texture(danger) != null, "theme maps danger eclipse orb texture")
 
@@ -25,17 +22,13 @@ func test_batch1_visual_theme_uses_v04_body_and_glow_paths(runner: TestRunner) -
 	if theme == null:
 		return
 	runner.assert_true(theme.color_orb_red_path.ends_with("_body_v04.png"), "star orb body path uses v04 runtime body art")
-	runner.assert_true(theme.combat_orb_attack_path.ends_with("_body_v04.png"), "combat orb body path uses v04 runtime body art")
 	runner.assert_true(theme.eclipse_orb_danger_path.ends_with("_body_v04.png"), "eclipse orb body path uses v04 runtime body art")
 	var red := BallState.new_ball(11, BallState.Kind.COLOR, Vector2.ZERO)
 	red.color_id = 0
-	var attack := BallState.new_ball(12, BallState.Kind.COMBAT, Vector2.ZERO)
-	attack.combat_kind = BallState.CombatKind.ATTACK
 	var danger := BallState.new_ball(13, BallState.Kind.HAZARD, Vector2.ZERO)
 	danger.hazard_phase = BallState.HazardPhase.DANGER
 
 	runner.assert_true(theme.get_orb_glow_texture(red) != null, "theme maps red star orb glow texture separately")
-	runner.assert_true(theme.get_orb_glow_texture(attack) != null, "theme maps attack combat orb glow texture separately")
 	runner.assert_true(theme.get_orb_glow_texture(danger) != null, "theme maps danger eclipse orb glow texture separately")
 
 func test_layout_v05_visual_theme_maps_screen_assets(runner: TestRunner) -> void:
@@ -50,6 +43,7 @@ func test_layout_v05_visual_theme_maps_screen_assets(runner: TestRunner) -> void
 	runner.assert_true(theme.boss_action_bar_fill_path.ends_with("boss_action_bar_fill_v04_stacked.png"), "boss action uses final stacked normal fill")
 	runner.assert_true(theme.boss_action_bar_fill_warning_path.ends_with("boss_action_bar_fill_warning_v04_stacked.png"), "boss action uses final stacked warning fill")
 	runner.assert_true(theme.boss_action_bar_glow_path.ends_with("boss_action_bar_glow_v04_stacked.png"), "boss action uses final stacked glow")
+	runner.assert_true(theme.vertical_queue_frame_path.ends_with("vertical_preview_queue_frame_v06.png"), "preview queue uses the v06 single-column frame")
 	runner.assert_true(theme.boss_hp_bar_frame() != null, "v05 layout maps boss HP bar frame")
 	runner.assert_true(theme.boss_action_bar_fill() != null, "theme maps boss action normal fill")
 	runner.assert_true(theme.boss_action_bar_fill_warning() != null, "theme maps boss action warning fill")
