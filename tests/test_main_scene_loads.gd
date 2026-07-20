@@ -98,7 +98,8 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	var boss_hp := scene.get_node("%BossHP") as Label
 	var shield_badge := scene.get_node("%ShieldBadge") as Control
 	var shield_value := scene.get_node("%ShieldValue") as Label
-	var menu_buttons := scene.get_node("BattleUI/MenuButtons") as HBoxContainer
+	var menu_overlay := scene.get_node("BattleUI/MenuOverlay") as Control
+	var menu_buttons := scene.get_node("BattleUI/MenuOverlay/MenuPanel/MenuButtons") as VBoxContainer
 	var main_menu_button := scene.get_node("%MainMenuButton") as Button
 	var restart_button := scene.get_node("%RestartButton") as Button
 	var end_game_button := scene.get_node("%EndGameButton") as Button
@@ -139,19 +140,20 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	runner.assert_true(boss_portrait != null and boss_portrait.texture != null, "v05 layout has a boss portrait")
 	runner.assert_true(player_portrait != null and player_portrait.texture != null, "v05 layout has a player portrait")
 	runner.assert_true(preview_row is VBoxContainer, "main preview queue is vertical")
-	runner.assert_true(menu_buttons != null, "battle UI has a grouped scene menu")
+	runner.assert_true(menu_overlay != null and not menu_overlay.visible, "battle UI scene menu is hidden until Esc")
+	runner.assert_true(menu_buttons != null, "battle UI has a vertical overlay scene menu")
 	runner.assert_true(main_menu_button != null, "battle UI has a main menu button")
 	runner.assert_true(restart_button != null, "battle UI has a restart button")
 	runner.assert_true(end_game_button != null, "battle UI has an end game button")
 	runner.assert_eq(battle_ui.main_menu_scene_path, "res://scenes/start.tscn", "main menu button targets the start scene")
 	runner.assert_eq(battle_ui.restart_scene_path, "res://scenes/main.tscn", "restart button reloads the battle scene")
-	runner.assert_true(menu_buttons.position.x > 850.0 and menu_buttons.position.y > 120.0, "battle scene menu stays in the upper-right safe area")
+	runner.assert_true(menu_buttons is VBoxContainer, "battle scene menu buttons are arranged vertically")
 	runner.assert_true(boss_hp.get_parent() == top_boss_bar_root, "boss HP text is grouped with the top boss bar")
 	runner.assert_true(not scene.has_node("BattleUI/ShieldMarks"), "legacy shield mark ring label is removed")
 	runner.assert_true(shield_badge != null and shield_badge.get_parent() == battle_ui, "shield badge is grouped with the battle UI")
 	runner.assert_true(shield_value != null and shield_value.get_parent() == shield_badge, "shield badge owns its value label")
 	runner.assert_true(shield_badge.position.x > player_hp.position.x and shield_badge.position.y < player_hp.position.y, "shield badge sits at the player HP upper-right")
-	runner.assert_true(boss_hp.position.y < 60.0, "boss HP text is placed near the top bar")
+	runner.assert_true(boss_hp.position.y > boss_hp_clip.position.y + boss_hp_clip.size.y, "boss HP text sits in the blank area below the HP fill")
 	runner.assert_true(playfield.position.x > 430.0 and playfield.position.x < 700.0, "playfield sits near the center after v05 layout shift")
 	runner.assert_true(top_boss_bar_root.position.x >= 280.0, "boss HP root keeps a left safe margin")
 	runner.assert_true(top_boss_bar_root.position.x + top_boss_bar_root.size.x <= 1140.0, "boss HP root keeps a right safe margin")
@@ -179,6 +181,29 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	runner.assert_true(queue_frame.modulate.a <= 0.75, "queue frame is subdued behind the orb icons")
 	runner.assert_true(not status_label.visible, "debug status label is hidden")
 	runner.assert_true(not boss_panel.visible, "old boss panel tint is hidden")
+	scene.queue_free()
+
+func test_battle_menu_toggles_with_escape(runner: TestRunner) -> void:
+	var packed := load("res://scenes/main.tscn")
+	var scene: Node = packed.instantiate()
+	var tree := Engine.get_main_loop() as SceneTree
+	tree.root.add_child(scene)
+	var battle_ui = scene.get_node("%BattleUI")
+	var menu_overlay := scene.get_node("%MenuOverlay") as Control
+	battle_ui.menu_overlay = menu_overlay
+
+	runner.assert_true(not menu_overlay.visible, "battle menu starts hidden")
+
+	var event := InputEventAction.new()
+	event.action = "ui_cancel"
+	event.pressed = true
+	battle_ui._unhandled_input(event)
+
+	runner.assert_true(menu_overlay.visible, "Esc opens the battle menu overlay")
+
+	battle_ui._unhandled_input(event)
+
+	runner.assert_true(not menu_overlay.visible, "Esc closes the battle menu overlay")
 	scene.queue_free()
 
 func test_boss_hp_and_stacked_action_bar_update_from_state(runner: TestRunner) -> void:

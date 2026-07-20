@@ -25,6 +25,7 @@ const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astra
 @onready var boss_action_glow: TextureRect = %BossActionGlow
 @onready var preview_row: BoxContainer = %PreviewRow
 @onready var status_label: Label = %Status
+@onready var menu_overlay: Control = %MenuOverlay
 @onready var main_menu_button: Button = %MainMenuButton
 @onready var restart_button: Button = %RestartButton
 @onready var end_game_button: Button = %EndGameButton
@@ -39,6 +40,13 @@ const BOSS_ACTION_WARNING_THRESHOLD := 0.85
 func _ready() -> void:
 	_connect_scene_menu()
 	apply_visual_theme()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		_toggle_scene_menu()
+		var viewport := get_viewport()
+		if viewport != null:
+			viewport.set_input_as_handled()
 
 func apply_visual_theme() -> void:
 	if battle_background == null or visual_theme == null:
@@ -122,6 +130,10 @@ func _connect_scene_menu() -> void:
 		restart_button.pressed.connect(_on_restart_button_pressed)
 	if end_game_button != null:
 		end_game_button.pressed.connect(_on_end_game_button_pressed)
+
+func _toggle_scene_menu() -> void:
+	if menu_overlay != null:
+		menu_overlay.visible = not menu_overlay.visible
 
 func _on_main_menu_button_pressed() -> void:
 	get_tree().change_scene_to_file(main_menu_scene_path)
