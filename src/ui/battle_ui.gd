@@ -51,12 +51,13 @@ func apply_visual_theme() -> void:
 	if boss_portrait != null:
 		boss_portrait.texture = visual_theme.boss_portrait()
 
-func update_from_state(battle: BattleState, boss_action_ratio: float, preview: Array[BallState]) -> void:
+func update_from_state(battle: BattleState, boss_action_ratio: float, preview: Array[BallState], shield_display_value: int = -1) -> void:
 	player_hp_label.text = str(battle.player_hp)
+	var displayed_shield := battle.player_shield if shield_display_value < 0 else shield_display_value
 	if shield_badge != null:
-		shield_badge.visible = battle.player_shield > 0
+		shield_badge.visible = displayed_shield > 0
 	if shield_value_label != null:
-		shield_value_label.text = str(battle.player_shield)
+		shield_value_label.text = str(displayed_shield)
 	boss_hp_label.text = "Boss HP %d/%d" % [battle.boss_hp, battle.boss_max_hp]
 	boss_action_bar.visible = false
 	boss_action_bar.value = 0.0

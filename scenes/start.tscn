@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://c7x4mqdltpswx"]
+[gd_scene format=3 uid="uid://c7x4mqdltpswx"]
 
 [ext_resource type="Script" path="res://src/ui/start_screen.gd" id="1_start"]
 [ext_resource type="Texture2D" uid="uid://c2kfvcau8eftg" path="res://assets/art/backgrounds/battle/astral_watercolor_layout_bg_v05.png" id="2_bg"]

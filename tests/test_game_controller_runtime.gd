@@ -82,6 +82,23 @@ func test_blue_chain_mitigates_danger_hazard_clear_damage(runner: TestRunner) ->
 	runner.assert_eq(controller.pending_hazard_mitigation, 1, "unused blue mitigation is kept for later hazard clears")
 	_destroy_controller(controller)
 
+func test_blue_mitigation_is_displayed_as_shield_badge(runner: TestRunner) -> void:
+	var controller := _instantiate_controller(runner)
+	if controller == null:
+		return
+	controller.chain_flash_seconds = 0.1
+	controller.playfield.balls = []
+	for i in range(5):
+		controller.playfield.add_ball(_color_ball(i, 1, Vector2(i * 30, 0)))
+
+	controller.advance_chain_resolution(0.0)
+	controller.advance_chain_resolution(0.11)
+	controller.ui.update_from_state(controller.battle, 0.0, [], controller._shield_display_value())
+
+	runner.assert_true(controller.ui.shield_badge.visible, "stored blue mitigation is shown as the shield badge")
+	runner.assert_eq(controller.ui.shield_value_label.text, "5", "shield badge shows the stored mitigation value")
+	_destroy_controller(controller)
+
 func test_late_chain_member_extends_flash_window_and_clears(runner: TestRunner) -> void:
 	var controller := _instantiate_controller(runner)
 	if controller == null:
@@ -324,7 +341,23 @@ func _instantiate_controller(runner: TestRunner) -> GameController:
 	controller.hazard_spawner = controller.get_node("%HazardSpawner") as HazardSpawner
 	controller.boss_controller = controller.get_node("%BossController") as BossController
 	controller.ui = controller.get_node("%BattleUI")
+	_bind_ui_nodes(controller)
 	return controller
+
+func _bind_ui_nodes(controller: GameController) -> void:
+	controller.ui.player_hp_label = controller.get_node("%PlayerHP")
+	controller.ui.shield_badge = controller.get_node("%ShieldBadge")
+	controller.ui.shield_value_label = controller.get_node("%ShieldValue")
+	controller.ui.boss_hp_label = controller.get_node("%BossHP")
+	controller.ui.boss_action_bar = controller.get_node("%BossActionBar")
+	controller.ui.boss_hp_clip = controller.get_node("%BossHPClip")
+	controller.ui.boss_hp_fill = controller.get_node("%BossHPFill")
+	controller.ui.boss_hp_missing = controller.get_node("%BossHPMissing")
+	controller.ui.boss_action_clip = controller.get_node("%BossActionClip")
+	controller.ui.boss_action_fill = controller.get_node("%BossActionFill")
+	controller.ui.boss_action_glow = controller.get_node("%BossActionGlow")
+	controller.ui.preview_row = controller.get_node("%PreviewRow")
+	controller.ui.status_label = controller.get_node("%Status")
 
 func _destroy_controller(controller: GameController) -> void:
 	if controller != null and is_instance_valid(controller):

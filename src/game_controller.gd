@@ -37,11 +37,11 @@ func _ready() -> void:
 	var counter := BurstCounterMechanic.new()
 	boss_controller.configure([volley_mechanic, phase70, phase40, phase15, counter])
 	spawn_queue.seed_preview()
-	ui.update_from_state(battle, 0.0, spawn_queue.preview)
+	ui.update_from_state(battle, 0.0, spawn_queue.preview, _shield_display_value())
 
 func _process(delta: float) -> void:
 	if battle.result() != "active":
-		ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview)
+		ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview, _shield_display_value())
 		return
 	var rotation_input := Input.get_axis("rotate_left", "rotate_right")
 	playfield.rotate_settled(rotation_input * playfield.rotation_speed * delta)
@@ -57,7 +57,7 @@ func _process(delta: float) -> void:
 		_apply_player_damage(damage, "boundary_explosion")
 		boss_controller.notify_player_damage(damage)
 	advance_chain_resolution(delta)
-	ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview)
+	ui.update_from_state(battle, _boss_action_ratio(), spawn_queue.preview, _shield_display_value())
 
 func advance_chain_resolution(delta: float) -> void:
 	_tick_chains(delta)
@@ -134,6 +134,9 @@ func _boss_action_ratio() -> float:
 		return 0.0
 	var state := boss_controller.get_mechanic_state(volley_mechanic)
 	return float(state.get("elapsed", 0.0)) / volley_mechanic.interval_seconds
+
+func _shield_display_value() -> int:
+	return battle.player_shield + pending_hazard_mitigation
 
 func _tick_chains(delta: float) -> void:
 	if active_chains.is_empty():
