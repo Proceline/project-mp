@@ -4,6 +4,8 @@ class_name BattleUI
 const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astral_batch1.tres")
 
 @export var visual_theme: VisualTheme = DEFAULT_VISUAL_THEME
+@export_file("*.tscn") var main_menu_scene_path: String = "res://scenes/start.tscn"
+@export_file("*.tscn") var restart_scene_path: String = "res://scenes/main.tscn"
 
 @onready var battle_background: TextureRect = %BattleBackground
 @onready var boss_hp_frame: TextureRect = %BossHPFrame
@@ -23,6 +25,9 @@ const DEFAULT_VISUAL_THEME: VisualTheme = preload("res://data/visual_theme_astra
 @onready var boss_action_glow: TextureRect = %BossActionGlow
 @onready var preview_row: BoxContainer = %PreviewRow
 @onready var status_label: Label = %Status
+@onready var main_menu_button: Button = %MainMenuButton
+@onready var restart_button: Button = %RestartButton
+@onready var end_game_button: Button = %EndGameButton
 
 const BOSS_HP_FILL_X := 197.0
 const BOSS_HP_FILL_WIDTH := 577.0
@@ -32,6 +37,7 @@ const BOSS_ACTION_FILL_HEIGHT := 12.0
 const BOSS_ACTION_WARNING_THRESHOLD := 0.85
 
 func _ready() -> void:
+	_connect_scene_menu()
 	apply_visual_theme()
 
 func apply_visual_theme() -> void:
@@ -108,3 +114,20 @@ func _update_boss_action_bar(boss_action_ratio: float) -> void:
 		boss_action_glow.visible = ratio >= BOSS_ACTION_WARNING_THRESHOLD
 		if visual_theme != null:
 			boss_action_glow.texture = visual_theme.boss_action_bar_glow()
+
+func _connect_scene_menu() -> void:
+	if main_menu_button != null:
+		main_menu_button.pressed.connect(_on_main_menu_button_pressed)
+	if restart_button != null:
+		restart_button.pressed.connect(_on_restart_button_pressed)
+	if end_game_button != null:
+		end_game_button.pressed.connect(_on_end_game_button_pressed)
+
+func _on_main_menu_button_pressed() -> void:
+	get_tree().change_scene_to_file(main_menu_scene_path)
+
+func _on_restart_button_pressed() -> void:
+	get_tree().change_scene_to_file(restart_scene_path)
+
+func _on_end_game_button_pressed() -> void:
+	get_tree().quit()

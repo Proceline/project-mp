@@ -20,7 +20,9 @@ func test_project_starts_from_start_scene(runner: TestRunner) -> void:
 	runner.assert_true(scene != null, "start scene instantiates")
 	if scene != null:
 		runner.assert_true(scene.has_node("CanvasLayer/StartButton"), "start scene has a button to enter gameplay")
+		runner.assert_true(scene.has_node("CanvasLayer/QuitButton"), "start scene has a button to end the game")
 		runner.assert_true(scene.has_node("CanvasLayer/Title"), "start scene shows a title")
+		runner.assert_eq(scene.game_scene_path, "res://scenes/main.tscn", "start scene button targets the main battle scene")
 		scene.queue_free()
 
 func test_playfield_renders_above_background_panels(runner: TestRunner) -> void:
@@ -96,6 +98,10 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	var boss_hp := scene.get_node("%BossHP") as Label
 	var shield_badge := scene.get_node("%ShieldBadge") as Control
 	var shield_value := scene.get_node("%ShieldValue") as Label
+	var menu_buttons := scene.get_node("BattleUI/MenuButtons") as HBoxContainer
+	var main_menu_button := scene.get_node("%MainMenuButton") as Button
+	var restart_button := scene.get_node("%RestartButton") as Button
+	var end_game_button := scene.get_node("%EndGameButton") as Button
 	var boss_hp_clip := scene.get_node("%BossHPClip") as Control
 	var boss_hp_fill := scene.get_node("%BossHPFill") as ColorRect
 	var boss_hp_missing := scene.get_node("%BossHPMissing") as ColorRect
@@ -133,6 +139,13 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	runner.assert_true(boss_portrait != null and boss_portrait.texture != null, "v05 layout has a boss portrait")
 	runner.assert_true(player_portrait != null and player_portrait.texture != null, "v05 layout has a player portrait")
 	runner.assert_true(preview_row is VBoxContainer, "main preview queue is vertical")
+	runner.assert_true(menu_buttons != null, "battle UI has a grouped scene menu")
+	runner.assert_true(main_menu_button != null, "battle UI has a main menu button")
+	runner.assert_true(restart_button != null, "battle UI has a restart button")
+	runner.assert_true(end_game_button != null, "battle UI has an end game button")
+	runner.assert_eq(battle_ui.main_menu_scene_path, "res://scenes/start.tscn", "main menu button targets the start scene")
+	runner.assert_eq(battle_ui.restart_scene_path, "res://scenes/main.tscn", "restart button reloads the battle scene")
+	runner.assert_true(menu_buttons.position.x > 850.0 and menu_buttons.position.y > 120.0, "battle scene menu stays in the upper-right safe area")
 	runner.assert_true(boss_hp.get_parent() == top_boss_bar_root, "boss HP text is grouped with the top boss bar")
 	runner.assert_true(not scene.has_node("BattleUI/ShieldMarks"), "legacy shield mark ring label is removed")
 	runner.assert_true(shield_badge != null and shield_badge.get_parent() == battle_ui, "shield badge is grouped with the battle UI")

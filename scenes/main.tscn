@@ -209,6 +209,34 @@ offset_right = 696.0
 offset_bottom = 69.0
 show_percentage = false
 
+[node name="MenuButtons" type="HBoxContainer" parent="BattleUI"]
+offset_left = 920.0
+offset_top = 136.0
+offset_right = 1254.0
+offset_bottom = 170.0
+theme_override_constants/separation = 8
+
+[node name="MainMenuButton" type="Button" parent="BattleUI/MenuButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(104, 32)
+theme_override_font_sizes/font_size = 14
+text = "Main Menu"
+
+[node name="RestartButton" type="Button" parent="BattleUI/MenuButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(88, 32)
+theme_override_font_sizes/font_size = 14
+text = "Restart"
+
+[node name="EndGameButton" type="Button" parent="BattleUI/MenuButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(96, 32)
+theme_override_font_sizes/font_size = 14
+text = "End Game"
+
 [node name="LeftQueueRoot" type="Control" parent="BattleUI" unique_id=1471030565]
 layout_mode = 3
 anchors_preset = 0
