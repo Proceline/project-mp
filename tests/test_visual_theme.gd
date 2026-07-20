@@ -65,7 +65,8 @@ func test_preview_icons_receive_theme_from_battle_ui(runner: TestRunner) -> void
 	var theme: VisualTheme = load("res://data/visual_theme_astral_batch1.tres")
 	battle_ui.visual_theme = theme
 	battle_ui.player_hp_label = scene.get_node("%PlayerHP")
-	battle_ui.shield_marks_label = scene.get_node("%ShieldMarks")
+	battle_ui.shield_badge = scene.get_node("%ShieldBadge")
+	battle_ui.shield_value_label = scene.get_node("%ShieldValue")
 	battle_ui.boss_hp_label = scene.get_node("%BossHP")
 	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
 	battle_ui.boss_action_clip = scene.get_node("%BossActionClip")

@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://cacmp2a8dadgl" path="res://assets/art/ui/queue/vertical_preview_queue_frame_v06.png" id="12_queue_v06"]
 [ext_resource type="Texture2D" uid="uid://cf3s6h5f3kr40" path="res://assets/art/ui/boss/action_bar/boss_action_bar_fill_v04_stacked.png" id="13_action_fill"]
 [ext_resource type="Texture2D" uid="uid://dwkvy3vwc14we" path="res://assets/art/ui/boss/action_bar/boss_action_bar_glow_v04_stacked.png" id="14_action_glow"]
+[ext_resource type="Texture2D" path="res://assets/art/board/shield/shield_ring_segments_v01.png" id="15_shield_ring"]
 
 [node name="GameController" type="Node2D" unique_id=379213318]
 script = ExtResource("1_game")
@@ -270,13 +271,36 @@ text = "30"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ShieldMarks" type="Label" parent="BattleUI" unique_id=1652420588]
+[node name="ShieldBadge" type="Control" parent="BattleUI"]
 unique_name_in_owner = true
-offset_left = 486.0
-offset_top = 406.0
-offset_right = 634.0
-offset_bottom = 430.0
+visible = false
+offset_left = 584.0
+offset_top = 326.0
+offset_right = 630.0
+offset_bottom = 372.0
+
+[node name="ShieldBadgeSymbol" type="TextureRect" parent="BattleUI/ShieldBadge"]
+layout_mode = 0
+offset_right = 46.0
+offset_bottom = 46.0
+texture = ExtResource("15_shield_ring")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ShieldValue" type="Label" parent="BattleUI/ShieldBadge"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 3.0
+offset_top = 7.0
+offset_right = 43.0
+offset_bottom = 39.0
+theme_override_colors/font_color = Color(0.0352941, 0.0392157, 0.0784314, 1)
+theme_override_colors/font_outline_color = Color(0.8, 0.95, 1, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 22
+text = "0"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Status" type="Label" parent="BattleUI" unique_id=1763603431]
 unique_name_in_owner = true

@@ -10,6 +10,19 @@ func test_main_scene_loads(runner: TestRunner) -> void:
 	if scene != null:
 		scene.queue_free()
 
+func test_project_starts_from_start_scene(runner: TestRunner) -> void:
+	runner.assert_eq(ProjectSettings.get_setting("application/run/main_scene"), "res://scenes/start.tscn", "project starts from the title screen")
+	var packed := load("res://scenes/start.tscn")
+	runner.assert_true(packed != null, "start scene resource loads")
+	var scene: Node = null
+	if packed != null:
+		scene = packed.instantiate()
+	runner.assert_true(scene != null, "start scene instantiates")
+	if scene != null:
+		runner.assert_true(scene.has_node("CanvasLayer/StartButton"), "start scene has a button to enter gameplay")
+		runner.assert_true(scene.has_node("CanvasLayer/Title"), "start scene shows a title")
+		scene.queue_free()
+
 func test_playfield_renders_above_background_panels(runner: TestRunner) -> void:
 	var packed := load("res://scenes/main.tscn")
 	var scene: Node = packed.instantiate()
@@ -30,7 +43,8 @@ func test_preview_renders_orb_icons_instead_of_code_text(runner: TestRunner) -> 
 	var battle_ui = scene.get_node("%BattleUI")
 	var preview_row: BoxContainer = scene.get_node("%PreviewRow")
 	battle_ui.player_hp_label = scene.get_node("%PlayerHP")
-	battle_ui.shield_marks_label = scene.get_node("%ShieldMarks")
+	battle_ui.shield_badge = scene.get_node("%ShieldBadge")
+	battle_ui.shield_value_label = scene.get_node("%ShieldValue")
 	battle_ui.boss_hp_label = scene.get_node("%BossHP")
 	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
 	battle_ui.boss_hp_missing = scene.get_node("%BossHPMissing")
@@ -78,7 +92,10 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	var boss_name := scene.get_node("BattleUI/BattleBackground/BossPresentationRoot/BossName") as Label
 	var preview_row := scene.get_node("%PreviewRow")
 	var status_label := scene.get_node("%Status") as Label
+	var player_hp := scene.get_node("%PlayerHP") as Label
 	var boss_hp := scene.get_node("%BossHP") as Label
+	var shield_badge := scene.get_node("%ShieldBadge") as Control
+	var shield_value := scene.get_node("%ShieldValue") as Label
 	var boss_hp_clip := scene.get_node("%BossHPClip") as Control
 	var boss_hp_fill := scene.get_node("%BossHPFill") as ColorRect
 	var boss_hp_missing := scene.get_node("%BossHPMissing") as ColorRect
@@ -117,6 +134,10 @@ func test_v05_layout_uses_safe_margins_and_quiet_queue_chrome(runner: TestRunner
 	runner.assert_true(player_portrait != null and player_portrait.texture != null, "v05 layout has a player portrait")
 	runner.assert_true(preview_row is VBoxContainer, "main preview queue is vertical")
 	runner.assert_true(boss_hp.get_parent() == top_boss_bar_root, "boss HP text is grouped with the top boss bar")
+	runner.assert_true(not scene.has_node("BattleUI/ShieldMarks"), "legacy shield mark ring label is removed")
+	runner.assert_true(shield_badge != null and shield_badge.get_parent() == battle_ui, "shield badge is grouped with the battle UI")
+	runner.assert_true(shield_value != null and shield_value.get_parent() == shield_badge, "shield badge owns its value label")
+	runner.assert_true(shield_badge.position.x > player_hp.position.x and shield_badge.position.y < player_hp.position.y, "shield badge sits at the player HP upper-right")
 	runner.assert_true(boss_hp.position.y < 60.0, "boss HP text is placed near the top bar")
 	runner.assert_true(playfield.position.x > 430.0 and playfield.position.x < 700.0, "playfield sits near the center after v05 layout shift")
 	runner.assert_true(top_boss_bar_root.position.x >= 280.0, "boss HP root keeps a left safe margin")
@@ -154,7 +175,8 @@ func test_boss_hp_and_stacked_action_bar_update_from_state(runner: TestRunner) -
 	tree.root.add_child(scene)
 	var battle_ui = scene.get_node("%BattleUI")
 	battle_ui.player_hp_label = scene.get_node("%PlayerHP")
-	battle_ui.shield_marks_label = scene.get_node("%ShieldMarks")
+	battle_ui.shield_badge = scene.get_node("%ShieldBadge")
+	battle_ui.shield_value_label = scene.get_node("%ShieldValue")
 	battle_ui.boss_hp_label = scene.get_node("%BossHP")
 	battle_ui.boss_action_bar = scene.get_node("%BossActionBar")
 	battle_ui.boss_hp_clip = scene.get_node("%BossHPClip")
@@ -168,10 +190,12 @@ func test_boss_hp_and_stacked_action_bar_update_from_state(runner: TestRunner) -
 	var battle := BattleState.new()
 	battle.boss_hp = 127
 	battle.boss_max_hp = 200
+	battle.player_shield = 0
 	var empty_preview: Array[BallState] = []
 
 	battle_ui.update_from_state(battle, 0.5, empty_preview)
 
+	runner.assert_true(not battle_ui.shield_badge.visible, "shield badge is hidden when shield is zero")
 	runner.assert_eq(battle_ui.boss_hp_label.text, "Boss HP 127/200", "boss HP label shows current HP")
 	runner.assert_true(battle_ui.boss_hp_clip.visible, "boss HP fill lane remains visible after boss damage")
 	runner.assert_true(battle_ui.boss_hp_clip.size.x > 360.0 and battle_ui.boss_hp_clip.size.x < 370.0, "boss HP fill clips to the current HP ratio")
@@ -187,6 +211,12 @@ func test_boss_hp_and_stacked_action_bar_update_from_state(runner: TestRunner) -
 
 	runner.assert_eq(battle_ui.boss_action_fill.texture, battle_ui.visual_theme.boss_action_bar_fill_warning(), "near-full action progress switches to warning fill")
 	runner.assert_true(battle_ui.boss_action_glow.visible, "near-full action progress shows glow")
+
+	battle.player_shield = 8
+	battle_ui.update_from_state(battle, 0.0, empty_preview)
+
+	runner.assert_true(battle_ui.shield_badge.visible, "shield badge is visible when shield is positive")
+	runner.assert_eq(battle_ui.shield_value_label.text, "8", "shield badge shows the current shield value")
 	scene.queue_free()
 
 func test_preview_warning_hazard_draws_without_value_label(runner: TestRunner) -> void:

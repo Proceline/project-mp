@@ -1,0 +1,79 @@
+[gd_scene load_steps=3 format=3 uid="uid://c7x4mqdltpswx"]
+
+[ext_resource type="Script" path="res://src/ui/start_screen.gd" id="1_start"]
+[ext_resource type="Texture2D" uid="uid://c2kfvcau8eftg" path="res://assets/art/backgrounds/battle/astral_watercolor_layout_bg_v05.png" id="2_bg"]
+
+[node name="StartScreen" type="Node"]
+script = ExtResource("1_start")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Background" type="TextureRect" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Shade" type="ColorRect" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.02, 0.018, 0.04, 0.48)
+
+[node name="Title" type="Label" parent="CanvasLayer"]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -310.0
+offset_top = -154.0
+offset_right = 310.0
+offset_bottom = -84.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0.05, 0.02, 0.05, 0.95)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 48
+text = "Astral Resonance"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -270.0
+offset_top = -78.0
+offset_right = 270.0
+offset_bottom = -38.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.86, 0.88, 0.95, 0.92)
+theme_override_colors/font_outline_color = Color(0.05, 0.02, 0.05, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 22
+text = "PvE Orb Boss Prototype"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StartButton" type="Button" parent="CanvasLayer"]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = 22.0
+offset_right = 120.0
+offset_bottom = 78.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 22
+text = "Start Game"
